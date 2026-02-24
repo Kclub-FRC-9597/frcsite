@@ -74,7 +74,7 @@ npm run deploy
 
 ## 使用说明
 
-### 登yyan'shi）
+# 测试账户
 - 用户名: `tester`
 - 密码: `password123`
 
