@@ -1,65 +1,88 @@
+// Re-export a minimal Durable Object class because existing Durable Object
+// instances are still registered for this Worker. Removing the exported class
+// causes Wrangler to reject the deploy. This minimal implementation is a no-op
+// placeholder and can be removed only after deleting the Durable Object via
+// a migration if you truly want to remove it.
 import { DurableObject } from "cloudflare:workers";
 
-/**
- * Welcome to Cloudflare Workers! This is your first Durable Objects application.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your Durable Object in action
- * - Run `npm run deploy` to publish your application
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/durable-objects
- */
+interface Env {
+	D1_PRESCOUT: any;
+	ASSETS: any;
+}
 
-
-/** A Durable Object's behavior is defined in an exported Javascript class */
 export class MyDurableObject extends DurableObject {
-	/**
-	 * The constructor is invoked once upon creation of the Durable Object, i.e. the first call to
-	 * 	`DurableObjectStub::get` for a given identifier (no-op constructors can be omitted)
-	 *
-	 * @param ctx - The interface for interacting with Durable Object state
-	 * @param env - The interface to reference bindings declared in wrangler.jsonc
-	 */
-	constructor(ctx: DurableObjectState, env: Env) {
-		super(ctx, env);
+	constructor(state: DurableObjectState, env: Env) {
+		super(state, env);
 	}
 
-	/**
-	 * The Durable Object exposes an RPC method sayHello which will be invoked when a Durable
-	 *  Object instance receives a request from a Worker via the same method invocation on the stub
-	 *
-	 * @param name - The name provided to a Durable Object instance from a Worker
-	 * @returns The greeting to be sent back to the Worker
-	 */
-	async sayHello(name: string): Promise<string> {
-		return `Hello, ${name}!`;
+	async fetch(request: Request): Promise<Response> {
+		return new Response("Not Found", { status: 404 });
 	}
 }
 
+// Simplified Worker: no Durable Object APIs. Serve static assets (public/) via fetch.
 export default {
-	/**
-	 * This is the standard fetch handler for a Cloudflare Worker
-	 *
-	 * @param request - The request submitted to the Worker from the client
-	 * @param env - The interface to reference bindings declared in wrangler.jsonc
-	 * @param ctx - The execution context of the Worker
-	 * @returns The response to be sent back to the client
-	 */
 	async fetch(request, env, ctx): Promise<Response> {
-		// Create a stub to open a communication channel with the Durable Object
-		// instance named "foo".
-		//
-		// Requests from all Workers to the Durable Object instance named "foo"
-		// will go to a single remote Durable Object instance.
-		const stub = env.MY_DURABLE_OBJECT.getByName("foo");
+		const url = new URL(request.url);
+		// API: prescout entries using D1 (SQL)
+		if (url.pathname === '/api/prescout') {
+			// Check if D1 binding exists
+			if (!env.D1_PRESCOUT) {
+				return new Response(JSON.stringify({ error: 'D1_PRESCOUT binding not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+			}
 
-		// Call the `sayHello()` RPC method on the stub to invoke the method on
-		// the remote Durable Object instance.
-		const greeting = await stub.sayHello("world");
+			// ensure table exists with correct schema (do NOT drop every time!)
+			try {
+				// Create table if it doesn't exist - this preserves existing data
+				await env.D1_PRESCOUT.prepare(`
+					CREATE TABLE IF NOT EXISTS prescout (
+						id TEXT PRIMARY KEY,
+						collector TEXT,
+						teamNumber TEXT,
+						teamName TEXT,
+						practice TEXT,
+						compCount INTEGER,
+						chassis TEXT,
+						event TEXT,
+						ts INTEGER
+					)
+				`).run();
+			} catch (err) {
+				return new Response(JSON.stringify({ error: 'DB Init Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+			}
 
-		return new Response(greeting);
+			if (request.method === 'GET') {
+				try {
+					const url_obj = new URL(request.url);
+					const event = url_obj.searchParams.get('event');
+					// If no event specified, return ALL data
+					let r;
+					if (event) {
+						r = await env.D1_PRESCOUT.prepare('SELECT id, collector, teamNumber, teamName, practice, compCount, chassis, event, ts FROM prescout WHERE event = ? ORDER BY ts DESC LIMIT 100').bind(event).all();
+					} else {
+						r = await env.D1_PRESCOUT.prepare('SELECT id, collector, teamNumber, teamName, practice, compCount, chassis, event, ts FROM prescout ORDER BY ts DESC LIMIT 100').all();
+					}
+					const rows = (r && r.results) ? r.results : [];
+					return new Response(JSON.stringify(rows), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Read Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else if (request.method === 'POST') {
+				try {
+					const body = await request.json() as any;
+					const id = crypto.randomUUID();
+					const stmt = env.D1_PRESCOUT.prepare('INSERT INTO prescout (id, collector, teamNumber, teamName, practice, compCount, chassis, event, ts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+					await stmt.bind(id, body.collector || null, String(body.teamNumber || ''), body.teamName || null, body.practice || null, Number(body.compCount || 0), body.chassis || null, body.event || '2025-einstein', Number(body.ts || Date.now())).run();
+					return new Response(JSON.stringify({ ok: true, id }), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Write Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else {
+				return new Response('Method Not Allowed', { status: 405 });
+			}
+		}
+
+		// Otherwise fall back to serving static assets via Assets Binding
+		return env.ASSETS.fetch(request);
 	},
 } satisfies ExportedHandler<Env>;

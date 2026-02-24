@@ -1,20 +1,1566 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
-	</head>
-	<body>
-		<h1 id="heading"></h1>
-		<p>This page comes from a static asset stored at `public/index.html` as configured in `wrangler.jsonc`.</p>
-		<script>
-			fetch('/message')
-				.then((resp) => resp.text())
-				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
-		</script>
-	</body>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luban Robotics #FRC9597 - A Team From K CLUB</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            flex-shrink: 0;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar a:hover {
+            background: #f0f0f0;
+        }
+
+        .sidebar a.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .entry-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .entry-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .entry-card h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .entry-detail {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .detail-item strong {
+            color: #333;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 1400px;
+            margin: 0 auto 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            margin: 10px 0 0;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .footer {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 1400px;
+            margin: 20px auto 0;
+            text-align: center;
+            color: #666;
+        }
+
+        /* Styles for external header.html */
+        .site-header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 1400px;
+            margin: 0 auto 20px;
+        }
+
+        .site-header .inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-header .brand {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .site-nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .site-nav a {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .site-nav a:hover {
+            background: #f0f0f0;
+        }
+
+        /* Styles for external footer.html */
+        .site-footer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 1400px;
+            margin: 20px auto 0;
+            color: white;
+        }
+
+        .site-footer .inner {
+            max-width: 100%;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
+        .footer-left .brand-large {
+            font-size: 3em;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .footer-left .slogan {
+            margin-top: 10px;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .footer-columns {
+            display: flex;
+            gap: 60px;
+        }
+
+        .footer-column {
+            min-width: 150px;
+        }
+
+        .footer-column strong {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-column li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: white;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                width: 250px;
+                height: 100vh;
+                transition: left 0.3s;
+                z-index: 999;
+                border-radius: 0;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .mobile-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .content {
+                width: 100%;
+            }
+
+            .footer-inner {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .footer-columns {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .site-header .inner {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .site-nav {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .site-header {
+                padding: 20px;
+            }
+
+            .site-footer {
+                padding: 20px;
+            }
+
+            .footer-left .brand-large {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <button class="mobile-toggle" onclick="toggleMobileSidebar()">☰</button>
+
+    <script>
+        // Auth state
+        let currentUser = localStorage.getItem('frc_user');
+
+        // Cache for loaded HTML
+        let headerHTML = '';
+        let footerHTML = '';
+
+        // Load external HTML files
+        async function loadHeader() {
+            if (!headerHTML) {
+                const response = await fetch('/header.html');
+                headerHTML = await response.text();
+            }
+            return headerHTML;
+        }
+
+        async function loadFooter() {
+            if (!footerHTML) {
+                const response = await fetch('/footer.html');
+                footerHTML = await response.text();
+            }
+            return footerHTML;
+        }
+
+        // Router
+        function navigate(hash) {
+            window.location.hash = hash;
+        }
+
+        async function renderApp() {
+            const app = document.getElementById('app');
+            let hash = window.location.hash || '#home';
+
+            // Redirect #tools to #tools/prescouting by default
+            if (hash === '#tools') {
+                hash = '#tools/prescouting';
+                window.history.replaceState(null, '', hash);
+            }
+
+            // Only require login for tools pages
+            if (!currentUser && hash.startsWith('#tools')) {
+                renderLogin();
+                return;
+            }
+
+            if (hash === '#login') {
+                renderLogin();
+            } else if (hash.startsWith('#tools')) {
+                await renderToolsLayout(hash);
+            } else {
+                await renderHome();
+            }
+        }
+
+        function renderLogin() {
+            const app = document.getElementById('app');
+            const returnTo = window.location.hash || '#home';
+            app.innerHTML = `
+                <div class="login-container">
+                    <h1>FRC Team 9597</h1>
+                    <h2>登录</h2>
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="username" placeholder="输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="password" placeholder="输入密码" onkeypress="if(event.key==='Enter')login('${returnTo}')">
+                    </div>
+                    <button onclick="login('${returnTo}')">登录</button>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <a href="#home" style="color: #667eea; text-decoration: none;">返回主页</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function login(returnTo = '#home') {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Simple auth check
+            if (username === 'tester' && password === 'password123') {
+                currentUser = username;
+                localStorage.setItem('frc_user', username);
+                // Redirect to prescouting if returnTo is login or tools
+                if (returnTo === '#login' || returnTo === '#tools') {
+                    window.location.hash = '#tools/prescouting';
+                } else {
+                    window.location.hash = returnTo;
+                }
+                // Manually trigger render to ensure page updates
+                await renderApp();
+            } else {
+                alert('用户名或密码错误');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('frc_user');
+            navigate('#home');
+        }
+
+        async function renderHome() {
+            const app = document.getElementById('app');
+            const loggedIn = currentUser ? true : false;
+            
+            const header = await loadHeader();
+            const footer = await loadFooter();
+            
+            app.innerHTML = `
+                ${header}
+                <div class="content" style="max-width: 1400px; margin: 0 auto;">
+                    <h1>欢迎来到 FRC Team 9597</h1>
+                    <p>鲁班门 - 我们的团队致力于机器人创新与技术探索。</p>
+                    <h2>关于我们</h2>
+                    <p>Team 9597 是一支充满活力的 FRC 团队，专注于培养学生的工程技能和团队协作能力。</p>
+                    ${!loggedIn ? '<p style="margin-top: 20px; color: #764ba2;"><strong>提示：</strong>访问工具页面需要登录</p>' : ''}
+                </div>
+                ${footer}
+            `;
+        }
+
+        async function renderToolsLayout(hash) {
+            const toolPath = hash.replace('#tools', '') || '/prescouting';
+            const app = document.getElementById('app');
+            
+            const header = await loadHeader();
+            const footer = await loadFooter();
+            
+            app.innerHTML = `
+                ${header}
+                <div class="container">
+                    <div class="sidebar" id="toolsSidebar">
+                        <h3>工具</h3>
+                        <ul>
+                            <li><a href="#tools/prescouting" class="${toolPath === '/prescouting' ? 'active' : ''}">PreScouting</a></li>
+                            <li><a href="#tools/scouting" class="${toolPath === '/scouting' ? 'active' : ''}">Scouting</a></li>
+                            <li><a href="#tools/analysis" class="${toolPath === '/analysis' ? 'active' : ''}">Analysis</a></li>
+                            <li><a href="#home">返回主页</a></li>
+                            <li><a href="#" onclick="logout()">登出</a></li>
+                        </ul>
+                    </div>
+                    <div class="content" id="toolsContent">
+                        ${renderToolsContent(toolPath)}
+                    </div>
+                </div>
+                ${footer}
+            `;
+        }
+
+        function renderToolsContent(path) {
+            if (path === '/scouting') {
+                return renderScouting();
+            } else if (path === '/prescouting') {
+                return renderPreScouting();
+            } else if (path === '/analysis') {
+                return renderAnalysis();
+            }
+            // Default to prescouting if no specific path
+            return renderPreScouting();
+        }
+
+        function renderScouting() {
+            return `
+                <h1>Scouting</h1>
+                <div style="margin-bottom: 20px;">
+                    <button onclick="showScoutingConfig()" style="margin-right: 10px;">配置字段</button>
+                    <button onclick="showScoutingForm()">开始收集数据</button>
+                    <button onclick="showScoutingData()" style="margin-left: 10px;">查看数据</button>
+                </div>
+                <div id="scouting-content">
+                    <p>点击上方按钮开始配置或收集数据。</p>
+                </div>
+            `;
+        }
+
+        function showScoutingConfig() {
+            const config = getScoutingConfig();
+            const templates = getScoutingTemplates();
+            const content = document.getElementById('scouting-content');
+            
+            content.innerHTML = `
+                <h2>配置字段</h2>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 5px;">快速加载模板</label>
+                        <select id="template-selector" onchange="if(this.value) loadTemplate(this.value)" style="width: 100%;">
+                            <option value="">选择模板...</option>
+                            <option value="默认比赛模板">默认比赛模板</option>
+                            ${templates.map(t => `<option value="${t.name}">${t.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                        <button onclick="showTemplateManager()">管理模板</button>
+                        <button onclick="saveAsTemplate()">保存为模板</button>
+                    </div>
+                </div>
+                <div id="field-list">
+                    ${config.fields.map((field, index) => `
+                        <div class="entry-card" style="cursor: default;">
+                            <h3>${field.label}</h3>
+                            <p>类型: ${getFieldTypeText(field.type)}</p>
+                            ${field.options ? `<p>选项: ${field.options.join(', ')}</p>` : ''}
+                            ${field.required ? '<p style="color: #667eea;">✓ 必填</p>' : ''}
+                            <button onclick="editScoutingField(${index})">编辑</button>
+                            <button onclick="deleteScoutingField(${index})">删除</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <button onclick="addScoutingField()">添加新字段</button>
+            `;
+        }
+
+        function getFieldTypeText(type) {
+            const types = {
+                'text': '文本',
+                'number': '数字',
+                'radio': '单选',
+                'checkbox': '多选'
+            };
+            return types[type] || type;
+        }
+
+        function getScoutingConfig() {
+            const savedConfig = localStorage.getItem('scouting_config');
+            if (savedConfig) {
+                return JSON.parse(savedConfig);
+            }
+            // Load default template on first use
+            const defaultTemplate = getDefaultTemplate();
+            saveScoutingConfig({ fields: defaultTemplate.fields });
+            return { fields: defaultTemplate.fields };
+        }
+
+        function getDefaultTemplate() {
+            return {
+                name: '默认比赛模板',
+                fields: [
+                    { id: 'event', label: 'Event', type: 'text', required: true },
+                    { id: 'team', label: '赛队队号', type: 'text', required: true },
+                    { id: 'stage', label: '阶段', type: 'radio', required: true, options: ['排位', '淘汰'] },
+                    { id: 'ball_score', label: '投球得分', type: 'number', required: false },
+                    { id: 'hang_score', label: '挂车得分', type: 'number', required: false },
+                    { id: 'collector', label: '记录者', type: 'text', required: true }
+                ]
+            };
+        }
+
+        function getScoutingTemplates() {
+            const templates = localStorage.getItem('scouting_templates');
+            return templates ? JSON.parse(templates) : [];
+        }
+
+        function saveScoutingTemplates(templates) {
+            localStorage.setItem('scouting_templates', JSON.stringify(templates));
+        }
+
+        function loadTemplate(templateName) {
+            if (templateName === '默认比赛模板') {
+                const defaultTemplate = getDefaultTemplate();
+                saveScoutingConfig({ fields: defaultTemplate.fields });
+                showScoutingConfig();
+                return;
+            }
+            
+            const templates = getScoutingTemplates();
+            const template = templates.find(t => t.name === templateName);
+            if (template) {
+                saveScoutingConfig({ fields: template.fields });
+                showScoutingConfig();
+            }
+        }
+
+        function saveAsTemplate() {
+            const config = getScoutingConfig();
+            const templateName = prompt('请输入模板名称：');
+            
+            if (!templateName) return;
+            
+            const templates = getScoutingTemplates();
+            
+            // Check if name already exists
+            if (templates.find(t => t.name === templateName) || templateName === '默认比赛模板') {
+                alert('模板名称已存在，请使用其他名称');
+                return;
+            }
+            
+            templates.push({
+                name: templateName,
+                fields: config.fields
+            });
+            
+            saveScoutingTemplates(templates);
+            alert('模板保存成功！');
+            showScoutingConfig();
+        }
+
+        function showTemplateManager() {
+            const templates = getScoutingTemplates();
+            const content = document.getElementById('scouting-content');
+            
+            content.innerHTML = `
+                <h2>模板管理</h2>
+                <div class="entry-card" style="background: #e8f0fe; border-left-color: #4285f4;">
+                    <h3>默认比赛模板</h3>
+                    <p>系统内置模板，包含：Event、赛队队号、阶段、投球得分、挂车得分、记录者</p>
+                    <button onclick="loadTemplate('默认比赛模板')">使用此模板</button>
+                </div>
+                ${templates.map((template, index) => `
+                    <div class="entry-card">
+                        <h3>${template.name}</h3>
+                        <p>包含 ${template.fields.length} 个字段</p>
+                        <button onclick="loadTemplate('${template.name}')">使用</button>
+                        <button onclick="deleteTemplate(${index})">删除</button>
+                    </div>
+                `).join('')}
+                ${templates.length === 0 ? '<p style="color: #666; margin-top: 20px;">暂无自定义模板</p>' : ''}
+                <button onclick="showScoutingConfig()" style="margin-top: 20px;">返回配置</button>
+            `;
+        }
+
+        function deleteTemplate(index) {
+            if (!confirm('确定要删除这个模板吗？')) return;
+            
+            const templates = getScoutingTemplates();
+            templates.splice(index, 1);
+            saveScoutingTemplates(templates);
+            showTemplateManager();
+        }
+
+        function saveScoutingConfig(config) {
+            localStorage.setItem('scouting_config', JSON.stringify(config));
+        }
+
+        function addScoutingField() {
+            const content = document.getElementById('scouting-content');
+            content.innerHTML = `
+                <h2>添加字段</h2>
+                <div class="form-group">
+                    <label>字段标签</label>
+                    <input type="text" id="field-label" placeholder="例如: Auto Score">
+                </div>
+                <div class="form-group">
+                    <label>字段ID（英文，无空格）</label>
+                    <input type="text" id="field-id" placeholder="例如: auto_score">
+                </div>
+                <div class="form-group">
+                    <label>字段类型</label>
+                    <select id="field-type" onchange="toggleOptionsField()">
+                        <option value="text">文本</option>
+                        <option value="number">数字</option>
+                        <option value="radio">单选</option>
+                        <option value="checkbox">多选</option>
+                    </select>
+                </div>
+                <div class="form-group" id="options-group" style="display: none;">
+                    <label>选项（用逗号分隔）</label>
+                    <input type="text" id="field-options" placeholder="例如: 选项1, 选项2, 选项3">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="field-required"> 必填字段
+                    </label>
+                </div>
+                <button onclick="saveNewScoutingField()">保存</button>
+                <button onclick="showScoutingConfig()">取消</button>
+            `;
+        }
+
+        function toggleOptionsField() {
+            const type = document.getElementById('field-type').value;
+            const optionsGroup = document.getElementById('options-group');
+            if (type === 'radio' || type === 'checkbox') {
+                optionsGroup.style.display = 'block';
+            } else {
+                optionsGroup.style.display = 'none';
+            }
+        }
+
+        function saveNewScoutingField() {
+            const label = document.getElementById('field-label').value;
+            const id = document.getElementById('field-id').value;
+            const type = document.getElementById('field-type').value;
+            const required = document.getElementById('field-required').checked;
+            const optionsInput = document.getElementById('field-options')?.value || '';
+
+            if (!label || !id) {
+                alert('请填写字段标签和ID');
+                return;
+            }
+
+            const field = { id, label, type, required };
+            
+            if (type === 'radio' || type === 'checkbox') {
+                if (!optionsInput) {
+                    alert('请填写选项');
+                    return;
+                }
+                field.options = optionsInput.split(',').map(o => o.trim());
+            }
+
+            const config = getScoutingConfig();
+            config.fields.push(field);
+            saveScoutingConfig(config);
+            
+            showScoutingConfig();
+        }
+
+        function editScoutingField(index) {
+            const config = getScoutingConfig();
+            const field = config.fields[index];
+            
+            const content = document.getElementById('scouting-content');
+            content.innerHTML = `
+                <h2>编辑字段</h2>
+                <div class="form-group">
+                    <label>字段标签</label>
+                    <input type="text" id="field-label" value="${field.label}">
+                </div>
+                <div class="form-group">
+                    <label>字段ID</label>
+                    <input type="text" id="field-id" value="${field.id}" readonly style="background: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                    <label>字段类型</label>
+                    <select id="field-type" onchange="toggleOptionsField()">
+                        <option value="text" ${field.type === 'text' ? 'selected' : ''}>文本</option>
+                        <option value="number" ${field.type === 'number' ? 'selected' : ''}>数字</option>
+                        <option value="radio" ${field.type === 'radio' ? 'selected' : ''}>单选</option>
+                        <option value="checkbox" ${field.type === 'checkbox' ? 'selected' : ''}>多选</option>
+                    </select>
+                </div>
+                <div class="form-group" id="options-group" style="display: ${field.type === 'radio' || field.type === 'checkbox' ? 'block' : 'none'};">
+                    <label>选项（用逗号分隔）</label>
+                    <input type="text" id="field-options" value="${field.options ? field.options.join(', ') : ''}">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="field-required" ${field.required ? 'checked' : ''}> 必填字段
+                    </label>
+                </div>
+                <button onclick="updateScoutingField(${index})">保存</button>
+                <button onclick="showScoutingConfig()">取消</button>
+            `;
+        }
+
+        function updateScoutingField(index) {
+            const label = document.getElementById('field-label').value;
+            const type = document.getElementById('field-type').value;
+            const required = document.getElementById('field-required').checked;
+            const optionsInput = document.getElementById('field-options')?.value || '';
+
+            if (!label) {
+                alert('请填写字段标签');
+                return;
+            }
+
+            const config = getScoutingConfig();
+            config.fields[index].label = label;
+            config.fields[index].type = type;
+            config.fields[index].required = required;
+            
+            if (type === 'radio' || type === 'checkbox') {
+                if (!optionsInput) {
+                    alert('请填写选项');
+                    return;
+                }
+                config.fields[index].options = optionsInput.split(',').map(o => o.trim());
+            } else {
+                delete config.fields[index].options;
+            }
+
+            saveScoutingConfig(config);
+            showScoutingConfig();
+        }
+
+        function deleteScoutingField(index) {
+            if (!confirm('确定要删除这个字段吗？')) return;
+            
+            const config = getScoutingConfig();
+            config.fields.splice(index, 1);
+            saveScoutingConfig(config);
+            showScoutingConfig();
+        }
+
+        function showScoutingForm() {
+            const config = getScoutingConfig();
+            const content = document.getElementById('scouting-content');
+            
+            let formHTML = '<h2>数据收集</h2><form id="scouting-form">';
+            
+            config.fields.forEach(field => {
+                formHTML += `<div class="form-group">`;
+                formHTML += `<label>${field.label}${field.required ? ' *' : ''}</label>`;
+                
+                if (field.type === 'text') {
+                    formHTML += `<input type="text" id="field-${field.id}" ${field.required ? 'required' : ''}>`;
+                } else if (field.type === 'number') {
+                    formHTML += `<input type="number" step="any" id="field-${field.id}" ${field.required ? 'required' : ''}>`;
+                } else if (field.type === 'radio' && field.options) {
+                    field.options.forEach((option, idx) => {
+                        formHTML += `
+                            <div>
+                                <label style="font-weight: normal;">
+                                    <input type="radio" name="field-${field.id}" value="${option}" ${field.required && idx === 0 ? 'required' : ''}>
+                                    ${option}
+                                </label>
+                            </div>`;
+                    });
+                } else if (field.type === 'checkbox' && field.options) {
+                    field.options.forEach(option => {
+                        formHTML += `
+                            <div>
+                                <label style="font-weight: normal;">
+                                    <input type="checkbox" name="field-${field.id}" value="${option}">
+                                    ${option}
+                                </label>
+                            </div>`;
+                    });
+                }
+                
+                formHTML += `</div>`;
+            });
+            
+            formHTML += `
+                <button type="button" onclick="submitScoutingData()">提交</button>
+                <button type="button" onclick="showScoutingData()">查看数据</button>
+            </form>`;
+            
+            content.innerHTML = formHTML;
+        }
+
+        async function submitScoutingData() {
+            const config = getScoutingConfig();
+            const data = { ts: Date.now() };
+            
+            for (const field of config.fields) {
+                if (field.type === 'checkbox') {
+                    const checkboxes = document.querySelectorAll(`input[name="field-${field.id}"]:checked`);
+                    data[field.id] = Array.from(checkboxes).map(cb => cb.value);
+                } else if (field.type === 'radio') {
+                    const radio = document.querySelector(`input[name="field-${field.id}"]:checked`);
+                    data[field.id] = radio ? radio.value : '';
+                } else {
+                    const input = document.getElementById(`field-${field.id}`);
+                    data[field.id] = input ? input.value : '';
+                }
+                
+                if (field.required && (!data[field.id] || (Array.isArray(data[field.id]) && data[field.id].length === 0))) {
+                    alert(`请填写必填字段: ${field.label}`);
+                    return;
+                }
+            }
+
+            // Save to localStorage for now (you can add API later)
+            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            data.id = crypto.randomUUID();
+            scoutingData.push(data);
+            localStorage.setItem('scouting_data', JSON.stringify(scoutingData));
+
+            alert('数据提交成功！');
+            showScoutingForm();
+        }
+
+        function showScoutingData() {
+            const config = getScoutingConfig();
+            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const content = document.getElementById('scouting-content');
+            
+            if (scoutingData.length === 0) {
+                content.innerHTML = `
+                    <h2>收集的数据</h2>
+                    <p>暂无数据</p>
+                    <button onclick="showScoutingForm()">开始收集</button>
+                `;
+                return;
+            }
+
+            let html = `
+                <h2>收集的数据</h2>
+                <button onclick="showScoutingForm()" style="margin-bottom: 15px;">继续收集</button>
+                <button onclick="exportScoutingData()" style="margin-bottom: 15px; margin-left: 10px;">导出数据</button>
+            `;
+            
+            scoutingData.reverse().forEach((entry, index) => {
+                html += `<div class="entry-card">`;
+                html += `<h3>记录 #${scoutingData.length - index}</h3>`;
+                html += `<div class="entry-detail">`;
+                
+                config.fields.forEach(field => {
+                    const value = entry[field.id];
+                    let displayValue = '';
+                    
+                    if (Array.isArray(value)) {
+                        displayValue = value.join(', ');
+                    } else {
+                        displayValue = value || '-';
+                    }
+                    
+                    html += `<div class="detail-item"><strong>${field.label}:</strong> ${displayValue}</div>`;
+                });
+                
+                html += `<div class="detail-item"><strong>提交时间:</strong> ${new Date(entry.ts).toLocaleString()}</div>`;
+                html += `</div>`;
+                html += `<button onclick="deleteScoutingEntry('${entry.id}')">删除</button>`;
+                html += `</div>`;
+            });
+            
+            content.innerHTML = html;
+        }
+
+        function deleteScoutingEntry(id) {
+            if (!confirm('确定要删除这条记录吗？')) return;
+            
+            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const filtered = scoutingData.filter(entry => entry.id !== id);
+            localStorage.setItem('scouting_data', JSON.stringify(filtered));
+            showScoutingData();
+        }
+
+        function exportScoutingData() {
+            const config = getScoutingConfig();
+            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            
+            if (scoutingData.length === 0) {
+                alert('暂无数据可导出');
+                return;
+            }
+
+            // Create CSV
+            let csv = config.fields.map(f => f.label).join(',') + ',提交时间\\n';
+            
+            scoutingData.forEach(entry => {
+                const row = config.fields.map(field => {
+                    const value = entry[field.id];
+                    if (Array.isArray(value)) {
+                        return `"${value.join('; ')}"`;
+                    }
+                    return `"${value || ''}"`;
+                }).join(',');
+                csv += row + ',' + new Date(entry.ts).toLocaleString() + '\\n';
+            });
+
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `scouting_data_${Date.now()}.csv`;
+            link.click();
+        }
+
+        function renderAnalysis() {
+            return `
+                <h1>Analysis</h1>
+                <div style="margin-bottom: 20px;">
+                    <button onclick="showAnalysisOverview()">数据总览</button>
+                    <button onclick="showTeamComparison()" style="margin-left: 10px;">赛队对比</button>
+                </div>
+                <div id="analysis-content">
+                    <p>点击上方按钮查看数据分析。</p>
+                </div>
+            `;
+        }
+
+        async function showAnalysisOverview() {
+            const content = document.getElementById('analysis-content');
+            content.innerHTML = '<p>加载中...</p>';
+            
+            // Get PreScouting data
+            const preScoutResponse = await fetch('/api/prescout');
+            const preScoutData = await preScoutResponse.json();
+            
+            // Get Scouting data
+            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const scoutingConfig = getScoutingConfig();
+            
+            // Get unique teams
+            const teams = new Set();
+            preScoutData.forEach(entry => teams.add(entry.teamNumber));
+            scoutingData.forEach(entry => {
+                if (entry.team) teams.add(entry.team);
+            });
+            
+            let html = `
+                <h2>数据总览</h2>
+                <p>共 ${teams.size} 支赛队 | PreScouting: ${preScoutData.length} 条记录 | Scouting: ${scoutingData.length} 条记录</p>
+                
+                <h3 style="margin-top: 30px;">PreScouting 数据</h3>
+                ${preScoutData.length > 0 ? `
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">队号</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">队名</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">赛事</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">练习时长</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">比赛次数</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">底盘</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">记录者</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${preScoutData.map(entry => `
+                                    <tr style="background: white; border-bottom: 1px solid #ddd;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>${entry.teamNumber}</strong></td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.teamName}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.event}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.practice}h</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.compCount}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.chassis}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.collector}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <button onclick="showTeamDetail('${entry.teamNumber}')" style="padding: 5px 10px; font-size: 12px;">查看详情</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : '<p style="color: #666;">暂无PreScouting数据</p>'}
+                
+                <h3 style="margin-top: 40px;">Scouting 数据</h3>
+                ${scoutingData.length > 0 ? `
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                            <thead>
+                                <tr style="background: #764ba2; color: white;">
+                                    ${scoutingConfig.fields.map(field => 
+                                        `<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">${field.label}</th>`
+                                    ).join('')}
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">提交时间</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${scoutingData.map(entry => `
+                                    <tr style="background: white; border-bottom: 1px solid #ddd;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                                        ${scoutingConfig.fields.map(field => {
+                                            const value = entry[field.id];
+                                            let displayValue = '';
+                                            if (Array.isArray(value)) {
+                                                displayValue = value.join(', ');
+                                            } else {
+                                                displayValue = value || '-';
+                                            }
+                                            return `<td style="padding: 10px; border: 1px solid #ddd;">${displayValue}</td>`;
+                                        }).join('')}
+                                        <td style="padding: 10px; border: 1px solid #ddd;">${new Date(entry.ts).toLocaleString()}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <button onclick="showTeamDetail('${entry.team || ''}')" style="padding: 5px 10px; font-size: 12px;">查看详情</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : '<p style="color: #666;">暂无Scouting数据</p>'}
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        async function showTeamDetail(teamNumber) {
+            if (!teamNumber) {
+                alert('未找到赛队信息');
+                return;
+            }
+            
+            const content = document.getElementById('analysis-content');
+            content.innerHTML = '<p>加载中...</p>';
+            
+            // Get PreScouting data for this team
+            const preScoutResponse = await fetch('/api/prescout');
+            const allPreScout = await preScoutResponse.json();
+            const teamPreScout = allPreScout.filter(entry => entry.teamNumber === teamNumber);
+            
+            // Get Scouting data for this team
+            const allScouting = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const teamScouting = allScouting.filter(entry => entry.team === teamNumber);
+            const scoutingConfig = getScoutingConfig();
+            
+            let html = `
+                <div style="margin-bottom: 20px;">
+                    <button onclick="showAnalysisOverview()">← 返回总览</button>
+                </div>
+                <h2>赛队 ${teamNumber} 详细数据</h2>
+                <p>PreScouting: ${teamPreScout.length} 条 | Scouting: ${teamScouting.length} 条</p>
+                
+                <h3 style="margin-top: 30px;">PreScouting 阶段</h3>
+            `;
+            
+            if (teamPreScout.length > 0) {
+                teamPreScout.forEach(entry => {
+                    html += `
+                        <div class="entry-card">
+                            <h3>Team ${entry.teamNumber} - ${entry.teamName}</h3>
+                            <div class="entry-detail">
+                                <div class="detail-item"><strong>Event:</strong> ${entry.event}</div>
+                                <div class="detail-item"><strong>Collector:</strong> ${entry.collector}</div>
+                                <div class="detail-item"><strong>Practice:</strong> ${entry.practice}h</div>
+                                <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount}</div>
+                                <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis}</div>
+                                <div class="detail-item"><strong>提交时间:</strong> ${new Date(entry.ts).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<p style="color: #666;">该赛队暂无PreScouting数据</p>';
+            }
+            
+            html += '<h3 style="margin-top: 40px;">Scouting 阶段</h3>';
+            
+            if (teamScouting.length > 0) {
+                teamScouting.forEach((entry, index) => {
+                    html += `
+                        <div class="entry-card">
+                            <h3>记录 #${index + 1}</h3>
+                            <div class="entry-detail">
+                    `;
+                    
+                    scoutingConfig.fields.forEach(field => {
+                        const value = entry[field.id];
+                        let displayValue = '';
+                        if (Array.isArray(value)) {
+                            displayValue = value.join(', ');
+                        } else {
+                            displayValue = value || '-';
+                        }
+                        html += `<div class="detail-item"><strong>${field.label}:</strong> ${displayValue}</div>`;
+                    });
+                    
+                    html += `
+                                <div class="detail-item"><strong>提交时间:</strong> ${new Date(entry.ts).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<p style="color: #666;">该赛队暂无Scouting数据</p>';
+            }
+            
+            content.innerHTML = html;
+        }
+
+        async function showTeamComparison() {
+            const content = document.getElementById('analysis-content');
+            content.innerHTML = '<p>加载中...</p>';
+            
+            // Get all data
+            const preScoutResponse = await fetch('/api/prescout');
+            const preScoutData = await preScoutResponse.json();
+            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            
+            // Build team list
+            const teamsMap = new Map();
+            
+            preScoutData.forEach(entry => {
+                if (!teamsMap.has(entry.teamNumber)) {
+                    teamsMap.set(entry.teamNumber, {
+                        number: entry.teamNumber,
+                        name: entry.teamName,
+                        preScoutCount: 0,
+                        scoutingCount: 0
+                    });
+                }
+                teamsMap.get(entry.teamNumber).preScoutCount++;
+            });
+            
+            scoutingData.forEach(entry => {
+                const teamNum = entry.team || '';
+                if (teamNum) {
+                    if (!teamsMap.has(teamNum)) {
+                        teamsMap.set(teamNum, {
+                            number: teamNum,
+                            name: '-',
+                            preScoutCount: 0,
+                            scoutingCount: 0
+                        });
+                    }
+                    teamsMap.get(teamNum).scoutingCount++;
+                }
+            });
+            
+            const teams = Array.from(teamsMap.values()).sort((a, b) => {
+                const numA = parseInt(a.number) || 0;
+                const numB = parseInt(b.number) || 0;
+                return numA - numB;
+            });
+            
+            let html = `
+                <h2>赛队对比</h2>
+                <p>共 ${teams.length} 支赛队</p>
+                
+                <div style="overflow-x: auto; margin-top: 20px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">队号</th>
+                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">队名</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">PreScouting 记录</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Scouting 记录</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">总记录数</th>
+                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${teams.map(team => {
+                                const total = team.preScoutCount + team.scoutingCount;
+                                return `
+                                    <tr style="background: white; border-bottom: 1px solid #ddd;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>${team.number}</strong></td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">${team.name}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${team.preScoutCount}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${team.scoutingCount}</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><strong>${total}</strong></td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <button onclick="showTeamDetail('${team.number}')" style="padding: 5px 10px; font-size: 12px;">查看详情</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        function renderPreScouting() {
+            return `
+                <h1>PreScouting</h1>
+                <div class="form-group">
+                    <label>Event</label>
+                    <input type="text" id="prescout-event" placeholder="赛事名称">
+                </div>
+                <div class="form-group">
+                    <label>Collector</label>
+                    <input type="text" id="prescout-collector" placeholder="收集者姓名">
+                </div>
+                <div class="form-group">
+                    <label>Team Number</label>
+                    <input type="text" id="prescout-team-number" placeholder="队伍编号">
+                </div>
+                <div class="form-group">
+                    <label>Team Name</label>
+                    <input type="text" id="prescout-team-name" placeholder="队伍名称">
+                </div>
+                <div class="form-group">
+                    <label>Operator Practice Duration (hours)</label>
+                    <input type="text" id="prescout-practice" placeholder="例如: 50">
+                </div>
+                <div class="form-group">
+                    <label>Competition Count</label>
+                    <input type="number" id="prescout-comp-count" placeholder="参加过的比赛数量">
+                </div>
+                <div class="form-group">
+                    <label>Chassis Type</label>
+                    <select id="prescout-chassis">
+                        <option value="">选择底盘类型</option>
+                        <option value="tank">Tank Drive</option>
+                        <option value="mecanum">Mecanum</option>
+                        <option value="swerve">Swerve</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <button onclick="submitPreScouting()">提交</button>
+
+                <h2 style="margin-top: 30px;">已收集的数据</h2>
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label>Filter by Event</label>
+                        <select id="filter-event" onchange="renderEntries()">
+                            <option value="">所有赛事</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Filter by Collector</label>
+                        <select id="filter-collector" onchange="renderEntries()">
+                            <option value="">所有收集者</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="prescout-entries">
+                    加载中...
+                </div>
+            `;
+        }
+
+        async function submitPreScouting() {
+            const data = {
+                event: document.getElementById('prescout-event').value,
+                collector: document.getElementById('prescout-collector').value,
+                teamNumber: document.getElementById('prescout-team-number').value,
+                teamName: document.getElementById('prescout-team-name').value,
+                practice: document.getElementById('prescout-practice').value,
+                compCount: parseInt(document.getElementById('prescout-comp-count').value),
+                chassis: document.getElementById('prescout-chassis').value
+            };
+
+            if (!data.event || !data.collector || !data.teamNumber || !data.teamName) {
+                alert('请填写所有必填字段');
+                return;
+            }
+
+            const response = await fetch('/api/prescout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('提交成功');
+                // Clear form
+                document.getElementById('prescout-event').value = '';
+                document.getElementById('prescout-collector').value = '';
+                document.getElementById('prescout-team-number').value = '';
+                document.getElementById('prescout-team-name').value = '';
+                document.getElementById('prescout-practice').value = '';
+                document.getElementById('prescout-comp-count').value = '';
+                document.getElementById('prescout-chassis').value = '';
+                
+                // Refresh entries
+                renderEntries();
+            } else {
+                alert('提交失败');
+            }
+        }
+
+        async function renderEntries() {
+            const eventFilter = document.getElementById('filter-event')?.value || '';
+            const collectorFilter = document.getElementById('filter-collector')?.value || '';
+            
+            const url = eventFilter ? `/api/prescout?event=${encodeURIComponent(eventFilter)}` : '/api/prescout';
+            const response = await fetch(url);
+            const entries = await response.json();
+
+            // Apply collector filter on frontend
+            let filteredEntries = entries;
+            if (collectorFilter) {
+                filteredEntries = entries.filter(e => e.collector === collectorFilter);
+            }
+
+            // Update filter dropdowns
+            updateFilterDropdowns(entries);
+
+            const container = document.getElementById('prescout-entries');
+            if (!container) return;
+
+            if (filteredEntries.length === 0) {
+                container.innerHTML = '<p>暂无数据</p>';
+                return;
+            }
+
+            container.innerHTML = filteredEntries.map(entry => `
+                <div class="entry-card" onclick="showEntryDetail('${entry.id}')">
+                    <h3>Team ${entry.teamNumber} - ${entry.teamName}</h3>
+                    <div class="entry-detail">
+                        <div class="detail-item"><strong>Event:</strong> ${entry.event}</div>
+                        <div class="detail-item"><strong>Collector:</strong> ${entry.collector}</div>
+                        <div class="detail-item"><strong>Practice:</strong> ${entry.practice}h</div>
+                        <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount}</div>
+                        <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateFilterDropdowns(entries) {
+            const eventFilter = document.getElementById('filter-event');
+            const collectorFilter = document.getElementById('filter-collector');
+
+            if (!eventFilter || !collectorFilter) return;
+
+            // Get unique events and collectors
+            const events = [...new Set(entries.map(e => e.event))];
+            const collectors = [...new Set(entries.map(e => e.collector))];
+
+            // Update event dropdown
+            const currentEvent = eventFilter.value;
+            eventFilter.innerHTML = '<option value="">所有赛事</option>' + 
+                events.map(e => `<option value="${e}" ${e === currentEvent ? 'selected' : ''}>${e}</option>`).join('');
+
+            // Update collector dropdown
+            const currentCollector = collectorFilter.value;
+            collectorFilter.innerHTML = '<option value="">所有收集者</option>' + 
+                collectors.map(c => `<option value="${c}" ${c === currentCollector ? 'selected' : ''}>${c}</option>`).join('');
+        }
+
+        async function showEntryDetail(id) {
+            const response = await fetch('/api/prescout');
+            const entries = await response.json();
+            const entry = entries.find(e => e.id === id);
+
+            if (!entry) {
+                alert('未找到该记录');
+                return;
+            }
+
+            alert(`
+Team ${entry.teamNumber} - ${entry.teamName}
+Event: ${entry.event}
+Collector: ${entry.collector}
+Practice Duration: ${entry.practice}h
+Competition Count: ${entry.compCount}
+Chassis Type: ${entry.chassis}
+Submitted: ${new Date(entry.ts).toLocaleString()}
+            `);
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('toolsSidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('active');
+            }
+        }
+
+        // Initialize
+        window.addEventListener('hashchange', renderApp);
+        window.addEventListener('load', () => {
+            renderApp();
+            // Auto-load entries if on prescouting page
+            const hash = window.location.hash;
+            if (hash === '#tools/prescouting' || hash === '#tools') {
+                setTimeout(renderEntries, 500);
+            }
+        });
+
+        // Auto refresh entries when navigating to prescouting
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash;
+            if (hash === '#tools/prescouting' || hash === '#tools') {
+                setTimeout(renderEntries, 500);
+            }
+        });
+    </script>
+</body>
 </html>

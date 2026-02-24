@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+			<meta charset="UTF-8" />
+			<!-- Header template -->
+			<template id="header-template">
+				<header class="site-header">
+					<div class="inner">
+						<div class="brand">FRC 9597</div>
+						<nav class="site-nav">
+							<a href="#home" data-link>Home</a>
+							<a href="#about" data-link>About</a>
+							<a href="#history" data-link>History</a>
+						</nav>
+					</div>
+				</header>
+			</template>
+
+			<!-- Footer template -->
+			<template id="footer-template">
+				<footer class="site-footer">
+					<div class="inner footer-inner">
+						<div class="footer-left">
+							<div>© FRC 9597</div>
+						</div>
+						<div class="footer-columns">
+							<div class="footer-column">
+								<strong>Tools</strong>
+								<ul>
+									<li><a href="#" data-link>PreScouting</a></li>
+									<li><a href="#" data-link>Scouting</a></li>
+								</ul>
+							</div>
+							<div class="footer-column">
+								<strong>Friend Links</strong>
+								<ul>
+									<li><a href="https://www.thebluealliance.com" target="_blank">The Blue Alliance</a></li>
+									<li><a href="https://docs.wpilib.org" target="_blank">WPILib</a></li>
+									<li><a href="https://www.firstinspires.org" target="_blank">FIRST</a></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</footer>
+			</template>
+
+		</head>
+		<body>
+			<!-- Page container -->
+			<div id="page-root">
+				<!-- header will be injected here -->
+				<main id="main" class="site-main">
+					<section id="app-content"></section>
+				</main>
+				<!-- footer will be injected here -->
+			</div>
+
+			<style>
+			:root{--max-width:980px;--accent:#003366;--muted:#666;--main-bg:#f6f8fb}
+			body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;color:#222;background:var(--main-bg)}
+			/* page root makes footer sticky */
+			#page-root{min-height:100vh;display:flex;flex-direction:column}
+			.inner{max-width:var(--max-width);margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+			.site-header{background:var(--accent);color:#fff;box-shadow:0 1px 0 rgba(0,0,0,0.06)}
+			.brand{font-weight:700;font-size:18px;color:#fff;text-decoration:none;display:inline-block;cursor:pointer}
+			.brand:hover{opacity:0.8}
+			.site-nav a{color:#fff;margin-left:16px;text-decoration:none;display:inline-block;padding:8px 0}
+			.site-nav{display:flex;align-items:center}
+			.site-header .inner{min-height:64px}
+			.site-main{max-width:var(--max-width);margin:24px auto;flex:1;width:100%;display:flex}
+			.page-section{display:flex;gap:20px;width:100%;align-items:flex-start}
+			.page-content{flex:1;background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);padding:24px}
+			.sidebar-outer{width:280px;flex:0 0 280px;height:fit-content;position:sticky;top:120px}
+			.toggle-sidebar{display:none;background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;margin-bottom:12px;font-size:14px;width:100%}
+			@media (max-width:900px){.sidebar-outer{position:fixed;left:-300px;top:0;width:280px;height:100vh;z-index:100;transition:left 0.3s ease;overflow-y:auto;background:white;box-shadow:2px 0 8px rgba(0,0,0,0.15);flex:none}.sidebar-outer.open{left:0}.toggle-sidebar{display:block}}
+			@media (max-width:600px){.page-content{padding:16px}}
+			.site-footer{background:var(--accent);color:#fff;border-top:1px solid rgba(255,255,255,0.06)}
+			.footer-inner{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+			.footer-columns{display:flex;gap:32px}
+			.footer-column ul{list-style:none;padding:0;margin:8px 0 0}
+			.footer-column li{margin-bottom:8px}
+			.site-footer .footer-links a{color:rgba(255,255,255,0.95);margin-left:12px;text-decoration:none}
+			.brand-large{font-size:28px;font-weight:800}
+			.slogan{margin-top:6px;opacity:0.9}
+			.footer-column strong{display:block;margin-bottom:8px;color:rgba(255,255,255,0.95)}
+			.footer-column a{color:rgba(255,255,255,0.95);text-decoration:none}
+			@media (max-width:800px){.footer-inner{flex-direction:column;align-items:flex-start}.footer-columns{flex-direction:column}}
+			@media (max-width:600px){.inner{padding:10px}.site-nav a{margin-left:8px;font-size:14px}}
+
+			.tools-nav{background: linear-gradient(180deg,#ffffff,#fbfdff);border:1px solid #e8eef6;padding:10px;border-radius:8px;box-shadow:0 6px 18px rgba(16,24,40,0.04)}
+			.tools-nav ul{list-style:none;padding-left:0;margin:6px 0}
+			.tools-nav li{margin:6px 0;border-radius:6px}
+			.tools-nav li > a{display:block;padding:8px 6px;border-radius:6px;cursor:pointer;color:var(--accent);text-decoration:none}
+			.tools-nav li > a:hover{background:#f1f7ff}
+			.tools-nav ul ul{padding-left:12px;margin-top:6px;border-left:2px solid rgba(0,51,102,0.06);padding-left:14px}
+			.tools-nav strong{display:block;margin-bottom:8px}
+			.tools-nav .parent-toggle::after{content:'▾';float:right;color:var(--muted)}
+			.tools-nav .parent-sub .parent-toggle::after{content:'▸'}
+
+			</style>
+
+			<script>
+				const content = document.getElementById('app-content');
+
+				function renderHome() {
+					content.innerHTML = `
+					<div class="page-section">
+						<h1>FRC Team 9597</h1>
+						<p>Welcome to the official site for FRC Team 9597. This page provides team information, resources and scouting tools.</p>
+						<ul>
+							<li><strong>Location:</strong> Your city</li>
+							<li><strong>Contact:</strong> contact@frc9597.com</li>
+							<li><strong>Rookie Year:</strong> 20XX</li>
+						</ul>
+					</div>
+					`;
+				}
+
+				function renderAbout() {
+					content.innerHTML = `
+					<div class="page-section">
+						<h1>About FRC 9597</h1>
+						<p>FRC 9597 is a competitive robotics team focused on engineering, outreach, and student development.</p>
+						<p>Our mission is to inspire students through hands-on STEM education.</p>
+					</div>
+					`;
+				}
+
+				function renderHistoryIndex() {
+					content.innerHTML = `
+					<div class="page-section">
+						<h1>Team History</h1>
+						<p>Explore highlights from recent seasons.</p>
+						<ul>
+							<li><a href="#history/2023" data-link>2023 Season</a></li>
+							<li><a href="#history/2024" data-link>2024 Season</a></li>
+							<li><a href="#history/2025" data-link>2025 Season</a></li>
+						</ul>
+					</div>
+					`;
+				}
+
+				function renderHistoryYear(year) {
+					if (year === '2023') {
+						content.innerHTML = `
+						<div class="page-section">
+							<h1>2023 Season</h1>
+							<p>In 2023, Team 9597 participated in regional competitions, focusing on ramp climbing strategies and driver training. Key achievements: strong outreach and improved reliability.</p>
+						</div>
+						`;
+					} else if (year === '2024') {
+						content.innerHTML = `
+						<div class="page-section">
+							<h1>2024 Season</h1>
+							<p>2024 marked a year of innovation with a new intake of students. The team experimented with autonomous routines and enhanced sensor integration.</p>
+						</div>
+						`;
+					} else if (year === '2025') {
+						content.innerHTML = `
+						<div class="page-section">
+							<h1>2025 Season</h1>
+							<p>In 2025 the team emphasized strategy and scouting, expanding community outreach and mentoring younger teams.</p>
+						</div>
+						`;
+					} else {
+						renderHistoryIndex();
+					}
+				}
+
+				function router() {
+					const hash = location.hash || '#home';
+					if (hash === '#home') renderHome();
+					else if (hash === '#about') renderAbout();
+					else if (hash === '#history') renderHistoryIndex();
+					else if (hash.startsWith('#history/')) {
+						const year = hash.split('/')[1];
+						renderHistoryYear(year);
+					}
+					else if (hash === '#login') renderLogin();
+					else if (hash === '#tools') renderToolsIndex();
+					else if (hash.startsWith('#tools/')) {
+						const seg = hash.split('/')[1];
+						if (seg === 'prescouting') renderPreScouting();
+						else if (seg === 'scouting') renderScouting();
+						else renderToolsIndex();
+					}
+					else renderHome();
+				}
+
+				function renderScouting(){
+					if (!isAuthenticated()){ location.hash = '#login'; return; }
+					content.innerHTML = renderToolsLayout(`
+					<h1>Scouting</h1>
+					<p>Scouting tools coming soon.</p>
+				`);
+			}
+
+			function renderToolsSidebar(){
+				return `
+					<div class="tools-nav">
+						<strong>Tools</strong>
+						<ul>
+							<li><a href="#tools/prescouting" data-link>PreScouting</a></li>
+							<li><a href="#tools/scouting" data-link>Scouting</a></li>
+							<li>
+								<a href="#tools/team-analysis" data-link>Team Analysis</a>
+								<ul>
+									<li><a href="#tools/team-analysis/overview" data-link>Overview</a>
+										<ul>
+											<li><a href="#tools/team-analysis/overview/basic" data-link>战队基础信息</a></li>
+											<li><a href="#tools/team-analysis/overview/performance" data-link>现场表现</a></li>
+										</ul>
+									</li>
+									<li><a href="#tools/team-analysis/analysis" data-link>Team Analysis</a></li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				`;
+			}
+
+			function renderToolsLayout(contentHtml){
+				// Sidebar should be on the left (outside white box); content on the right (inside white box)
+				const html = `
+					<div class="page-section">
+						<div class="sidebar-outer" id="sidebar-container">
+							${renderToolsSidebar()}
+						</div>
+						<div class="page-content">
+							<button class="toggle-sidebar" id="toggle-sidebar-btn">☰ Tools</button>
+							${contentHtml}
+						</div>
+					</div>
+				`;
+				
+				// Schedule sidebar toggle setup after render
+				setTimeout(() => {
+					const toggleBtn = document.getElementById('toggle-sidebar-btn');
+					const sidebar = document.getElementById('sidebar-container');
+					const pageContent = document.querySelector('.page-content');
+					if (toggleBtn && sidebar) {
+						toggleBtn.addEventListener('click', (e) => {
+							e.stopPropagation();
+							sidebar.classList.toggle('open');
+						});
+						// Close sidebar when clicking on content (mobile)
+						if (pageContent) {
+							pageContent.addEventListener('click', () => {
+								if (window.innerWidth <= 900 && sidebar.classList.contains('open')) {
+									sidebar.classList.remove('open');
+								}
+							});
+						}
+					}
+				}, 0);
+				
+				return html;
+			}
+					const [h,f] = await Promise.all([fetch('/header.html').then(r=>r.text()), fetch('/footer.html').then(r=>r.text())]);
+					const root = document.getElementById('page-root');
+					// inject header at top, footer at bottom
+					root.insertAdjacentHTML('afterbegin', h);
+					root.insertAdjacentHTML('beforeend', f);
+				} catch (err){
+					console.warn('Failed to load partials', err);
+				}
+			}
+
+			function bindLinks(){
+					// bind dynamic links; enforce login for Tools routes
+					document.querySelectorAll('[data-link]').forEach(a => a.addEventListener('click', (e)=>{
+						e.preventDefault();
+						const href = a.getAttribute('href') || '';
+						if (href.startsWith('#tools') && !isAuthenticated()) {
+							// remember requested path and send to login
+							sessionStorage.setItem('nextHash', href.replace('#',''));
+							location.hash = '#login';
+						} else {
+							location.hash = href.replace('#','');
+						}
+					}));
+					// auth controls
+					const auth = document.getElementById('auth-controls');
+					if (auth) {
+						auth.innerHTML = '';
+						if (isAuthenticated()) {
+							const user = getUser();
+							const btn = document.createElement('button');
+							btn.textContent = 'Logout ('+user+')';
+							btn.addEventListener('click', () => { logoutUser(); location.hash = '#home'; });
+							auth.appendChild(btn);
+						} else {
+							const btn = document.createElement('button');
+							btn.textContent = 'Login';
+							btn.addEventListener('click', () => { location.hash = '#login'; });
+							auth.appendChild(btn);
+						}
+					}
+				}
+
+				async function init(){
+					await loadPartials();
+					bindLinks();
+					window.addEventListener('hashchange', router);
+					router();
+				}
+
+				// initial
+				init();
+
+				// --- Authentication helpers ---
+				function isAuthenticated(){
+					return !!localStorage.getItem('authUser');
+				}
+
+				function getUser(){
+					return localStorage.getItem('authUser') || null;
+				}
+
+				function loginUser(username){
+					localStorage.setItem('authUser', username);
+					bindLinks();
+				}
+
+				function logoutUser(){
+					localStorage.removeItem('authUser');
+					bindLinks();
+				}
+
+				// --- Login and Tools pages ---
+				function renderLogin(){
+					content.innerHTML = `
+						<div class="page-section">
+							<h1>Login</h1>
+							<form id="login-form">
+								<label>Username: <input name="username" required/></label><br/><br/>
+								<label>Password: <input name="password" type="password" required/></label><br/><br/>
+								<button type="submit">Login</button>
+							</form>
+							<div style="margin-top:12px;color:var(--muted);font-size:14px">
+								Test account: <strong>tester</strong> / <strong>password123</strong>
+								<button id="use-test" style="margin-left:12px">Use test account</button>
+							</div>
+						</div>
+					`;
+
+					document.getElementById('login-form').addEventListener('submit', (e)=>{
+						e.preventDefault();
+						const form = e.target;
+						const username = form.username.value.trim();
+						const password = form.password.value || '';
+						// accept test account; also accept any non-empty username for convenience
+						if (!username) return;
+						if (username === 'tester' && password === 'password123') {
+							loginUser(username);
+						} else if (username) {
+							// allow quick login for other usernames (no password enforcement)
+							loginUser(username);
+						}
+						const next = sessionStorage.getItem('nextHash');
+						if (next) {
+							sessionStorage.removeItem('nextHash');
+							location.hash = '#'+next;
+						} else {
+							location.hash = '#tools';
+						}
+					});
+
+					// autofill with test account when requested
+					document.getElementById('use-test').addEventListener('click', ()=>{
+						document.querySelector('#login-form [name=username]').value = 'tester';
+						document.querySelector('#login-form [name=password]').value = 'password123';
+					});
+
+					// ensure links behave (if user clicks while on login page)
+					document.querySelectorAll('[data-link]').forEach(a => a.addEventListener('click', (e)=>{
+						e.preventDefault();
+						const href = a.getAttribute('href') || '';
+						if (href.startsWith('#tools') && !isAuthenticated()) {
+							sessionStorage.setItem('nextHash', href.replace('#',''));
+							location.hash = '#login';
+						} else {
+							location.hash = href.replace('#','');
+						}
+					}));
+
+				}
+
+				function renderToolsIndex(){
+					if (!isAuthenticated()){ location.hash = '#login'; return; }
+					content.innerHTML = renderToolsLayout(`
+					<h1>Tools</h1>
+					<p>Select a tool from the left sidebar.</p>
+				`);
+			}
+
+				function renderPreScouting(){
+					if (!isAuthenticated()){ location.hash = '#login'; return; }
+					const user = getUser();
+				const currentYear = new Date().getFullYear();
+				content.innerHTML = renderToolsLayout(`
+					<div style="display:flex;gap:20px">
+						<div style="flex:1">
+							<h1>PreScouting</h1>
+							<form id="prescout-form">
+								<label>Event: <select name="event" id="prescout-event">
+									<option value="2025-einstein">2025 Einstein</option>
+									<option value="2025-curie">2025 Curie</option>
+									<option value="2025-newton">2025 Newton</option>
+									<option value="2024-einstein">2024 Einstein</option>
+								</select></label><br/><br/>
+								<label>Collector: <input name="collector" value="${user}" required/></label><br/><br/>
+								<label>Team Number *: <input name="teamNumber" required/></label><br/><br/>
+								<label>Team Name: <input name="teamName"/></label><br/><br/>
+								<label>Operator practice duration: <input name="practice" placeholder="e.g. 3 months, 1 year"/></label><br/><br/>
+								<label>Operator competition count: <input type="number" name="compCount" min="0"/></label><br/><br/>
+								<label>Chassis type *:
+								<select name="chassis" required>
+									<option value="">--请选择--</option>
+									<option value="tank">Tank</option>
+									<option value="swerve">Swerve</option>
+									<option value="mecanum">Mecanum</option>
+									<option value="other">Other</option>
+								</select>
+								</label><br/><br/>
+								<button type="submit">Save</button>
+							</form>
+						</div>
+						<div style="flex:0 0 420px;border-left:1px solid #eee;padding-left:16px">
+							<h3>Collected Data</h3>
+							<div style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px">
+								<label style="font-size:12px">Event: <select id="filter-event" style="width:100%;padding:4px;border:1px solid #ccc;border-radius:4px">
+									<option value="">All Events</option>
+									<option value="2025-einstein">2025 Einstein</option>
+									<option value="2025-curie">2025 Curie</option>
+									<option value="2025-newton">2025 Newton</option>
+									<option value="2024-einstein">2024 Einstein</option>
+								</select></label>
+								<label style="font-size:12px">Collector: <select id="filter-collector" style="width:100%;padding:4px;border:1px solid #ccc;border-radius:4px">
+									<option value="">All Collectors</option>
+								</select></label>
+							</div>
+							<div id="entries-list" style="max-height:500px;overflow-y:auto">
+							</div>
+						</div>
+					</div>
+				`);
+
+				const form = document.getElementById('prescout-form');
+				let submitBtn = form.querySelector('button[type="submit"]');
+				const filterEvent = document.getElementById('filter-event');
+				const filterCollector = document.getElementById('filter-collector');
+				
+				// Add filter change listeners
+				filterEvent.addEventListener('change', () => {
+					renderEntries();
+				});
+				filterCollector.addEventListener('change', () => {
+					renderEntries();
+				});
+
+				form.addEventListener('submit', async (e)=>{
+					e.preventDefault();
+					submitBtn.disabled = true;
+					submitBtn.textContent = 'Saving...';
+					
+					const fd = new FormData(form);
+					const selectedEvent = fd.get('event');  // 保存用户选择的 event
+					const entry = {
+						collector: fd.get('collector'),
+						teamNumber: fd.get('teamNumber'),
+						teamName: fd.get('teamName'),
+						practice: fd.get('practice'),
+						compCount: fd.get('compCount'),
+						chassis: fd.get('chassis'),
+						event: selectedEvent,
+						ts: Date.now()
+					};
+					
+					try {
+						console.log('Submitting entry:', entry);
+						const res = await fetch('/api/prescout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry) });
+						console.log('Response status:', res.status);
+						
+						if (res.ok) {
+							const data = await res.json();
+							console.log('Success:', data);
+							alert('Data saved successfully!');
+							
+							// 重新加载表格
+							await renderEntries();
+							
+							// 更新 collector 下拉框选项
+							updateCollectorOptions();
+							
+							form.reset();
+							form.collector.value = user;
+							document.getElementById('prescout-event').value = selectedEvent;
+						} else {
+							const errData = await res.json().catch(() => ({ error: 'Unknown error: ' + res.statusText }));
+							console.log('Error response:', errData);
+							alert('Failed to save entry: ' + (errData.error || 'Unknown error'));
+						}
+					} catch (err) {
+						console.error('Network error:', err);
+						alert('Network error: ' + err.message);
+					} finally {
+						submitBtn.disabled = false;
+						submitBtn.textContent = 'Save';
+					}
+				});
+
+				function updateCollectorOptions() {
+					// Update collector dropdown with unique collectors from all data
+					const collectors = [...new Set(currentEntriesList.map(e => e.collector))].sort();
+					const currentValue = filterCollector.value;
+					filterCollector.innerHTML = '<option value="">All Collectors</option>' + 
+						collectors.map(c => `<option value="${c}">${c}</option>`).join('');
+					if (collectors.includes(currentValue)) {
+						filterCollector.value = currentValue;
+					}
+				}
+				
+				async function renderEntries(){
+					const container = document.getElementById('entries-list');
+					const filterEventValue = filterEvent.value;
+					const filterCollectorValue = filterCollector.value;
+					
+					console.log('renderEntries called - fetching all data');
+					try {
+						const url = '/api/prescout';
+						console.log('Fetching from:', url);
+						const res = await fetch(url);
+						console.log('GET response status:', res.status, res.statusText);
+						
+						if (!res.ok) { 
+							const errText = await res.text();
+							console.log('GET error response:', errText);
+							container.innerHTML = '<div style="padding:12px;text-align:center;color:red">Error: ' + res.statusText + '</div>'; 
+							return; 
+						}
+						const list = await res.json();
+						console.log('Fetched entries:', list);
+						currentEntriesList = list;
+						
+						// Update collector options
+						updateCollectorOptions();
+						
+						// Apply filters
+						let filtered = list;
+						if (filterEventValue) {
+							filtered = filtered.filter(e => e.event === filterEventValue);
+						}
+						if (filterCollectorValue) {
+							filtered = filtered.filter(e => e.collector === filterCollectorValue);
+						}
+						
+						console.log('Filtered entries:', filtered);
+						if (!filtered.length) { 
+							container.innerHTML = '<div style="padding:12px;text-align:center">No entries match filters.</div>'; 
+							return; 
+						}
+						
+						console.log('Total filtered entries:', filtered.length);
+						container.innerHTML = filtered.map((it, idx) => `
+							<div style="padding:12px;margin-bottom:8px;background:#f9f9f9;border-left:3px solid #0066cc;border-radius:4px;cursor:pointer" onclick="showEntryDetail('${it.teamNumber}', '${it.event}')">
+								<div style="font-weight:600;color:#0066cc;margin-bottom:4px">Team ${it.teamNumber}</div>
+								<div style="font-size:12px;color:#666;margin-bottom:2px"><strong>Event:</strong> ${it.event}</div>
+								<div style="font-size:12px;color:#666;margin-bottom:2px"><strong>Collector:</strong> ${it.collector}</div>
+								<div style="font-size:12px;color:#666;margin-bottom:2px"><strong>Team Name:</strong> ${it.teamName || 'N/A'}</div>
+								<div style="font-size:12px;color:#666;margin-bottom:2px"><strong>Chassis:</strong> ${it.chassis || 'N/A'}</div>
+								<div style="font-size:11px;color:#999">Practice: ${it.practice || 'N/A'} | Comps: ${it.compCount || 0}</div>
+							</div>
+						`).join('');
+					} catch (err) {
+						console.error('renderEntries error:', err, err.stack);
+						container.innerHTML = '<div style="padding:12px;color:red">Error loading entries: ' + err.message + '</div>';
+					}
+				}
+
+				renderEntries();
+			}
+
+			function renderTeamAnalysisIndex(){
+				if (!isAuthenticated()){ location.hash = '#login'; return; }
+				content.innerHTML = renderToolsLayout(`<h1>Team Analysis</h1><p>分析模块 - 请选择队伍进行查看。</p>`);
+			}
+
+			function renderTeamOverview(section){
+				if (!isAuthenticated()){ location.hash = '#login'; return; }
+				if (section === 'basic'){
+					content.innerHTML = renderToolsLayout(`<h1>战队基础信息</h1><p>显示由 PreScouting 收集到的队伍信息（示例）</p>`);
+				} else if (section === 'performance'){
+					content.innerHTML = renderToolsLayout(`<h1>现场表现</h1><p>显示由 Scouting 收集到的现场表现（示例）</p>`);
+				} else {
+					renderTeamAnalysisIndex();
+				}
+			}
+
+			// Global variable to cache entries for detail view
+			let currentEntriesList = [];
+			function showEntryDetail(teamNum, event){
+				// Find all entries for this team in this event
+				const entries = currentEntriesList.filter(e => e.teamNumber === teamNum && e.event === event);
+				if (!entries.length) return;
+				
+				const firstEntry = entries[0];
+				const detailsHtml = entries.map((it, idx) => `
+					<div style="margin-bottom:12px;padding:8px;background:#f9f9f9;border-left:3px solid #0066cc">
+						<p><strong>Collector:</strong> ${it.collector}</p>
+						<p><strong>Team Name:</strong> ${it.teamName || 'N/A'}</p>
+						<p><strong>Operator practice duration:</strong> ${it.practice || 'N/A'}</p>
+						<p><strong>Operator competition count:</strong> ${it.compCount || 0}</p>
+						<p><strong>Chassis type:</strong> ${it.chassis || 'N/A'}</p>
+						<p><strong>Timestamp:</strong> ${new Date(it.ts).toLocaleString()}</p>
+					</div>
+				`).join('');
+				
+				content.innerHTML = renderToolsLayout(`
+					<div style="padding:20px">
+						<button onclick="renderPreScouting()" style="margin-bottom:16px;padding:6px 12px">← Back to PreScouting</button>
+						<h2>Team ${teamNum}</h2>
+						<p style="color:#666">Event: ${event}</p>
+						<div style="background:#fff;padding:16px;border-radius:8px;border:1px solid #eee">
+							<h3>Collected Records (${entries.length})</h3>
+							${detailsHtml}
+						</div>
+					</div>
+				`);
+			}
+
+			</script>
+	</body>
+</html>

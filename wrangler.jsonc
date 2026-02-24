@@ -19,19 +19,18 @@
 		// The path to the directory containing the `index.html` file to be served at `/`
 		"directory": "./public"
 	},
-	"durable_objects": {
-		"bindings": [
-			{
-				"class_name": "MyDurableObject",
-				"name": "MY_DURABLE_OBJECT"
-			}
-		]
-	},
 	"observability": {
 		"enabled": true
 	},
 	"compatibility_flags": [
 		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "D1_PRESCOUT",
+			"database_name": "prescout_db",
+			"database_id": "0e52c877-b1fa-4149-9c57-8d1150223fe2"
+		}
 	]
 	/**
 	 * Smart Placement
