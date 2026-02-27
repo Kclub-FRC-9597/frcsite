@@ -89,6 +89,17 @@ npm run deploy
 ### Analysis
 查看和分析 PreScouting 和 Scouting 阶段收集的所有数据。
 
+## 后续工作计划说明
+
+1. 添加账户 dashboard 页面（可修改自己的账户密码）。
+2. 添加 K CLUB 介绍页面（考虑单独注册域名指向这个页面）。
+3. `admin` 账户可以管理其他用户。
+4. 主页文字介绍提供编辑权限（管理员特权）。
+5. 添加常用系统管理员。
+6. PreScouting/Scouting 单独设置一个管理员，负责模板编辑、scouting 工作分配等。
+7. 添加 `root` 管理员，拥有所有系统管理权限；`admin` 为常规管理员，`root` 可修改所有可修改的信息。
+8. 赛年信息添加本赛季的参赛队员/指导老师等信息，支持 `admin` 编辑。
+
 ## License
 
 © 2026 Luban Robotics #FRC9597 - K CLUB
