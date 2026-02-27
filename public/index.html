@@ -423,6 +423,91 @@
     <script>
         // Auth state
         let currentUser = localStorage.getItem('frc_user');
+        let currentRole = localStorage.getItem('frc_role');
+        let currentToken = localStorage.getItem('frc_token');
+
+        const ADMIN_USER = 'admin';
+        const ADMIN_PASS = 'admin123';
+        const ADMIN_TOKEN = 'admin-token-2026';
+
+        const DEFAULT_EVENTS = ['2025-einstein'];
+
+        if (currentUser && !currentRole) {
+            currentRole = 'tester';
+            localStorage.setItem('frc_role', 'tester');
+        }
+
+        function isAdmin() {
+            return currentRole === 'admin' && currentToken === ADMIN_TOKEN;
+        }
+
+        function apiFetch(url, options = {}) {
+            if (!isAdmin()) {
+                return fetch(url, options);
+            }
+            const headers = new Headers(options.headers || {});
+            headers.set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+            return fetch(url, { ...options, headers });
+        }
+
+        function getLocalPrescoutData() {
+            return JSON.parse(localStorage.getItem('prescout_data') || '[]');
+        }
+
+        function saveLocalPrescoutData(entries) {
+            localStorage.setItem('prescout_data', JSON.stringify(entries));
+        }
+
+        function getLocalScoutingData() {
+            return JSON.parse(localStorage.getItem('scouting_data') || '[]');
+        }
+
+        function saveLocalScoutingData(entries) {
+            localStorage.setItem('scouting_data', JSON.stringify(entries));
+        }
+
+        function getEventOptions() {
+            const saved = localStorage.getItem('event_options');
+            if (saved) return JSON.parse(saved);
+            localStorage.setItem('event_options', JSON.stringify(DEFAULT_EVENTS));
+            return [...DEFAULT_EVENTS];
+        }
+
+        function addEventOption(name) {
+            if (!name) return;
+            const options = getEventOptions();
+            if (options.includes(name)) return;
+            options.push(name);
+            localStorage.setItem('event_options', JSON.stringify(options));
+        }
+
+        async function getPrescoutEntries(eventFilter = '') {
+            if (isAdmin()) {
+                const url = eventFilter ? `/api/prescout?event=${encodeURIComponent(eventFilter)}` : '/api/prescout';
+                const response = await apiFetch(url);
+                return await response.json();
+            }
+
+            let entries = getLocalPrescoutData();
+            if (eventFilter) {
+                entries = entries.filter(e => e.event === eventFilter);
+            }
+            return entries;
+        }
+
+        async function getScoutingEntries(eventFilter = '') {
+            if (isAdmin()) {
+                const url = eventFilter ? `/api/scouting?event=${encodeURIComponent(eventFilter)}` : '/api/scouting';
+                const response = await apiFetch(url);
+                return await response.json();
+            }
+
+            let entries = getLocalScoutingData();
+            if (eventFilter) {
+                entries = entries.filter(e => e.event === eventFilter);
+            }
+            return entries;
+        }
 
         // Cache for loaded HTML
         let headerHTML = '';
@@ -502,26 +587,42 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Simple auth check
-            if (username === 'tester' && password === 'password123') {
+            if (username === ADMIN_USER && password === ADMIN_PASS) {
                 currentUser = username;
+                currentRole = 'admin';
+                currentToken = ADMIN_TOKEN;
                 localStorage.setItem('frc_user', username);
-                // Redirect to prescouting if returnTo is login or tools
-                if (returnTo === '#login' || returnTo === '#tools') {
-                    window.location.hash = '#tools/prescouting';
-                } else {
-                    window.location.hash = returnTo;
-                }
-                // Manually trigger render to ensure page updates
-                await renderApp();
+                localStorage.setItem('frc_role', 'admin');
+                localStorage.setItem('frc_token', ADMIN_TOKEN);
+            } else if (username === 'tester' && password === 'password123') {
+                currentUser = username;
+                currentRole = 'tester';
+                currentToken = '';
+                localStorage.setItem('frc_user', username);
+                localStorage.setItem('frc_role', 'tester');
+                localStorage.removeItem('frc_token');
             } else {
                 alert('用户名或密码错误');
+                return;
             }
+
+            // Redirect to prescouting if returnTo is login or tools
+            if (returnTo === '#login' || returnTo === '#tools') {
+                window.location.hash = '#tools/prescouting';
+            } else {
+                window.location.hash = returnTo;
+            }
+            // Manually trigger render to ensure page updates
+            await renderApp();
         }
 
         function logout() {
             currentUser = null;
+            currentRole = null;
+            currentToken = null;
             localStorage.removeItem('frc_user');
+            localStorage.removeItem('frc_role');
+            localStorage.removeItem('frc_token');
             navigate('#home');
         }
 
@@ -535,11 +636,65 @@
             app.innerHTML = `
                 ${header}
                 <div class="content" style="max-width: 1400px; margin: 0 auto;">
-                    <h1>欢迎来到 FRC Team 9597</h1>
-                    <p>鲁班门 - 我们的团队致力于机器人创新与技术探索。</p>
-                    <h2>关于我们</h2>
-                    <p>Team 9597 是一支充满活力的 FRC 团队，专注于培养学生的工程技能和团队协作能力。</p>
-                    ${!loggedIn ? '<p style="margin-top: 20px; color: #764ba2;"><strong>提示：</strong>访问工具页面需要登录</p>' : ''}
+                    <h1>🤖 欢迎来到 Luban Robotics</h1>
+                    <p style="font-size: 1.2em; color: #667eea; margin-bottom: 30px;">
+                        <strong>FRC Team 9597</strong> - A Team From K CLUB
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+                        <h2 style="margin-bottom: 15px;">🎯 关于我们</h2>
+                        <p style="line-height: 1.8; color: #555;">
+                            Luban Robotics（鲁班门）是一支充满激情与创新精神的 FRC 团队，隶属于 K CLUB。
+                            我们以中国古代著名工匠鲁班命名，秉承精益求精的工匠精神，致力于机器人技术的研发与创新。
+                        </p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div style="background: white; border: 2px solid #667eea; padding: 20px; border-radius: 10px;">
+                            <h3 style="color: #667eea; margin-bottom: 10px;">🔧 技术创新</h3>
+                            <p style="color: #666; line-height: 1.6;">
+                                融合机械设计、电子工程、编程开发等多学科知识，打造高性能竞赛机器人
+                            </p>
+                        </div>
+                        <div style="background: white; border: 2px solid #764ba2; padding: 20px; border-radius: 10px;">
+                            <h3 style="color: #764ba2; margin-bottom: 10px;">👥 团队协作</h3>
+                            <p style="color: #666; line-height: 1.6;">
+                                培养学生的沟通能力、领导力和团队精神，共同应对挑战，共同成长进步
+                            </p>
+                        </div>
+                        <div style="background: white; border: 2px solid #667eea; padding: 20px; border-radius: 10px;">
+                            <h3 style="color: #667eea; margin-bottom: 10px;">🏆 竞赛精神</h3>
+                            <p style="color: #666; line-height: 1.6;">
+                                参加 FIRST Robotics Competition，与全球优秀团队切磋交流，追求卓越表现
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 4px solid #667eea;">
+                        <h2 style="margin-bottom: 15px;">💡 我们的工具</h2>
+                        <p style="line-height: 1.8; color: #555; margin-bottom: 15px;">
+                            为了更好地进行赛事数据分析和战略规划，我们开发了专业的 Scouting 系统：
+                        </p>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="padding: 8px 0; color: #555;">
+                                <strong style="color: #667eea;">📋 PreScouting</strong> - 赛前数据收集与团队评估
+                            </li>
+                            <li style="padding: 8px 0; color: #555;">
+                                <strong style="color: #764ba2;">📊 Scouting</strong> - 现场实时数据记录与分析
+                            </li>
+                            <li style="padding: 8px 0; color: #555;">
+                                <strong style="color: #667eea;">📈 Analysis</strong> - 数据可视化与战略决策支持
+                            </li>
+                        </ul>
+                    </div>
+
+                    ${!loggedIn ? `
+                        <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 10px; border: 1px solid #ffc107;">
+                            <p style="color: #856404; margin: 0;">
+                                <strong>💡 提示：</strong>访问工具页面需要登录。请联系团队管理员获取访问权限。
+                            </p>
+                        </div>
+                    ` : ''}
                 </div>
                 ${footer}
             `;
@@ -977,19 +1132,31 @@
                 }
             }
 
-            // Save to localStorage for now (you can add API later)
-            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
-            data.id = crypto.randomUUID();
-            scoutingData.push(data);
-            localStorage.setItem('scouting_data', JSON.stringify(scoutingData));
+            if (isAdmin()) {
+                const response = await apiFetch('/api/scouting', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-            alert('数据提交成功！');
+                if (!response.ok) {
+                    alert('提交失败');
+                    return;
+                }
+            } else {
+                const scoutingData = getLocalScoutingData();
+                data.id = crypto.randomUUID();
+                scoutingData.push(data);
+                saveLocalScoutingData(scoutingData);
+            }
+
+            alert(isAdmin() ? '数据提交成功！' : '数据提交成功（本地保存）！');
             showScoutingForm();
         }
 
-        function showScoutingData() {
+        async function showScoutingData() {
             const config = getScoutingConfig();
-            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const scoutingData = await getScoutingEntries('');
             const content = document.getElementById('scouting-content');
             
             if (scoutingData.length === 0) {
@@ -1027,7 +1194,9 @@
                 
                 html += `<div class="detail-item"><strong>提交时间:</strong> ${new Date(entry.ts).toLocaleString()}</div>`;
                 html += `</div>`;
-                html += `<button onclick="deleteScoutingEntry('${entry.id}')">删除</button>`;
+                if (!isAdmin()) {
+                    html += `<button onclick="deleteScoutingEntry('${entry.id}')">删除</button>`;
+                }
                 html += `</div>`;
             });
             
@@ -1037,15 +1206,15 @@
         function deleteScoutingEntry(id) {
             if (!confirm('确定要删除这条记录吗？')) return;
             
-            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const scoutingData = getLocalScoutingData();
             const filtered = scoutingData.filter(entry => entry.id !== id);
-            localStorage.setItem('scouting_data', JSON.stringify(filtered));
+            saveLocalScoutingData(filtered);
             showScoutingData();
         }
 
-        function exportScoutingData() {
+        async function exportScoutingData() {
             const config = getScoutingConfig();
-            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const scoutingData = await getScoutingEntries('');
             
             if (scoutingData.length === 0) {
                 alert('暂无数据可导出');
@@ -1092,11 +1261,10 @@
             content.innerHTML = '<p>加载中...</p>';
             
             // Get PreScouting data
-            const preScoutResponse = await fetch('/api/prescout');
-            const preScoutData = await preScoutResponse.json();
+            const preScoutData = await getPrescoutEntries('');
             
             // Get Scouting data
-            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const scoutingData = await getScoutingEntries('');
             const scoutingConfig = getScoutingConfig();
             
             // Get unique teams
@@ -1197,12 +1365,11 @@
             content.innerHTML = '<p>加载中...</p>';
             
             // Get PreScouting data for this team
-            const preScoutResponse = await fetch('/api/prescout');
-            const allPreScout = await preScoutResponse.json();
+            const allPreScout = await getPrescoutEntries('');
             const teamPreScout = allPreScout.filter(entry => entry.teamNumber === teamNumber);
             
             // Get Scouting data for this team
-            const allScouting = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const allScouting = await getScoutingEntries('');
             const teamScouting = allScouting.filter(entry => entry.team === teamNumber);
             const scoutingConfig = getScoutingConfig();
             
@@ -1275,9 +1442,8 @@
             content.innerHTML = '<p>加载中...</p>';
             
             // Get all data
-            const preScoutResponse = await fetch('/api/prescout');
-            const preScoutData = await preScoutResponse.json();
-            const scoutingData = JSON.parse(localStorage.getItem('scouting_data') || '[]');
+            const preScoutData = await getPrescoutEntries('');
+            const scoutingData = await getScoutingEntries('');
             
             // Build team list
             const teamsMap = new Map();
@@ -1356,15 +1522,21 @@
         }
 
         function renderPreScouting() {
+            const eventOptions = getEventOptions();
+            const eventOptionsHtml = eventOptions.map(e => `<option value="${e}">${e}</option>`).join('');
             return `
                 <h1>PreScouting</h1>
                 <div class="form-group">
                     <label>Event</label>
-                    <input type="text" id="prescout-event" placeholder="赛事名称">
+                    <select id="prescout-event" onchange="handleEventChange()">
+                        <option value="">选择赛事</option>
+                        ${eventOptionsHtml}
+                        <option value="__custom__">添加自定义...</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Collector</label>
-                    <input type="text" id="prescout-collector" placeholder="收集者姓名">
+                    <input type="text" id="prescout-collector" placeholder="收集者姓名" value="${currentUser || ''}">
                 </div>
                 <div class="form-group">
                     <label>Team Number</label>
@@ -1410,15 +1582,32 @@
                     </div>
                 </div>
                 <div id="prescout-entries">
-                    加载中...
+                    暂无数据
                 </div>
             `;
+        }
+
+        function handleEventChange() {
+            const select = document.getElementById('prescout-event');
+            if (!select) return;
+            if (select.value === '__custom__') {
+                const name = prompt('请输入赛事名称：');
+                if (name) {
+                    addEventOption(name);
+                    select.innerHTML = '<option value="">选择赛事</option>' +
+                        getEventOptions().map(e => `<option value="${e}">${e}</option>`).join('') +
+                        '<option value="__custom__">添加自定义...</option>';
+                    select.value = name;
+                } else {
+                    select.value = '';
+                }
+            }
         }
 
         async function submitPreScouting() {
             const data = {
                 event: document.getElementById('prescout-event').value,
-                collector: document.getElementById('prescout-collector').value,
+                collector: document.getElementById('prescout-collector').value || currentUser || '',
                 teamNumber: document.getElementById('prescout-team-number').value,
                 teamName: document.getElementById('prescout-team-name').value,
                 practice: document.getElementById('prescout-practice').value,
@@ -1431,37 +1620,44 @@
                 return;
             }
 
-            const response = await fetch('/api/prescout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            if (isAdmin()) {
+                const response = await apiFetch('/api/prescout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-            if (response.ok) {
-                alert('提交成功');
-                // Clear form
-                document.getElementById('prescout-event').value = '';
-                document.getElementById('prescout-collector').value = '';
-                document.getElementById('prescout-team-number').value = '';
-                document.getElementById('prescout-team-name').value = '';
-                document.getElementById('prescout-practice').value = '';
-                document.getElementById('prescout-comp-count').value = '';
-                document.getElementById('prescout-chassis').value = '';
-                
-                // Refresh entries
-                renderEntries();
+                if (!response.ok) {
+                    alert('提交失败');
+                    return;
+                }
             } else {
-                alert('提交失败');
+                const entries = getLocalPrescoutData();
+                data.id = crypto.randomUUID();
+                data.ts = Date.now();
+                entries.push(data);
+                saveLocalPrescoutData(entries);
             }
+
+            alert(isAdmin() ? '提交成功' : '提交成功（本地保存）');
+            // Clear form
+            document.getElementById('prescout-event').value = '';
+            document.getElementById('prescout-collector').value = '';
+            document.getElementById('prescout-team-number').value = '';
+            document.getElementById('prescout-team-name').value = '';
+            document.getElementById('prescout-practice').value = '';
+            document.getElementById('prescout-comp-count').value = '';
+            document.getElementById('prescout-chassis').value = '';
+            
+            // Refresh entries
+            renderEntries();
         }
 
         async function renderEntries() {
             const eventFilter = document.getElementById('filter-event')?.value || '';
             const collectorFilter = document.getElementById('filter-collector')?.value || '';
-            
-            const url = eventFilter ? `/api/prescout?event=${encodeURIComponent(eventFilter)}` : '/api/prescout';
-            const response = await fetch(url);
-            const entries = await response.json();
+
+            const entries = await getPrescoutEntries(eventFilter);
 
             // Apply collector filter on frontend
             let filteredEntries = entries;
@@ -1516,8 +1712,7 @@
         }
 
         async function showEntryDetail(id) {
-            const response = await fetch('/api/prescout');
-            const entries = await response.json();
+            const entries = await getPrescoutEntries('');
             const entry = entries.find(e => e.id === id);
 
             if (!entry) {
