@@ -1000,6 +1000,8 @@
             const footer = await loadFooter();
             const content = await renderSeasonContent(seasonPath);
 
+            const logoutBtn = isAdmin() ? '<li><a href="#" onclick="logout()">登出</a></li>' : '';
+
             app.innerHTML = `
                 ${header}
                 <div class="container">
@@ -1010,6 +1012,7 @@
                             <li><a href="#seasons/2025" class="${seasonPath === '/2025' ? 'active' : ''}">📊 2025 赛季</a></li>
                             <li><a href="#seasons/2024" class="${seasonPath === '/2024' ? 'active' : ''}">🎊 2024 新秀年</a></li>
                             <li style="border-top: 1px solid #e0e0e0; margin-top: 10px; padding-top: 10px;"><a href="#home">返回主页</a></li>
+                            ${logoutBtn}
                         </ul>
                     </div>
                     <div class="content" id="seasonsContent">
