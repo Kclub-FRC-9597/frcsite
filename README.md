@@ -2,6 +2,8 @@
 
 A Team From K CLUB
 
+9597 主站: www.frc9597.com
+
 ## 项目简介
 
 FRC Team 9597 的数据收集和分析系统，用于比赛前调研（PreScouting）和现场数据收集（Scouting）。
@@ -99,6 +101,7 @@ npm run deploy
 6. PreScouting/Scouting 单独设置一个管理员，负责模板编辑、scouting 工作分配等。
 7. 添加 `root` 管理员，拥有所有系统管理权限；`admin` 为常规管理员，`root` 可修改所有可修改的信息。
 8. 赛年信息添加本赛季的参赛队员/指导老师等信息，支持 `admin` 编辑。
+9. 赞助商管理支持从系统已有赞助商列表直接添加；主页展示当年赞助商列表。
 
 ## License
 
