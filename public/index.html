@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Luban Robotics #FRC9597 - A Team From K CLUB</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
@@ -418,7 +418,7 @@
 </head>
 <body>
     <div id="app"></div>
-    <button class="mobile-toggle" onclick="toggleMobileSidebar()">☰</button>
+    <button class="mobile-toggle" id="mobileToggle" onclick="toggleMobileSidebar()">☰</button>
 
     <script>
         // Auth state
@@ -481,6 +481,48 @@
             localStorage.setItem('event_options', JSON.stringify(options));
         }
 
+        async function submitLocalPrescout(id) {
+            const entries = getLocalPrescoutData();
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+
+            const response = await apiFetch('/api/prescout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entry)
+            });
+
+            if (!response.ok) {
+                alert('提交失败');
+                return;
+            }
+
+            const filtered = entries.filter(e => e.id !== id);
+            saveLocalPrescoutData(filtered);
+            renderEntries();
+        }
+
+        async function submitLocalScouting(id) {
+            const entries = getLocalScoutingData();
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+
+            const response = await apiFetch('/api/scouting', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entry)
+            });
+
+            if (!response.ok) {
+                alert('提交失败');
+                return;
+            }
+
+            const filtered = entries.filter(e => e.id !== id);
+            saveLocalScoutingData(filtered);
+            showScoutingData();
+        }
+
         async function getPrescoutEntries(eventFilter = '') {
             if (isAdmin()) {
                 const url = eventFilter ? `/api/prescout?event=${encodeURIComponent(eventFilter)}` : '/api/prescout';
@@ -538,6 +580,7 @@
         async function renderApp() {
             const app = document.getElementById('app');
             let hash = window.location.hash || '#home';
+            const mobileToggle = document.getElementById('mobileToggle');
 
             // Redirect #tools to #tools/prescouting by default
             if (hash === '#tools') {
@@ -547,15 +590,19 @@
 
             // Only require login for tools pages
             if (!currentUser && hash.startsWith('#tools')) {
+                if (mobileToggle) mobileToggle.style.display = 'flex';
                 renderLogin();
                 return;
             }
 
             if (hash === '#login') {
+                if (mobileToggle) mobileToggle.style.display = 'none';
                 renderLogin();
             } else if (hash.startsWith('#tools')) {
+                if (mobileToggle) mobileToggle.style.display = 'flex';
                 await renderToolsLayout(hash);
             } else {
+                if (mobileToggle) mobileToggle.style.display = 'none';
                 await renderHome();
             }
         }
@@ -726,6 +773,10 @@
                 </div>
                 ${footer}
             `;
+
+            if (toolPath === '/prescouting') {
+                setTimeout(renderEntries, 0);
+            }
         }
 
         function renderToolsContent(path) {
@@ -1201,6 +1252,41 @@
             });
             
             content.innerHTML = html;
+
+            if (isAdmin()) {
+                const localEntries = getLocalScoutingData();
+                if (localEntries.length === 0) return;
+
+                let localHtml = `
+                    <h3 style="margin-top: 24px;">本地数据（待提交）</h3>
+                `;
+
+                localEntries.forEach((entry, index) => {
+                    localHtml += `<div class="entry-card">`;
+                    localHtml += `<h3>本地记录 #${index + 1}</h3>`;
+                    localHtml += `<div class="entry-detail">`;
+
+                    config.fields.forEach(field => {
+                        const value = entry[field.id];
+                        let displayValue = '';
+
+                        if (Array.isArray(value)) {
+                            displayValue = value.join(', ');
+                        } else {
+                            displayValue = value || '-';
+                        }
+
+                        localHtml += `<div class="detail-item"><strong>${field.label}:</strong> ${displayValue}</div>`;
+                    });
+
+                    localHtml += `<div class="detail-item"><strong>提交时间:</strong> ${new Date(entry.ts || Date.now()).toLocaleString()}</div>`;
+                    localHtml += `</div>`;
+                    localHtml += `<button onclick="submitLocalScouting('${entry.id}')" style="margin-top: 10px;">提交到服务器</button>`;
+                    localHtml += `</div>`;
+                });
+
+                content.innerHTML += localHtml;
+            }
         }
 
         function deleteScoutingEntry(id) {
@@ -1523,7 +1609,8 @@
 
         function renderPreScouting() {
             const eventOptions = getEventOptions();
-            const eventOptionsHtml = eventOptions.map(e => `<option value="${e}">${e}</option>`).join('');
+            const defaultEvent = eventOptions[0] || '';
+            const eventOptionsHtml = eventOptions.map(e => `<option value="${e}" ${e === defaultEvent ? 'selected' : ''}>${e}</option>`).join('');
             return `
                 <h1>PreScouting</h1>
                 <div class="form-group">
@@ -1641,8 +1728,7 @@
 
             alert(isAdmin() ? '提交成功' : '提交成功（本地保存）');
             // Clear form
-            document.getElementById('prescout-event').value = '';
-            document.getElementById('prescout-collector').value = '';
+            document.getElementById('prescout-collector').value = currentUser || '';
             document.getElementById('prescout-team-number').value = '';
             document.getElementById('prescout-team-name').value = '';
             document.getElementById('prescout-practice').value = '';
@@ -1671,23 +1757,48 @@
             const container = document.getElementById('prescout-entries');
             if (!container) return;
 
+            let html = '';
+
             if (filteredEntries.length === 0) {
-                container.innerHTML = '<p>暂无数据</p>';
-                return;
+                html += '<p>暂无数据</p>';
+            } else {
+                html += filteredEntries.map(entry => `
+                    <div class="entry-card" onclick="showEntryDetail('${entry.id}')">
+                        <h3>Team ${entry.teamNumber} - ${entry.teamName}</h3>
+                        <div class="entry-detail">
+                            <div class="detail-item"><strong>Event:</strong> ${entry.event}</div>
+                            <div class="detail-item"><strong>Collector:</strong> ${entry.collector}</div>
+                            <div class="detail-item"><strong>Practice:</strong> ${entry.practice}h</div>
+                            <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount}</div>
+                            <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis}</div>
+                        </div>
+                    </div>
+                `).join('');
             }
 
-            container.innerHTML = filteredEntries.map(entry => `
-                <div class="entry-card" onclick="showEntryDetail('${entry.id}')">
-                    <h3>Team ${entry.teamNumber} - ${entry.teamName}</h3>
-                    <div class="entry-detail">
-                        <div class="detail-item"><strong>Event:</strong> ${entry.event}</div>
-                        <div class="detail-item"><strong>Collector:</strong> ${entry.collector}</div>
-                        <div class="detail-item"><strong>Practice:</strong> ${entry.practice}h</div>
-                        <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount}</div>
-                        <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis}</div>
-                    </div>
-                </div>
-            `).join('');
+            if (isAdmin()) {
+                const localEntries = getLocalPrescoutData();
+                if (localEntries.length > 0) {
+                    html += `
+                        <h3 style="margin-top: 24px;">本地数据（待提交）</h3>
+                        ${localEntries.map(entry => `
+                            <div class="entry-card">
+                                <h3>Team ${entry.teamNumber || '-'} - ${entry.teamName || '-'}</h3>
+                                <div class="entry-detail">
+                                    <div class="detail-item"><strong>Event:</strong> ${entry.event || '-'}</div>
+                                    <div class="detail-item"><strong>Collector:</strong> ${entry.collector || '-'}</div>
+                                    <div class="detail-item"><strong>Practice:</strong> ${entry.practice || '-'}h</div>
+                                    <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount ?? '-'}</div>
+                                    <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis || '-'}</div>
+                                </div>
+                                <button onclick="submitLocalPrescout('${entry.id}')" style="margin-top: 10px;">提交到服务器</button>
+                            </div>
+                        `).join('')}
+                    `;
+                }
+            }
+
+            container.innerHTML = html;
         }
 
         function updateFilterDropdowns(entries) {
