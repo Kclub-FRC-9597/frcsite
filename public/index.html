@@ -759,12 +759,25 @@
                 ${header}
                 <div class="content" style="max-width: 1400px; margin: 0 auto;">
                     <h1>📅 赛年记录</h1>
-                    <p style="font-size: 1.1em; color: #667eea; margin-bottom: 30px;">
+                    <p style="font-size: 1.1em; color: #667eea; margin-bottom: 20px;">
                         <strong>FRC 9597 Luban Robotics</strong> 赛季成绩与历史
                     </p>
 
+                    <!-- Season Navigation -->
+                    <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                        <a href="#seasons-2026" style="text-decoration: none; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; font-weight: bold; transition: transform 0.2s; display: inline-block;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🏆 2026 赛季
+                        </a>
+                        <a href="#seasons-2025" style="text-decoration: none; padding: 12px 24px; background: #667eea; color: white; border-radius: 8px; font-weight: bold; transition: transform 0.2s; display: inline-block;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            📊 2025 赛季
+                        </a>
+                        <a href="#seasons-2024" style="text-decoration: none; padding: 12px 24px; background: #764ba2; color: white; border-radius: 8px; font-weight: bold; transition: transform 0.2s; display: inline-block;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🎊 2024 新秀年
+                        </a>
+                    </div>
+
                     <!-- 2026 Season -->
-                    <div style="background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                    <div id="seasons-2026" style="background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); scroll-margin-top: 20px;">
                         <h2 style="color: #667eea; margin-bottom: 5px; font-size: 1.8em;">🏆 2026 赛季</h2>
                         <div style="color: #27ae60; margin-bottom: 20px; font-size: 0.95em; font-weight: bold;">⏳ 当前进行中</div>
                         
@@ -784,7 +797,7 @@
                     </div>
 
                     <!-- 2025 Season -->
-                    <div style="background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                    <div id="seasons-2025" style="background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); scroll-margin-top: 20px;">
                         <h2 style="color: #667eea; margin-bottom: 5px; font-size: 1.8em;">🏆 2025 赛季</h2>
                         <div style="color: #998; margin-bottom: 20px; font-size: 0.95em;">赛季已完成</div>
                         
@@ -838,7 +851,7 @@
                     </div>
 
                     <!-- 2024 Season -->
-                    <div style="background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                    <div id="seasons-2024" style="background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); scroll-margin-top: 20px;">
                         <h2 style="color: #764ba2; margin-bottom: 5px; font-size: 1.8em;">🎊 2024 赛季（新秀年）</h2>
                         <div style="color: #998; margin-bottom: 20px; font-size: 0.95em;">团队第一个赛季</div>
                         
