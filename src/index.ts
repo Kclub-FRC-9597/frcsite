@@ -26,9 +26,15 @@ export class MyDurableObject extends DurableObject {
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
+		// For non-GET requests to /api/, require authentication
+		// For GET requests to /api/sponsors, allow without authentication
+		// For other APIs, require authentication
 		if (url.pathname.startsWith('/api/')) {
-			const authError = requireAuth(request);
-			if (authError) return authError;
+			const isSponsorGetRequest = url.pathname === '/api/sponsors' && request.method === 'GET';
+			if (!isSponsorGetRequest) {
+				const authError = requireAuth(request);
+				if (authError) return authError;
+			}
 		}
 		// API: prescout entries using D1 (SQL)
 		if (url.pathname === '/api/prescout') {
