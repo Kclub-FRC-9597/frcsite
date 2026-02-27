@@ -601,6 +601,9 @@
             } else if (hash.startsWith('#tools')) {
                 if (mobileToggle) mobileToggle.style.display = 'flex';
                 await renderToolsLayout(hash);
+            } else if (hash === '#seasons') {
+                if (mobileToggle) mobileToggle.style.display = 'none';
+                await renderSeasons();
             } else {
                 if (mobileToggle) mobileToggle.style.display = 'none';
                 await renderHome();
@@ -742,6 +745,159 @@
                             </p>
                         </div>
                     ` : ''}
+                </div>
+                ${footer}
+            `;
+        }
+
+        async function renderSeasons() {
+            const app = document.getElementById('app');
+            const header = await loadHeader();
+            const footer = await loadFooter();
+
+            app.innerHTML = `
+                ${header}
+                <div class="content" style="max-width: 1400px; margin: 0 auto;">
+                    <h1>📅 赛年记录</h1>
+                    <p style="font-size: 1.1em; color: #667eea; margin-bottom: 30px;">
+                        <strong>FRC 9597 Luban Robotics</strong> 赛季成绩与历史
+                    </p>
+
+                    <!-- 2025 Season -->
+                    <div style="background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                        <h2 style="color: #667eea; margin-bottom: 5px; font-size: 1.8em;">🏆 2025 赛季</h2>
+                        <div style="color: #998; margin-bottom: 20px; font-size: 0.95em;">当前进行中</div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="border-bottom: 2px solid #667eea;">
+                                    <th style="text-align: left; padding: 12px; color: #667eea; font-weight: bold;">赛事</th>
+                                    <th style="text-align: center; padding: 12px; color: #667eea; font-weight: bold;">排名</th>
+                                    <th style="text-align: center; padding: 12px; color: #667eea; font-weight: bold;">成绩</th>
+                                    <th style="text-align: center; padding: 12px; color: #667eea; font-weight: bold;">奖项</th>
+                                    <th style="text-align: center; padding: 12px; color: #667eea; font-weight: bold;">联盟</th>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e0e0e0;">
+                                    <td style="padding: 12px; font-weight: bold; color: #333;">上海区域赛 (Shanghai Regional)</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">第 17 名</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">9-5-1</td>
+                                    <td style="text-align: center; padding: 12px; color: #e74c3c; font-weight: bold;">🥊 分区决赛队伍</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">第 5 联队（主帅 4613）</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; font-weight: bold; color: #333;">迈阿密谷区域赛 (Miami Valley Regional)</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">第 11 名</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">7-5-0</td>
+                                    <td style="text-align: center; padding: 12px; color: #888;">-</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">第 7 联队（担任主帅）</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                                <p style="margin: 0; color: #667eea; font-weight: bold; margin-bottom: 5px;">总成绩</p>
+                                <p style="margin: 0; font-size: 1.4em; color: #333; font-weight: bold;">16-10-1</p>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">赛季战绩</p>
+                            </div>
+                            <div style="background: #f2e8f8; padding: 15px; border-radius: 8px; border-left: 4px solid #764ba2;">
+                                <p style="margin: 0; color: #764ba2; font-weight: bold; margin-bottom: 5px;">全球排名</p>
+                                <p style="margin: 0; font-size: 1.4em; color: #333; font-weight: bold;">#398</p>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">区域排名赛积分池</p>
+                            </div>
+                        </div>
+
+                        <div style="background: #fef5e7; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12; color: #555;">
+                            <p style="margin: 0;"><strong>📊 关键数据：</strong></p>
+                            <ul style="margin: 10px 0 0 20px; color: #555;">
+                                <li>上海赛事：39 区域排名赛积分（14 资格赛 + 5 联队 + 20 淘汰赛）</li>
+                                <li>迈阿密赛事：26 区域排名赛积分（16 资格赛 + 10 联队）</li>
+                                <li>机器人代号：待补充</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 2024 Season -->
+                    <div style="background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                        <h2 style="color: #764ba2; margin-bottom: 5px; font-size: 1.8em;">🎊 2024 赛季（新秀年）</h2>
+                        <div style="color: #998; margin-bottom: 20px; font-size: 0.95em;">团队第一个赛季</div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="border-bottom: 2px solid #764ba2;">
+                                    <th style="text-align: left; padding: 12px; color: #764ba2; font-weight: bold;">赛事</th>
+                                    <th style="text-align: center; padding: 12px; color: #764ba2; font-weight: bold;">排名</th>
+                                    <th style="text-align: center; padding: 12px; color: #764ba2; font-weight: bold;">成绩</th>
+                                    <th style="text-align: center; padding: 12px; color: #764ba2; font-weight: bold;">奖项</th>
+                                    <th style="text-align: center; padding: 12px; color: #764ba2; font-weight: bold;">联盟</th>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e0e0e0;">
+                                    <td style="padding: 12px; font-weight: bold; color: #333;">七叶树区域赛 (Buckeye Regional)</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">第 9 名</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">9-4-0</td>
+                                    <td style="text-align: center; padding: 12px; color: #27ae60; font-weight: bold;">🌟 新秀灵感奖</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">第 6 联队（选秀 2252, 5667）</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; font-weight: bold; color: #333;">迈阿密谷区域赛 (Miami Valley Regional)</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">第 29 名</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">5-8-2</td>
+                                    <td style="text-align: center; padding: 12px; color: #27ae60; font-weight: bold;">🌟 新秀灵感奖</td>
+                                    <td style="text-align: center; padding: 12px; color: #666;">第 4 联队（主帅 5811）</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div style="background: #e8f8f4; padding: 15px; border-radius: 8px; border-left: 4px solid #764ba2;">
+                                <p style="margin: 0; color: #764ba2; font-weight: bold; margin-bottom: 5px;">总成绩</p>
+                                <p style="margin: 0; font-size: 1.4em; color: #333; font-weight: bold;">14-12-2</p>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">赛季战绩（首赛季）</p>
+                            </div>
+                            <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
+                                <p style="margin: 0; color: #3498db; font-weight: bold; margin-bottom: 5px;">主要奖项</p>
+                                <p style="margin: 0; font-size: 1.4em; color: #333; font-weight: bold;">2 个</p>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">连获新秀灵感奖</p>
+                            </div>
+                        </div>
+
+                        <div style="background: #fef5e7; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12; color: #555;">
+                            <p style="margin: 0;"><strong>📊 关键成就：</strong></p>
+                            <ul style="margin: 10px 0 0 20px; color: #555;">
+                                <li>🌟 两场地区赛均获得新秀灵感奖（Rookie Inspiration Award）</li>
+                                <li>🎯 七叶树区域赛排名第 9，创造新秀年最佳排名</li>
+                                <li>🤝 成功与多支优质队伍建立联队合作关系</li>
+                                <li>🎨 机器人代号：321 Krish endo</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Team Overview -->
+                    <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 25px; border-radius: 10px; margin-top: 30px;">
+                        <h2 style="margin-bottom: 15px; color: #333;">📈 团队发展路线</h2>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                            <div style="padding: 15px; background: white; border-radius: 8px;">
+                                <p style="margin: 0; color: #667eea; font-weight: bold; font-size: 1.1em;">2024 - 新秀之光</p>
+                                <p style="margin: 5px 0 0 0; color: #666; line-height: 1.6;">
+                                    从零开始，克服种种挑战，首赛季即获两个灵感奖，展现出团队的热情与潜力
+                                </p>
+                            </div>
+                            <div style="padding: 15px; background: white; border-radius: 8px;">
+                                <p style="margin: 0; color: #764ba2; font-weight: bold; font-size: 1.1em;">2025 - 稳步成长</p>
+                                <p style="margin: 5px 0 0 0; color: #666; line-height: 1.6;">
+                                    进入分区决赛，全球排名进入 TOP 400，技术水平和竞争力实现显著提升
+                                </p>
+                            </div>
+                        </div>
+                        <p style="color: #555; line-height: 1.8; margin: 0;">
+                            作为 FRC 新秀队伍，Luban Robotics 在 FIRST 精神的指引下，不断学习、创新和进步。
+                            我们为所有支持我们的家长、学生和合作伙伴感到骄傲，也期待在后续的赛季中继续超越自我！
+                        </p>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="#home" style="color: #667eea; text-decoration: none; font-size: 1.05em; font-weight: bold;">← 返回主页</a>
+                    </div>
                 </div>
                 ${footer}
             `;
