@@ -151,6 +151,97 @@ export default {
 			}
 		}
 
+		// API: sponsors management using D1 (SQL)
+		if (url.pathname === '/api/sponsors') {
+			if (!env.D1_PRESCOUT) {
+				return new Response(JSON.stringify({ error: 'D1_PRESCOUT binding not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+			}
+
+			try {
+				// Create table if it doesn't exist
+				await env.D1_PRESCOUT.prepare(`
+					CREATE TABLE IF NOT EXISTS sponsors (
+						id TEXT PRIMARY KEY,
+						year INTEGER,
+						name TEXT,
+						logo_url TEXT,
+						website TEXT,
+						created_at INTEGER,
+						updated_at INTEGER
+					)
+				`).run();
+			} catch (err) {
+				return new Response(JSON.stringify({ error: 'DB Init Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+			}
+
+			if (request.method === 'GET') {
+				try {
+					const url_obj = new URL(request.url);
+					const year = url_obj.searchParams.get('year');
+					let r;
+					if (year) {
+						r = await env.D1_PRESCOUT.prepare('SELECT id, year, name, logo_url, website, created_at, updated_at FROM sponsors WHERE year = ? ORDER BY created_at ASC').bind(Number(year)).all();
+					} else {
+						r = await env.D1_PRESCOUT.prepare('SELECT id, year, name, logo_url, website, created_at, updated_at FROM sponsors ORDER BY year DESC, created_at ASC').all();
+					}
+					const rows = (r && r.results) ? r.results : [];
+					return new Response(JSON.stringify(rows), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Read Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else if (request.method === 'POST') {
+				const authError = requireAuth(request);
+				if (authError) return authError;
+
+				try {
+					const body = await request.json() as any;
+					const id = crypto.randomUUID();
+					const now = Date.now();
+					const stmt = env.D1_PRESCOUT.prepare('INSERT INTO sponsors (id, year, name, logo_url, website, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
+					await stmt.bind(id, Number(body.year), String(body.name || ''), body.logo_url || null, body.website || null, now, now).run();
+					return new Response(JSON.stringify({ ok: true, id }), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Write Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else if (request.method === 'PUT') {
+				const authError = requireAuth(request);
+				if (authError) return authError;
+
+				try {
+					const body = await request.json() as any;
+					const url_obj = new URL(request.url);
+					const id = url_obj.searchParams.get('id');
+					if (!id) {
+						return new Response(JSON.stringify({ error: 'Missing id parameter' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+					}
+					const now = Date.now();
+					const stmt = env.D1_PRESCOUT.prepare('UPDATE sponsors SET name = ?, logo_url = ?, website = ?, year = ?, updated_at = ? WHERE id = ?');
+					await stmt.bind(String(body.name || ''), body.logo_url || null, body.website || null, Number(body.year), now, id).run();
+					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Update Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else if (request.method === 'DELETE') {
+				const authError = requireAuth(request);
+				if (authError) return authError;
+
+				try {
+					const url_obj = new URL(request.url);
+					const id = url_obj.searchParams.get('id');
+					if (!id) {
+						return new Response(JSON.stringify({ error: 'Missing id parameter' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+					}
+					const stmt = env.D1_PRESCOUT.prepare('DELETE FROM sponsors WHERE id = ?');
+					await stmt.bind(id).run();
+					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Delete Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else {
+				return new Response('Method Not Allowed', { status: 405 });
+			}
+		}
+
 		// Otherwise fall back to serving static assets via Assets Binding
 		return env.ASSETS.fetch(request);
 	},

@@ -682,6 +682,231 @@
             navigate('#home');
         }
 
+        // Sponsor Management Functions
+        async function getSponsorsByYear(year) {
+            try {
+                const response = await apiFetch(`/api/sponsors?year=${year}`);
+                if (!response.ok) throw new Error('Failed to fetch sponsors');
+                return await response.json();
+            } catch (err) {
+                console.error('Error fetching sponsors:', err);
+                return [];
+            }
+        }
+
+        async function addSponsor(year, name, logoUrl = null, website = null) {
+            if (!isAdmin()) {
+                alert('需要管理员权限');
+                return false;
+            }
+            try {
+                const response = await apiFetch('/api/sponsors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ year: Number(year), name, logo_url: logoUrl, website })
+                });
+                if (!response.ok) throw new Error('Failed to add sponsor');
+                const data = await response.json();
+                return data;
+            } catch (err) {
+                console.error('Error adding sponsor:', err);
+                alert('添加赞助商失败');
+                return false;
+            }
+        }
+
+        async function updateSponsor(id, year, name, logoUrl = null, website = null) {
+            if (!isAdmin()) {
+                alert('需要管理员权限');
+                return false;
+            }
+            try {
+                const response = await apiFetch(`/api/sponsors?id=${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ year: Number(year), name, logo_url: logoUrl, website })
+                });
+                if (!response.ok) throw new Error('Failed to update sponsor');
+                return await response.json();
+            } catch (err) {
+                console.error('Error updating sponsor:', err);
+                alert('更新赞助商失败');
+                return false;
+            }
+        }
+
+        async function deleteSponsor(id) {
+            if (!isAdmin()) {
+                alert('需要管理员权限');
+                return false;
+            }
+            if (!confirm('确定要删除这个赞助商吗？')) return false;
+            try {
+                const response = await apiFetch(`/api/sponsors?id=${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) throw new Error('Failed to delete sponsor');
+                return await response.json();
+            } catch (err) {
+                console.error('Error deleting sponsor:', err);
+                alert('删除赞助商失败');
+                return false;
+            }
+        }
+
+        async function renderSponsorsSection(year) {
+            const sponsors = await getSponsorsByYear(year);
+            if (!sponsors || sponsors.length === 0) {
+                return '<p style="color: #999; font-style: italic;">暂无赞助商信息</p>';
+            }
+
+            let html = '<div style="display: flex; flex-wrap: wrap; gap: 15px;">';
+            for (const sponsor of sponsors) {
+                if (sponsor.logo_url) {
+                    html += `<div style="text-align: center;">
+                        <a href="${sponsor.website || '#'}" target="_blank" rel="noreferrer" style="text-decoration: none;">
+                            <img src="${sponsor.logo_url}" alt="${sponsor.name}" style="max-height: 60px; max-width: 150px; object-fit: contain;">
+                        </a>
+                    </div>`;
+                } else {
+                    if (sponsor.website) {
+                        html += `<div style="padding: 10px 15px; background: #f5f5f5; border-radius: 6px; border: 1px solid #ddd;">
+                            <a href="${sponsor.website}" target="_blank" rel="noreferrer" style="color: #667eea; text-decoration: none; font-weight: bold;">${sponsor.name}</a>
+                        </div>`;
+                    } else {
+                        html += `<div style="padding: 10px 15px; background: #f5f5f5; border-radius: 6px; border: 1px solid #ddd;">
+                            <span style="color: #555; font-weight: bold;">${sponsor.name}</span>
+                        </div>`;
+                    }
+                }
+            }
+            html += '</div>';
+
+            if (isAdmin()) {
+                html += `<button onclick="showSponsorsManagement(${year})" style="margin-top: 15px; padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">✏️ 编辑赞助商</button>`;
+            }
+
+            return html;
+        }
+
+        async function showSponsorsManagement(year) {
+            if (!isAdmin()) {
+                alert('需要管理员权限');
+                return;
+            }
+
+            const sponsors = await getSponsorsByYear(year);
+            const app = document.getElementById('app');
+
+            let sponsorRows = sponsors.map(s => `
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: center;">
+                        <div>
+                            <label style="font-size: 0.9em; color: #666;">名称:</label>
+                            <input type="text" value="${s.name}" id="sponsor_name_${s.id}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.9em; color: #666;">Logo URL:</label>
+                            <input type="text" value="${s.logo_url || ''}" id="sponsor_logo_${s.id}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.9em; color: #666;">网站:</label>
+                            <input type="text" value="${s.website || ''}" id="sponsor_website_${s.id}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="saveSponsorEdit('${s.id}', ${year})" style="padding: 8px 12px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">💾</button>
+                            <button onclick="deleteSponsorAndRefresh('${s.id}', ${year})" style="padding: 8px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            if (sponsorRows === '') {
+                sponsorRows = '<p style="color: #999; font-style: italic;">暂无赞助商，点击下方"添加赞助商"创建</p>';
+            }
+
+            app.innerHTML = `
+                ${await loadHeader()}
+                <div class="content" style="max-width: 1000px; margin: 0 auto;">
+                    <h1>📝 ${year}赛季赞助商管理</h1>
+                    
+                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                        <h3 style="margin-top: 0; color: #667eea;">当前赞助商列表</h3>
+                        ${sponsorRows}
+                    </div>
+
+                    <div style="background: #fffbf0; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                        <h3 style="margin-top: 0; color: #f39c12;">➕ 添加新赞助商</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">赞助商名称 *</label>
+                                <input type="text" id="new_sponsor_name" placeholder="例如: SolidWorks" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Logo URL</label>
+                                <input type="text" id="new_sponsor_logo" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">公司网站</label>
+                                <input type="text" id="new_sponsor_website" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button onclick="addNewSponsor(${year})" style="width: 100%; padding: 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">添加赞助商</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="navigate('#seasons/${year}')" style="padding: 10px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">返回赛季页面</button>
+                    </div>
+                </div>
+                ${await loadFooter()}
+            `;
+        }
+
+        async function saveSponsorEdit(id, year) {
+            const name = document.getElementById(`sponsor_name_${id}`).value;
+            const logo = document.getElementById(`sponsor_logo_${id}`).value;
+            const website = document.getElementById(`sponsor_website_${id}`).value;
+
+            if (!name.trim()) {
+                alert('赞助商名称不能为空');
+                return;
+            }
+
+            const result = await updateSponsor(id, year, name, logo || null, website || null);
+            if (result && result.ok) {
+                alert('更新成功');
+                await showSponsorsManagement(year);
+            }
+        }
+
+        async function deleteSponsorAndRefresh(id, year) {
+            const result = await deleteSponsor(id);
+            if (result && result.ok) {
+                alert('删除成功');
+                await showSponsorsManagement(year);
+            }
+        }
+
+        async function addNewSponsor(year) {
+            const name = document.getElementById('new_sponsor_name').value;
+            const logo = document.getElementById('new_sponsor_logo').value;
+            const website = document.getElementById('new_sponsor_website').value;
+
+            if (!name.trim()) {
+                alert('赞助商名称不能为空');
+                return;
+            }
+
+            const result = await addSponsor(year, name, logo || null, website || null);
+            if (result && result.ok) {
+                alert('添加成功');
+                await showSponsorsManagement(year);
+            }
+        }
+
         async function renderHome() {
             const app = document.getElementById('app');
             const loggedIn = currentUser ? true : false;
@@ -773,6 +998,7 @@
             
             const header = await loadHeader();
             const footer = await loadFooter();
+            const content = await renderSeasonContent(seasonPath);
 
             app.innerHTML = `
                 ${header}
@@ -787,25 +1013,26 @@
                         </ul>
                     </div>
                     <div class="content" id="seasonsContent">
-                        ${renderSeasonContent(seasonPath)}
+                        ${content}
                     </div>
                 </div>
                 ${footer}
             `;
         }
 
-        function renderSeasonContent(path) {
+        async function renderSeasonContent(path) {
             if (path === '/2026') {
-                return renderSeason2026();
+                return await renderSeason2026();
             } else if (path === '/2025') {
-                return renderSeason2025();
+                return await renderSeason2025();
             } else if (path === '/2024') {
-                return renderSeason2024();
+                return await renderSeason2024();
             }
-            return renderSeason2026();
+            return await renderSeason2026();
         }
 
-        function renderSeason2026() {
+        async function renderSeason2026() {
+            const sponsorsHtml = await renderSponsorsSection(2026);
             return `
                 <h1>🏆 2026 赛季</h1>
                 <div style="color: #27ae60; margin-bottom: 20px; font-weight: bold;">⏳ 当前进行中</div>
@@ -823,10 +1050,16 @@
                         <li>争取获得更多奖项认可</li>
                     </ul>
                 </div>
+
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-top: 20px;">
+                    <p style="margin: 0; color: #667eea; font-weight: bold; margin-bottom: 10px;">🤝 2026赛季赞助商</p>
+                    <div style="margin: 0; color: #555; line-height: 1.8;">${sponsorsHtml}</div>
+                </div>
             `;
         }
 
-        function renderSeason2025() {
+        async function renderSeason2025() {
+            const sponsorsHtml = await renderSponsorsSection(2025);
             return `
                 <h1>📊 2025 赛季</h1>
                 <div style="color: #998; margin-bottom: 20px;">赛季已完成</div>
@@ -877,10 +1110,16 @@
                         <li>迈阿密赛事：26 区域排名赛积分（16 资格赛 + 10 联队）</li>
                     </ul>
                 </div>
+
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-top: 20px;">
+                    <p style="margin: 0; color: #667eea; font-weight: bold; margin-bottom: 10px;">🤝 2025赛季赞助商</p>
+                    <div style="margin: 0; color: #555; line-height: 1.8;">${sponsorsHtml}</div>
+                </div>
             `;
         }
 
-        function renderSeason2024() {
+        async function renderSeason2024() {
+            const sponsorsHtml = await renderSponsorsSection(2024);
             return `
                 <h1>🎊 2024 赛季（新秀年）</h1>
                 <div style="color: #998; margin-bottom: 20px;">团队第一个赛季</div>
@@ -932,6 +1171,11 @@
                         <li>🤝 成功与多支优质队伍建立联队合作关系</li>
                         <li>🎨 机器人代号：321 Krish endo</li>
                     </ul>
+                </div>
+
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-top: 20px;">
+                    <p style="margin: 0; color: #667eea; font-weight: bold; margin-bottom: 10px;">🤝 2024赛季赞助商</p>
+                    <div style="margin: 0; color: #555; line-height: 1.8;">${sponsorsHtml}</div>
                 </div>
             `;
         }
