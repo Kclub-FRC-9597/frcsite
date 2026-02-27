@@ -170,6 +170,35 @@ export default {
 						updated_at INTEGER
 					)
 				`).run();
+
+				// Initialize default sponsors if table is empty
+				const checkResult = await env.D1_PRESCOUT.prepare('SELECT COUNT(*) as count FROM sponsors').first() as any;
+				if (checkResult && checkResult.count === 0) {
+					const defaultSponsors = [
+						{ year: 2026, name: 'SolidWorks', logo_url: null, website: 'https://www.solidworks.com' },
+						{ year: 2026, name: 'OnShape', logo_url: null, website: 'https://www.onshape.com' },
+						{ year: 2026, name: 'FRC', logo_url: null, website: 'https://www.firstinspires.org' },
+						{ year: 2025, name: 'Bambo', logo_url: null, website: null },
+						{ year: 2025, name: 'MakeX', logo_url: null, website: null },
+						{ year: 2025, name: 'XTool', logo_url: null, website: null },
+						{ year: 2025, name: 'Makeblock', logo_url: null, website: null },
+						{ year: 2025, name: 'SolidWorks', logo_url: null, website: 'https://www.solidworks.com' },
+						{ year: 2025, name: 'FRC', logo_url: null, website: 'https://www.firstinspires.org' },
+						{ year: 2024, name: 'SolidWorks', logo_url: null, website: 'https://www.solidworks.com' },
+						{ year: 2024, name: 'OnShape', logo_url: null, website: 'https://www.onshape.com' },
+						{ year: 2024, name: 'FRC', logo_url: null, website: 'https://www.firstinspires.org' },
+						{ year: 2024, name: '智慧土豆', logo_url: null, website: null },
+						{ year: 2024, name: '敏源传感', logo_url: null, website: null },
+					];
+
+					const now = Date.now();
+					for (const sponsor of defaultSponsors) {
+						const id = crypto.randomUUID();
+						await env.D1_PRESCOUT.prepare(
+							'INSERT INTO sponsors (id, year, name, logo_url, website, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+						).bind(id, sponsor.year, sponsor.name, sponsor.logo_url, sponsor.website, now, now).run();
+					}
+				}
 			} catch (err) {
 				return new Response(JSON.stringify({ error: 'DB Init Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
 			}
