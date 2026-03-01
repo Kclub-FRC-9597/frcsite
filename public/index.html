@@ -719,6 +719,7 @@
                         <ul>
                             <li><a href="#account/profile" class="${accountSection === '/profile' ? 'active' : ''}">👤 个人信息</a></li>
                             <li><a href="#account/password" class="${accountSection === '/password' ? 'active' : ''}">🔐 修改密码</a></li>
+                            ${isAdmin() ? `<li><a href="#account/users" class="${accountSection === '/users' ? 'active' : ''}">👥 用户管理</a></li>` : ''}
                             <li><a href="#account/danger" class="${accountSection === '/danger' ? 'active' : ''}">⚠️ 危险区域</a></li>
                             <li style="border-top: 1px solid #e0e0e0; margin-top: 10px; padding-top: 10px;"><a href="#home">返回主页</a></li>
                             <li><a href="#" onclick="logout()">登出</a></li>
@@ -740,6 +741,8 @@
                     if (changePasswordBtn) {
                         changePasswordBtn.addEventListener('click', changePassword);
                     }
+                } else if (accountSection === '/users') {
+                    setupUserManagementListeners();
                 } else if (accountSection === '/danger') {
                     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
                     if (deleteAccountBtn) {
@@ -767,6 +770,14 @@
                             <input type="password" id="confirmPassword" placeholder="确认新密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                         </div>
                         <button id="changePasswordBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">确认修改密码</button>
+                    </div>
+                `;
+            } else if (section === '/users') {
+                return `
+                    <h1>👥 用户管理</h1>
+                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h2 style="color: #667eea; margin-top: 0;">所有账户</h2>
+                        <div id="usersList"></div>
                     </div>
                 `;
             } else if (section === '/danger') {
@@ -881,6 +892,115 @@
                 <button id="editNicknameBtn" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; white-space: nowrap;">编辑昵称</button>
             `;
             setupProfileEventListeners();
+        }
+
+        function getAllUsers() {
+            // Return list of all users (hardcoded system users + any custom users)
+            return [
+                { username: ADMIN_USER, role: 'admin', isSystemUser: true },
+                { username: 'tester', role: 'tester', isSystemUser: true }
+            ];
+        }
+
+        function setupUserManagementListeners() {
+            const usersList = document.getElementById('usersList');
+            const users = getAllUsers();
+            
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 10px;">用户名</th><th style="text-align: left; padding: 10px;">昵称</th><th style="text-align: left; padding: 10px;">角色</th><th style="text-align: left; padding: 10px;">操作</th></tr></thead>';
+            html += '<tbody>';
+            
+            for (const user of users) {
+                const nickname = localStorage.getItem(`nickname_${user.username}`) || '未设置';
+                const roleDisplay = user.role === 'admin' ? '👑 管理员' : '👤 测试员';
+                
+                html += `<tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;">${user.username}</td>
+                    <td style="padding: 12px;">${nickname}</td>
+                    <td style="padding: 12px;">${roleDisplay}</td>
+                    <td style="padding: 12px; display: flex; gap: 8px;">
+                        <button class="editUserBtn" data-username="${user.username}" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">编辑</button>
+                        <button class="resetPasswordBtn" data-username="${user.username}" style="padding: 6px 12px; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">重置密码</button>
+                        ${!user.isSystemUser ? `<button class="deleteUserBtn" data-username="${user.username}" style="padding: 6px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">删除</button>` : ''}
+                    </td>
+                </tr>`;
+            }
+            
+            html += '</tbody></table>';
+            usersList.innerHTML = html;
+            
+            // Setup event listeners for edit buttons
+            document.querySelectorAll('.editUserBtn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editUserNickname(this.dataset.username);
+                });
+            });
+            
+            // Setup event listeners for reset password buttons
+            document.querySelectorAll('.resetPasswordBtn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    resetUserPassword(this.dataset.username);
+                });
+            });
+            
+            // Setup event listeners for delete buttons
+            document.querySelectorAll('.deleteUserBtn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteUser(this.dataset.username);
+                });
+            });
+        }
+
+        function editUserNickname(username) {
+            const nickname = localStorage.getItem(`nickname_${username}`) || '';
+            const newNickname = prompt(`编辑 ${username} 的昵称：`, nickname);
+            
+            if (newNickname === null) return; // User cancelled
+            
+            const trimmedNickname = newNickname.trim();
+            
+            if (trimmedNickname === '') {
+                localStorage.removeItem(`nickname_${username}`);
+                alert('昵称已清除');
+            } else if (trimmedNickname.length > 20) {
+                alert('昵称长度不能超过20个字符');
+                return;
+            } else {
+                localStorage.setItem(`nickname_${username}`, trimmedNickname);
+                alert('昵称已修改');
+            }
+            
+            // Refresh the users list
+            setupUserManagementListeners();
+        }
+
+        function resetUserPassword(username) {
+            if (!confirm(`确定要重置 ${username} 的密码吗？`)) {
+                return;
+            }
+            
+            // Reset to default password
+            const defaultPassword = username === ADMIN_USER ? ADMIN_PASS : 'password123';
+            localStorage.removeItem(`password_${username}`);
+            alert(`${username} 的密码已重置为默认密码`);
+        }
+
+        function deleteUser(username) {
+            if (!confirm(`确定要删除用户 ${username} 吗？此操作无法撤销！`)) {
+                return;
+            }
+            
+            if (!confirm(`再次确认：删除 ${username} 将清除其所有数据！`)) {
+                return;
+            }
+            
+            // Delete user data
+            localStorage.removeItem(`password_${username}`);
+            localStorage.removeItem(`nickname_${username}`);
+            alert(`用户 ${username} 已删除`);
+            
+            // Refresh the users list
+            setupUserManagementListeners();
         }
 
         async function changePassword() {
