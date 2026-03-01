@@ -862,16 +862,23 @@
                     </div>
 
                     <div style="display: flex; gap: 10px;">
-                        <button id="backToSeasonBtn" style="padding: 10px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">返回赛季页面</button>
+                        <button id="backToSeasonBtn" style="padding: 10px 20px; background: #95a5a6 !important; color: white !important; border: none !important; border-radius: 4px; cursor: pointer !important; pointer-events: auto !important;">返回赛季页面</button>
                     </div>
                 </div>
                 ${await loadFooter()}
             `;
             
             // Add event listener for back button
-            document.getElementById('backToSeasonBtn').addEventListener('click', function() {
-                window.location.hash = `#seasons/${year}`;
-            });
+            setTimeout(function() {
+                const btn = document.getElementById('backToSeasonBtn');
+                if (btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.hash = `#seasons/${year}`;
+                    });
+                }
+            }, 100);
         }
 
         async function saveSponsorEdit(id, year) {
