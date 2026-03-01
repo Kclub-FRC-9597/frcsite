@@ -672,10 +672,6 @@
             await renderApp();
         }
 
-        function goBackToSeason(year) {
-            window.location.hash = `#seasons/${year}`;
-        }
-
         function logout() {
             currentUser = null;
             currentRole = null;
@@ -872,13 +868,10 @@
             setTimeout(function() {
                 const btn = document.getElementById('backToSeasonBtn');
                 if (btn) {
-                    console.log('Button found:', btn);
                     btn.addEventListener('click', function(e) {
-                        console.log('Button clicked!');
                         e.preventDefault();
                         e.stopPropagation();
                         const targetHash = `#seasons/${year}`;
-                        console.log('Navigating to:', targetHash);
                         window.location.hash = targetHash;
                         // Manual trigger to ensure page updates
                         setTimeout(() => {
@@ -887,11 +880,9 @@
                     });
                     // Also try onclick for double safety
                     btn.onclick = function(e) {
-                        console.log('Button onclick triggered!');
                         e.preventDefault();
                         e.stopPropagation();
                         const targetHash = `#seasons/${year}`;
-                        console.log('Navigating to:', targetHash);
                         window.location.hash = targetHash;
                         // Manual trigger to ensure page updates
                         setTimeout(() => {
@@ -899,8 +890,6 @@
                         }, 50);
                         return false;
                     };
-                } else {
-                    console.log('Button not found!');
                 }
             }, 100);
         }
