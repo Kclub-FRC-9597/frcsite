@@ -862,11 +862,16 @@
                     </div>
 
                     <div style="display: flex; gap: 10px;">
-                        <button onclick="goBackToSeason(${year})" style="padding: 10px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; !important;">返回赛季页面</button>
+                        <button id="backToSeasonBtn" style="padding: 10px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">返回赛季页面</button>
                     </div>
                 </div>
                 ${await loadFooter()}
             `;
+            
+            // Add event listener for back button
+            document.getElementById('backToSeasonBtn').addEventListener('click', function() {
+                window.location.hash = `#seasons/${year}`;
+            });
         }
 
         async function saveSponsorEdit(id, year) {
