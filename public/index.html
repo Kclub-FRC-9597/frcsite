@@ -880,6 +880,10 @@
                         const targetHash = `#seasons/${year}`;
                         console.log('Navigating to:', targetHash);
                         window.location.hash = targetHash;
+                        // Manual trigger to ensure page updates
+                        setTimeout(() => {
+                            renderApp();
+                        }, 50);
                     });
                     // Also try onclick for double safety
                     btn.onclick = function(e) {
@@ -889,6 +893,10 @@
                         const targetHash = `#seasons/${year}`;
                         console.log('Navigating to:', targetHash);
                         window.location.hash = targetHash;
+                        // Manual trigger to ensure page updates
+                        setTimeout(() => {
+                            renderApp();
+                        }, 50);
                         return false;
                     };
                 } else {
