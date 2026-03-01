@@ -604,6 +604,13 @@
             if (hash === '#login') {
                 if (mobileToggle) mobileToggle.style.display = 'none';
                 renderLogin();
+            } else if (hash === '#account') {
+                if (mobileToggle) mobileToggle.style.display = 'none';
+                if (currentUser) {
+                    await renderAccountDashboard();
+                } else {
+                    window.location.hash = '#login';
+                }
             } else if (hash.startsWith('#tools')) {
                 if (mobileToggle) mobileToggle.style.display = 'flex';
                 await renderToolsLayout(hash);
@@ -643,14 +650,17 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            if (username === ADMIN_USER && password === ADMIN_PASS) {
+            // Check if password has been changed
+            const savedPassword = localStorage.getItem(`password_${username}`);
+            
+            if (username === ADMIN_USER && (password === ADMIN_PASS || password === savedPassword)) {
                 currentUser = username;
                 currentRole = 'admin';
                 currentToken = ADMIN_TOKEN;
                 localStorage.setItem('frc_user', username);
                 localStorage.setItem('frc_role', 'admin');
                 localStorage.setItem('frc_token', ADMIN_TOKEN);
-            } else if (username === 'tester' && password === 'password123') {
+            } else if (username === 'tester' && (password === 'password123' || password === savedPassword)) {
                 currentUser = username;
                 currentRole = 'tester';
                 currentToken = '';
@@ -681,6 +691,124 @@
             localStorage.removeItem('frc_token');
             navigate('#home');
         }
+
+        async function renderAccountDashboard() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                ${await loadHeader()}
+                <div class="content" style="max-width: 600px; margin: 0 auto;">
+                    <h1>👤 账户设置</h1>
+                    
+                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                        <h2 style="color: #667eea; margin-top: 0;">用户信息</h2>
+                        <p style="margin: 10px 0;"><strong>用户名:</strong> ${currentUser}</p>
+                        <p style="margin: 10px 0;"><strong>角色:</strong> ${currentRole === 'admin' ? '管理员' : '测试员'}</p>
+                    </div>
+
+                    <div style="background: #fffbf0; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                        <h2 style="color: #f39c12; margin-top: 0;">🔐 修改密码</h2>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">当前密码</label>
+                            <input type="password" id="currentPassword" placeholder="输入当前密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">新密码</label>
+                            <input type="password" id="newPassword" placeholder="输入新密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">确认新密码</label>
+                            <input type="password" id="confirmPassword" placeholder="确认新密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <button id="changePasswordBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">修改密码</button>
+                    </div>
+
+                    <div style="background: #ffebee; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                        <h2 style="color: #e74c3c; margin-top: 0;">⚠️ 危险区域</h2>
+                        <p style="color: #666; margin-bottom: 15px;">以下操作无法撤销。请谨慎操作。</p>
+                        <button id="deleteAccountBtn" style="width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">注销账户</button>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="window.location.hash = '#home'" style="flex: 1; padding: 10px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">返回首页</button>
+                    </div>
+                </div>
+                ${await loadFooter()}
+            `;
+
+            // Setup event listeners
+            setTimeout(function() {
+                document.getElementById('changePasswordBtn').addEventListener('click', changePassword);
+                document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
+            }, 100);
+        }
+
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                alert('请填写所有密码字段');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('新密码与确认密码不一致');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('新密码至少需要6个字符');
+                return;
+            }
+
+            // Verify current password
+            const savedPassword = localStorage.getItem(`password_${currentUser}`);
+            const defaultPassword = currentUser === ADMIN_USER ? ADMIN_PASS : 'password123';
+            const isPasswordValid = currentPassword === defaultPassword || currentPassword === savedPassword;
+            
+            if (!isPasswordValid) {
+                alert('当前密码错误');
+                return;
+            }
+
+            // Save new password locally (for demo purposes)
+            // In production, this should be sent to backend and stored securely
+            localStorage.setItem(`password_${currentUser}`, newPassword);
+            alert('密码已成功修改');
+            
+            // Clear password fields
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        async function deleteAccount() {
+            if (!confirm('⚠️ 确定要注销账户吗？此操作无法撤销！')) {
+                return;
+            }
+
+            if (!confirm('⚠️ 再次确认：注销账户将删除所有相关数据！')) {
+                return;
+            }
+
+            // Save username before clearing
+            const username = currentUser;
+            
+            // Delete account data and logout
+            currentUser = null;
+            currentRole = null;
+            currentToken = null;
+            localStorage.removeItem('frc_user');
+            localStorage.removeItem('frc_role');
+            localStorage.removeItem('frc_token');
+            localStorage.removeItem(`password_${username}`);
+            
+            alert('账户已注销。将返回首页。');
+            window.location.hash = '#home';
+            await renderApp();
+        }
+
 
         // Sponsor Management Functions
         async function getSponsorsByYear(year) {
@@ -946,6 +1074,17 @@
             app.innerHTML = `
                 ${header}
                 <div class="content" style="max-width: 1400px; margin: 0 auto;">
+                    ${loggedIn ? `
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <p style="margin: 0; color: #2e7d32;">👋 欢迎回来，<strong>${currentUser}</strong>！</p>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <a href="#account" style="padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; font-weight: bold;">账户设置</a>
+                                <button onclick="logout()" style="padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">登出</button>
+                            </div>
+                        </div>
+                    ` : ''}
                     <h1>🤖 欢迎来到 Luban Robotics</h1>
                     <p style="font-size: 1.2em; color: #667eea; margin-bottom: 30px;">
                         <strong>FRC Team 9597</strong> - A Team From K CLUB
