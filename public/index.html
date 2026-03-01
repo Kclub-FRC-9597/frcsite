@@ -858,7 +858,7 @@
                     </div>
 
                     <div style="display: flex; gap: 10px;">
-                        <button onclick="navigate('#seasons/${year}')" style="padding: 10px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">返回赛季页面</button>
+                        <button onclick="window.location.hash = '#seasons/${year}'" style="padding: 10px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">返回赛季页面</button>
                     </div>
                 </div>
                 ${await loadFooter()}
