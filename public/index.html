@@ -588,6 +588,12 @@
                 window.history.replaceState(null, '', hash);
             }
 
+            // Redirect #account to #account/profile by default
+            if (hash === '#account') {
+                hash = '#account/profile';
+                window.history.replaceState(null, '', hash);
+            }
+
             // Redirect #seasons to #seasons/2026 by default
             if (hash === '#seasons') {
                 hash = '#seasons/2026';
@@ -604,7 +610,7 @@
             if (hash === '#login') {
                 if (mobileToggle) mobileToggle.style.display = 'none';
                 renderLogin();
-            } else if (hash === '#account') {
+            } else if (hash.startsWith('#account')) {
                 if (mobileToggle) mobileToggle.style.display = 'none';
                 if (currentUser) {
                     await renderAccountDashboard();
@@ -694,42 +700,23 @@
 
         async function renderAccountDashboard() {
             const app = document.getElementById('app');
+            const accountSection = window.location.hash.replace('#account', '') || '/profile';
+            
             app.innerHTML = `
                 ${await loadHeader()}
-                <div class="content" style="max-width: 600px; margin: 0 auto;">
-                    <h1>👤 账户设置</h1>
-                    
-                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-                        <h2 style="color: #667eea; margin-top: 0;">用户信息</h2>
-                        <p style="margin: 10px 0;"><strong>用户名:</strong> ${currentUser}</p>
-                        <p style="margin: 10px 0;"><strong>角色:</strong> ${currentRole === 'admin' ? '管理员' : '测试员'}</p>
+                <div class="container">
+                    <div class="sidebar" id="accountSidebar">
+                        <h3>账户</h3>
+                        <ul>
+                            <li><a href="#account/profile" class="${accountSection === '/profile' ? 'active' : ''}">👤 个人信息</a></li>
+                            <li><a href="#account/password" class="${accountSection === '/password' ? 'active' : ''}">🔐 修改密码</a></li>
+                            <li><a href="#account/danger" class="${accountSection === '/danger' ? 'active' : ''}">⚠️ 危险区域</a></li>
+                            <li style="border-top: 1px solid #e0e0e0; margin-top: 10px; padding-top: 10px;"><a href="#home">返回主页</a></li>
+                            <li><a href="#" onclick="logout()">登出</a></li>
+                        </ul>
                     </div>
-
-                    <div style="background: #fffbf0; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-                        <h2 style="color: #f39c12; margin-top: 0;">🔐 修改密码</h2>
-                        <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">当前密码</label>
-                            <input type="password" id="currentPassword" placeholder="输入当前密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                        <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">新密码</label>
-                            <input type="password" id="newPassword" placeholder="输入新密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                        <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">确认新密码</label>
-                            <input type="password" id="confirmPassword" placeholder="确认新密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                        <button id="changePasswordBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">修改密码</button>
-                    </div>
-
-                    <div style="background: #ffebee; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-                        <h2 style="color: #e74c3c; margin-top: 0;">⚠️ 危险区域</h2>
-                        <p style="color: #666; margin-bottom: 15px;">以下操作无法撤销。请谨慎操作。</p>
-                        <button id="deleteAccountBtn" style="width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">注销账户</button>
-                    </div>
-
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="window.location.hash = '#home'" style="flex: 1; padding: 10px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">返回首页</button>
+                    <div class="content" id="accountContent">
+                        ${renderAccountContent(accountSection)}
                     </div>
                 </div>
                 ${await loadFooter()}
@@ -737,9 +724,83 @@
 
             // Setup event listeners
             setTimeout(function() {
-                document.getElementById('changePasswordBtn').addEventListener('click', changePassword);
-                document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
+                if (accountSection === '/password') {
+                    const changePasswordBtn = document.getElementById('changePasswordBtn');
+                    if (changePasswordBtn) {
+                        changePasswordBtn.addEventListener('click', changePassword);
+                    }
+                } else if (accountSection === '/danger') {
+                    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+                    if (deleteAccountBtn) {
+                        deleteAccountBtn.addEventListener('click', deleteAccount);
+                    }
+                }
             }, 100);
+        }
+
+        function renderAccountContent(section) {
+            if (section === '/password') {
+                return `
+                    <h1>🔐 修改密码</h1>
+                    <div style="background: #fffbf0; padding: 20px; border-radius: 8px;">
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">当前密码</label>
+                            <input type="password" id="currentPassword" placeholder="输入当前密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">新密码</label>
+                            <input type="password" id="newPassword" placeholder="输入新密码（至少6个字符）" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">确认新密码</label>
+                            <input type="password" id="confirmPassword" placeholder="确认新密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <button id="changePasswordBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">确认修改密码</button>
+                    </div>
+                `;
+            } else if (section === '/danger') {
+                return `
+                    <h1>⚠️ 危险区域</h1>
+                    <div style="background: #ffebee; padding: 20px; border-radius: 8px;">
+                        <p style="color: #d32f2f; font-weight: bold; margin-bottom: 15px;">🚨 警告：以下操作无法撤销。请谨慎操作。</p>
+                        <h2 style="color: #d32f2f; margin-top: 20px;">注销账户</h2>
+                        <p style="color: #666;">注销账户将删除所有相关数据，包括密码修改记录和个人配置。此操作无法恢复。</p>
+                        <button id="deleteAccountBtn" style="width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px;">注销账户</button>
+                    </div>
+                `;
+            } else { // /profile
+                return `
+                    <h1>👤 个人信息</h1>
+                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px;">
+                        <div style="margin-bottom: 20px;">
+                            <p style="color: #666; margin: 5px 0;">
+                                <strong>用户名</strong>
+                            </p>
+                            <p style="margin: 5px 0; font-size: 18px; color: #333;">${currentUser}</p>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <p style="color: #666; margin: 5px 0;">
+                                <strong>账户角色</strong>
+                            </p>
+                            <p style="margin: 5px 0; font-size: 18px; color: #333;">${currentRole === 'admin' ? '👑 管理员' : '👤 测试员'}</p>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <p style="color: #666; margin: 5px 0;">
+                                <strong>账户状态</strong>
+                            </p>
+                            <p style="margin: 5px 0; font-size: 18px; color: #27ae60;">✅ 活跃</p>
+                        </div>
+                    </div>
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                        <h2 style="color: #2e7d32; margin-top: 0;">💡 建议</h2>
+                        <ul style="color: #555; line-height: 1.8;">
+                            <li>定期修改密码以保护账户安全</li>
+                            <li>请勿与他人共享账户信息</li>
+                            <li>谨慎操作"危险区域"中的功能</li>
+                        </ul>
+                    </div>
+                `;
+            }
         }
 
         async function changePassword() {
