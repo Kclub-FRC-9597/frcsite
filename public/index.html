@@ -862,7 +862,7 @@
                     </div>
 
                     <div style="display: flex; gap: 10px;">
-                        <button id="backToSeasonBtn" style="padding: 10px 20px; background: #95a5a6 !important; color: white !important; border: none !important; border-radius: 4px; cursor: pointer !important; pointer-events: auto !important;">返回赛季页面</button>
+                        <button id="backToSeasonBtn" style="padding: 10px 20px; background: #95a5a6 !important; color: white !important; border: none !important; border-radius: 4px; cursor: pointer !important; pointer-events: auto !important; font-size: 16px !important; font-weight: bold !important; display: inline-block !important;">返回赛季页面</button>
                     </div>
                 </div>
                 ${await loadFooter()}
@@ -872,11 +872,27 @@
             setTimeout(function() {
                 const btn = document.getElementById('backToSeasonBtn');
                 if (btn) {
+                    console.log('Button found:', btn);
                     btn.addEventListener('click', function(e) {
+                        console.log('Button clicked!');
                         e.preventDefault();
                         e.stopPropagation();
-                        window.location.hash = `#seasons/${year}`;
+                        const targetHash = `#seasons/${year}`;
+                        console.log('Navigating to:', targetHash);
+                        window.location.hash = targetHash;
                     });
+                    // Also try onclick for double safety
+                    btn.onclick = function(e) {
+                        console.log('Button onclick triggered!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const targetHash = `#seasons/${year}`;
+                        console.log('Navigating to:', targetHash);
+                        window.location.hash = targetHash;
+                        return false;
+                    };
+                } else {
+                    console.log('Button not found!');
                 }
             }, 100);
         }
