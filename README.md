@@ -44,6 +44,58 @@ npm run dev
 npm run deploy
 ```
 
+## 双电脑协作：保证操作同一数据库（D1）
+
+适用于两台电脑都开发、都可部署到同一个 Cloudflare Worker。
+
+### 一次性配置（两台电脑都做）
+1. 拉取同一仓库并安装依赖：
+  ```bash
+  npm install
+  ```
+2. 登录 Cloudflare（各自账号）：
+  ```bash
+  npx wrangler login
+  npm run cf:whoami
+  ```
+3. 确认 `wrangler.jsonc` 中 D1 配置一致（同一个 `database_id`）。
+
+### 每次开发前检查（两台电脑都做）
+按顺序执行以下命令：
+
+```bash
+git pull --rebase
+npm run cf:whoami
+npm run db:list
+npm run db:check
+```
+
+检查标准：
+- `cf:whoami` 显示同一个 Cloudflare Account。
+- `db:list` 中存在 `prescout_db`，并且 ID 与 `wrangler.jsonc` 一致。
+- `db:check` 返回 `ok = 1`（表示已连到远程数据库）。
+
+### 联调同一远程数据库
+如果希望本地开发就直接连同一个线上 D1，请使用：
+
+```bash
+npm run dev:remote
+```
+
+不要只用 `npm run dev` 做多人联调（默认可能使用本地状态，导致两台电脑看到的数据不一致）。
+
+### 部署前固定流程（两台电脑都一样）
+```bash
+git pull --rebase
+npm run db:check
+npm run deploy
+```
+
+### 常见报错排查
+- `database binding not found`：检查 `wrangler.jsonc` 的 `binding` 是否与代码中使用名称一致。
+- `not found / unauthorized`：重新执行 `npx wrangler login`，并确认账号有该 D1/Worker 权限。
+- 两台电脑结果不一致：优先检查是否一台使用了 `dev --remote`，另一台使用了本地 `dev`。
+
 ## 数据库配置
 
 项目使用 Cloudflare D1 数据库。需要在 `wrangler.jsonc` 中配置数据库绑定：

@@ -5,8 +5,12 @@
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
+		"dev:remote": "wrangler dev --remote",
 		"start": "wrangler dev",
-		"cf-typegen": "wrangler types"
+		"cf-typegen": "wrangler types",
+		"cf:whoami": "wrangler whoami",
+		"db:list": "wrangler d1 list",
+		"db:check": "wrangler d1 execute prescout_db --remote --command \"SELECT 1 as ok;\""
 	},
 	"devDependencies": {
 		"@types/node": "^25.3.0",
