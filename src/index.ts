@@ -30,8 +30,8 @@ export default {
 		// For GET requests to /api/sponsors, allow without authentication
 		// For other APIs, require authentication
 		if (url.pathname.startsWith('/api/')) {
-			const isSponsorGetRequest = url.pathname === '/api/sponsors' && request.method === 'GET';
-			if (!isSponsorGetRequest) {
+			const isPublicGetRequest = request.method === 'GET' && url.pathname === '/api/sponsors';
+			if (!isPublicGetRequest) {
 				const authError = requireAuth(request);
 				if (authError) return authError;
 			}
