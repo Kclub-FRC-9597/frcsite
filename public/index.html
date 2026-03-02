@@ -6,6 +6,42 @@
     <title>Luban Robotics #FRC9597 - A Team From K CLUB</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
+        :root {
+            --bg-0: #0b1020;
+            --bg-1: #0f162a;
+            --panel: rgba(17, 25, 44, 0.9);
+            --panel-strong: rgba(20, 30, 50, 0.96);
+            --surface-soft: rgba(15, 23, 41, 0.92);
+            --surface-contrast: rgba(11, 18, 33, 0.95);
+            --header-bg: rgba(16, 24, 42, 0.9);
+            --footer-bg: rgba(16, 24, 42, 0.92);
+            --footer-text: #f3f8ff;
+            --text-main: #d5e0f5;
+            --text-muted: #93a6c8;
+            --line: rgba(176, 62, 62, 0.3);
+            --accent: #b8001f;
+            --accent-2: #990019;
+            --success: #16f2b3;
+        }
+
+        body.light-theme {
+            --bg-0: #eef2f9;
+            --bg-1: #f5f8fe;
+            --panel: rgba(255, 255, 255, 0.94);
+            --panel-strong: rgba(255, 255, 255, 0.98);
+            --surface-soft: rgba(247, 250, 255, 1);
+            --surface-contrast: rgba(241, 246, 255, 1);
+            --header-bg: rgba(255, 255, 255, 0.96);
+            --footer-bg: rgba(248, 251, 255, 0.98);
+            --footer-text: #2b3c62;
+            --text-main: #21314f;
+            --text-muted: #556b91;
+            --line: rgba(188, 104, 104, 0.34);
+            --accent: #b8001f;
+            --accent-2: #9f001b;
+            --success: #0ab57f;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,30 +50,55 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-main);
+            background: var(--bg-1);
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+            color-scheme: dark;
+        }
+
+        body.light-theme {
+            color-scheme: light;
+        }
+
+        body::before {
+            content: '';
+            display: none;
+        }
+
+        body.light-theme::before {
+            display: none;
+        }
+
+        #app {
+            position: relative;
+            z-index: 1;
         }
 
         .container {
             display: flex;
-            gap: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
+            gap: 0;
+            max-width: none;
+            margin: 0;
         }
 
         .sidebar {
-            background: white;
-            border-radius: 10px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            backdrop-filter: blur(8px);
+            border-radius: 0;
             padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
             width: 250px;
             flex-shrink: 0;
         }
 
         .sidebar h3 {
             margin-bottom: 15px;
-            color: #667eea;
+            color: var(--accent);
+            letter-spacing: 0.4px;
         }
 
         .sidebar ul {
@@ -50,46 +111,52 @@
 
         .sidebar a {
             text-decoration: none;
-            color: #333;
+            color: var(--text-main);
             display: block;
             padding: 8px 12px;
-            border-radius: 5px;
-            transition: background 0.3s;
+            border-radius: 4px;
+            transition: background 0.25s, box-shadow 0.25s;
         }
 
         .sidebar a:hover {
-            background: #f0f0f0;
+            background: color-mix(in srgb, var(--accent) 12%, transparent);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent);
         }
 
         .sidebar a.active {
-            background: #667eea;
-            color: white;
+            background: color-mix(in srgb, var(--accent) 18%, transparent);
+            color: var(--text-main);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent);
         }
 
         .content {
             flex: 1;
-            background: white;
-            border-radius: 15px;
+            background: var(--panel-strong);
+            border: 1px solid var(--line);
+            backdrop-filter: blur(8px);
+            border-radius: 0;
             padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
         }
 
         .login-container {
             max-width: 400px;
             margin: 100px auto;
-            background: white;
+            background: var(--panel-strong);
+            border: 1px solid var(--line);
             padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 0;
+            box-shadow: none;
         }
 
         h1 {
-            color: #667eea;
+            color: var(--accent);
             margin-bottom: 20px;
+            text-shadow: none;
         }
 
         h2 {
-            color: #764ba2;
+            color: var(--accent-2);
             margin-bottom: 15px;
         }
 
@@ -100,78 +167,87 @@
         label {
             display: block;
             margin-bottom: 5px;
-            color: #555;
+            color: var(--text-muted);
             font-weight: 500;
         }
 
         input, select, textarea {
             width: 100%;
             padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
+            border: 1px solid var(--line);
+            background: var(--surface-contrast);
+            color: var(--text-main);
+            border-radius: 4px;
             font-size: 14px;
-            transition: border 0.3s;
+            transition: border 0.3s, box-shadow 0.3s;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--accent);
             color: white;
             padding: 12px 24px;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: none;
         }
 
         button:hover {
-            transform: translateY(-2px);
+            transform: none;
+            filter: brightness(1.04);
+            box-shadow: none;
         }
 
         .entry-card {
-            background: #f9f9f9;
-            border-radius: 8px;
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+            border-radius: 4px;
             padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            margin-bottom: 0;
+            border-left: 1px solid var(--line);
         }
 
         .entry-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
             cursor: pointer;
         }
 
         .entry-card h3 {
-            color: #667eea;
+            color: var(--accent);
             margin-bottom: 8px;
         }
 
         .entry-detail {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
+            gap: 8px;
             color: #666;
             font-size: 14px;
         }
 
         .detail-item {
-            background: white;
+            background: var(--surface-contrast);
+            border: 1px solid var(--line);
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 3px;
+            color: var(--text-muted);
         }
 
         .detail-item strong {
-            color: #333;
+            color: #d8e7ff;
         }
 
         .filter-section {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
@@ -186,7 +262,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--accent);
             color: white;
             width: 50px;
             height: 50px;
@@ -199,10 +275,11 @@
         }
 
         .header {
-            background: white;
-            border-radius: 15px;
+            background: var(--panel-strong);
+            border: 1px solid var(--line);
+            border-radius: 0;
             padding: 30px 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
             max-width: 1400px;
             margin: 0 auto 20px;
             text-align: center;
@@ -215,29 +292,32 @@
 
         .header p {
             margin: 10px 0 0;
-            color: #666;
+            color: var(--text-muted);
             font-size: 1.1em;
         }
 
         .footer {
-            background: white;
-            border-radius: 15px;
+            background: var(--panel-strong);
+            border: 1px solid var(--line);
+            border-radius: 0;
             padding: 20px 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
             max-width: 1400px;
             margin: 20px auto 0;
             text-align: center;
-            color: #666;
+            color: var(--text-muted);
         }
 
         /* Styles for external header.html */
         .site-header {
-            background: white;
-            border-radius: 15px;
+            background: var(--header-bg);
+            border: 1px solid var(--line);
+            backdrop-filter: blur(8px);
+            border-radius: 0;
             padding: 20px 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            max-width: 1400px;
-            margin: 0 auto 20px;
+            box-shadow: none;
+            max-width: none;
+            margin: 0;
         }
 
         .site-header .inner {
@@ -249,8 +329,9 @@
         .site-header .brand {
             font-size: 1.8em;
             font-weight: bold;
-            color: #667eea;
+            color: var(--accent);
             text-decoration: none;
+            text-shadow: none;
         }
 
         .site-nav {
@@ -259,26 +340,65 @@
         }
 
         .site-nav a {
-            color: #333;
+            color: var(--text-main);
             text-decoration: none;
             padding: 8px 16px;
-            border-radius: 5px;
-            transition: background 0.3s;
+            border-radius: 4px;
+            transition: background 0.25s, box-shadow 0.25s;
         }
 
         .site-nav a:hover {
-            background: #f0f0f0;
+            background: color-mix(in srgb, var(--accent) 12%, transparent);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent);
+        }
+
+        .theme-toggle {
+            margin-left: 0;
+            padding: 8px 12px;
+            font-size: 13px;
+            line-height: 1;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(11, 20, 38, 0.78);
+            color: var(--text-main);
+            box-shadow: none;
+            white-space: nowrap;
+        }
+
+        .theme-toggle:hover {
+            transform: none;
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
+        }
+
+        body.light-theme .theme-toggle {
+            background: rgba(255, 255, 255, 0.92);
         }
 
         /* Styles for external footer.html */
         .site-footer {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
+            background: var(--footer-bg);
+            border: 1px solid var(--line);
+            border-radius: 0;
             padding: 30px 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            max-width: 1400px;
-            margin: 20px auto 0;
-            color: white;
+            box-shadow: none;
+            backdrop-filter: blur(8px);
+            max-width: none;
+            margin: 0;
+            color: var(--footer-text);
+            position: relative;
+            z-index: 2;
+        }
+
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            top: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 26%, white 74%), transparent);
+            opacity: 0.25;
+            pointer-events: none;
         }
 
         .site-footer .inner {
@@ -329,13 +449,98 @@
         }
 
         .footer-column a {
-            color: rgba(255, 255, 255, 0.85);
+            color: color-mix(in srgb, var(--footer-text) 86%, transparent);
             text-decoration: none;
             transition: color 0.3s;
         }
 
         .footer-column a:hover {
-            color: white;
+            color: var(--accent);
+        }
+
+        body.light-theme .site-footer,
+        body.light-theme .site-footer * {
+            color: var(--footer-text);
+        }
+
+        body.light-theme .site-footer a {
+            color: var(--accent) !important;
+        }
+
+        body.light-theme .site-footer [style*="color: rgba(255,255,255"],
+        body.light-theme .site-footer [style*="color: #fff"],
+        body.light-theme .site-footer [style*="color:#fff"] {
+            color: var(--footer-text) !important;
+        }
+
+        .content p,
+        .content li,
+        .content td,
+        .content th,
+        .content span,
+        .content div,
+        .content label {
+            color: var(--text-main);
+        }
+
+        .content [style*="background: #f8f9fa"],
+        .content [style*="background: #f9f9f9"],
+        .content [style*="background: #f5f5f5"],
+        .content [style*="background: #f0f8ff"],
+        .content [style*="background: #e8f4f8"],
+        .content [style*="background: #f2e8f8"],
+        .content [style*="background: #e8f8f4"],
+        .content [style*="background: #fef5e7"],
+        .content [style*="background: #fffbf0"],
+        .content [style*="background: #ffebee"],
+        .content [style*="background: #e8f5e9"],
+        .content [style*="background: #e8f0fe"] {
+            background: var(--surface-soft) !important;
+            border: 1px solid var(--line) !important;
+            color: var(--text-main) !important;
+        }
+
+        .content [style*="color: #333"],
+        .content [style*="color: #555"],
+        .content [style*="color: #666"],
+        .content [style*="color: #999"] {
+            color: var(--text-main) !important;
+        }
+
+        .content [style*="color: #667eea"],
+        .content [style*="color:#667eea"],
+        .content [style*="color: #764ba2"],
+        .content [style*="color:#764ba2"] {
+            color: var(--accent) !important;
+        }
+
+        .content [style*="background: #667eea"],
+        .content [style*="background:#667eea"],
+        .content [style*="background: #764ba2"],
+        .content [style*="background:#764ba2"] {
+            background: var(--accent) !important;
+            color: #fff !important;
+        }
+
+        .content [style*="border-left: 4px solid #667eea"],
+        .content [style*="border-left:4px solid #667eea"],
+        .content [style*="border-left: 4px solid #764ba2"],
+        .content [style*="border-left:4px solid #764ba2"] {
+            border-left-color: var(--accent) !important;
+        }
+
+        .content table,
+        .content th,
+        .content td {
+            border-color: rgba(96, 130, 194, 0.32) !important;
+        }
+
+        .content tr[onmouseover] {
+            transition: background 0.2s;
+        }
+
+        .content a {
+            color: #7fe9ff;
         }
 
         @media (max-width: 900px) {
@@ -386,6 +591,11 @@
 
             .site-nav {
                 justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .theme-toggle {
+                margin-left: 0;
             }
         }
 
@@ -430,7 +640,37 @@
         const ADMIN_PASS = 'admin123';
         const ADMIN_TOKEN = 'admin-token-2026';
 
+        const THEME_KEY = 'frc_theme';
+
         const DEFAULT_EVENTS = ['2025-einstein'];
+
+        function getCurrentTheme() {
+            return document.body.classList.contains('light-theme') ? 'light' : 'dark';
+        }
+
+        function applyTheme(mode) {
+            const isLight = mode === 'light';
+            document.body.classList.toggle('light-theme', isLight);
+            localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
+
+            const label = isLight ? '☀️' : '🌙';
+            document.querySelectorAll('.theme-toggle').forEach(btn => {
+                btn.textContent = label;
+                btn.setAttribute('aria-label', isLight ? '切换到夜间模式' : '切换到白天模式');
+                btn.setAttribute('title', isLight ? '切换到夜间模式' : '切换到白天模式');
+            });
+        }
+
+        function toggleTheme() {
+            applyTheme(getCurrentTheme() === 'dark' ? 'light' : 'dark');
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+        }
+
+        initTheme();
 
         if (currentUser && !currentRole) {
             currentRole = 'tester';
@@ -618,11 +858,15 @@
             
             // Add account settings link if user is logged in
             let header = headerHTML;
+            const isLight = getCurrentTheme() === 'light';
+            const themeBtn = `<button class="theme-toggle" onclick="toggleTheme()" title="${isLight ? '切换到夜间模式' : '切换到白天模式'}" aria-label="${isLight ? '切换到夜间模式' : '切换到白天模式'}">${isLight ? '☀️' : '🌙'}</button>`;
             if (currentUser) {
                 header = headerHTML.replace(
                     '</nav>',
-                    `<a href="#account/profile" style="color: inherit; margin-left: 15px;">👤 账户</a></nav>`
+                    `<a href="#account/profile" style="color: inherit;">👤 账户</a>${themeBtn}</nav>`
                 );
+            } else {
+                header = headerHTML.replace('</nav>', `${themeBtn}</nav>`);
             }
             return header;
         }
@@ -834,7 +1078,6 @@
                 return `
                     <h1>📝 编辑主页内容</h1>
                     <div style="background: #f0f8ff; padding: 20px; border-radius: 8px;">
-                        <h2 style="color: #667eea; margin-top: 0;">🎯 关于我们</h2>
                         <div class="form-group">
                             <label style="display: block; margin-bottom: 8px; font-weight: bold;">第一段</label>
                             <textarea id="aboutP1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 80px;">${content.aboutUs.p1}</textarea>
@@ -1564,31 +1807,18 @@
             
             // Build features section HTML
             const featuresHtml = content.features.map(feature => `
-                <div style="background: white; border: 2px solid ${feature.color}; padding: 20px; border-radius: 10px;">
+                <div style="background: var(--panel); border: 1px solid var(--line); border-left: 3px solid ${feature.color}; padding: 20px; border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);">
                     <h3 style="color: ${feature.color}; margin-bottom: 10px;">${feature.icon} ${feature.title}</h3>
-                    <p style="color: #666; line-height: 1.6;">
+                    <p style="color: var(--text-main); line-height: 1.6;">
                         ${feature.description}
                     </p>
                 </div>
             `).join('');
             
-            // Build tools section HTML
-            const toolsHtml = content.tools.items.map(item => `
-                <li style="padding: 8px 0; color: #555;">
-                    <strong style="color: ${item.color};">${item.icon} ${item.name}</strong> - ${item.description}
-                </li>
-            `).join('');
-            
             app.innerHTML = `
                 ${header}
-                <div class="content" style="max-width: 1400px; margin: 0 auto;">
-                    <h1>🤖 欢迎来到 Luban Robotics</h1>
-                    <p style="font-size: 1.2em; color: #667eea; margin-bottom: 30px;">
-                        <strong>FRC Team 9597</strong> - A Team From K CLUB
-                    </p>
-                    
-                    <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 25px; border-radius: 10px; margin-bottom: 30px;">
-                        <h2 style="margin-bottom: 15px;">🎯 关于我们</h2>
+                <div class="content" style="max-width: none; margin: 0; padding: 24px 40px;">
+                    <div style="padding: 0; margin-bottom: 20px;">
                         <p style="line-height: 1.8; color: #555; margin-bottom: 15px;">
                             ${content.aboutUs.p1}
                         </p>
@@ -1600,18 +1830,8 @@
                         </p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0; margin-bottom: 20px;">
                         ${featuresHtml}
-                    </div>
-
-                    <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 4px solid #667eea;">
-                        <h2 style="margin-bottom: 15px;">💡 我们的工具</h2>
-                        <p style="line-height: 1.8; color: #555; margin-bottom: 15px;">
-                            ${content.tools.description}
-                        </p>
-                        <ul style="list-style: none; padding-left: 0;">
-                            ${toolsHtml}
-                        </ul>
                     </div>
                 </div>
                 ${footer}
