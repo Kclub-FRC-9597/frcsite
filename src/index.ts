@@ -177,6 +177,9 @@ export default {
 					)
 				`).run();
 
+				// Normalize legacy sponsor naming
+				await env.D1_PRESCOUT.prepare("UPDATE sponsors SET name = 'Bambu' WHERE lower(name) = 'bambo'").run();
+
 				// Initialize default sponsors if table is empty
 				const checkResult = await env.D1_PRESCOUT.prepare('SELECT COUNT(*) as count FROM sponsors').first() as any;
 				if (checkResult && checkResult.count === 0) {
@@ -184,7 +187,7 @@ export default {
 						{ year: 2026, name: 'SolidWorks', logo_url: null, website: 'https://www.solidworks.com' },
 						{ year: 2026, name: 'OnShape', logo_url: null, website: 'https://www.onshape.com' },
 						{ year: 2026, name: 'FRC', logo_url: null, website: 'https://www.firstinspires.org' },
-						{ year: 2025, name: 'Bambo', logo_url: null, website: null },
+						{ year: 2025, name: 'Bambu', logo_url: null, website: null },
 						{ year: 2025, name: 'MakeX', logo_url: null, website: null },
 						{ year: 2025, name: 'XTool', logo_url: null, website: null },
 						{ year: 2025, name: 'Makeblock', logo_url: null, website: null },

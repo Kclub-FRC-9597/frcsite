@@ -137,7 +137,7 @@ const sponsors = await getSponsorsByYear(2025);
 - FRC (https://www.firstinspires.org)
 
 ### 2025 赛季
-- Bambo
+- Bambu
 - MakeX
 - XTool
 - Makeblock
