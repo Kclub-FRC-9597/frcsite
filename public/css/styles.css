@@ -14,7 +14,7 @@
             --accent: #b8001f;
             --accent-2: #990019;
             --success: #16f2b3;
-            --bg-image: url('/bg-pattern.svg');
+            --bg-image: url('/assets/bg-pattern.svg');
             --bg-image-opacity: 0.28;
         }
 

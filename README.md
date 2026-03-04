@@ -114,11 +114,19 @@ npm run deploy
 
 ```
 .
-├── public/           # 前端静态文件
-│   ├── index.html    # 主页面
-│   ├── header.html   # 页头组件
-│   ├── footer.html   # 页脚组件
-│   └── favicon.png   # 网站图标
+├── public/                # 前端静态文件
+│   ├── index.html         # SPA 入口页面
+│   ├── assets/            # 图片与图标等静态资源
+│   │   ├── bg-pattern.svg
+│   │   ├── favicon.ico
+│   │   └── favicon.png
+│   ├── css/
+│   │   └── styles.css     # 全站样式文件
+│   ├── js/
+│   │   └── account.js     # 账户模块逻辑（从 index.html 拆分）
+│   └── partials/
+│       ├── header.html    # 页头组件
+│       └── footer.html    # 页脚组件
 ├── src/              # 后端代码
 │   └── index.ts      # Worker API 端点
 ├── package.json      # 项目依赖
