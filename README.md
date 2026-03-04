@@ -123,7 +123,11 @@ npm run deploy
 │   ├── css/
 │   │   └── styles.css     # 全站样式文件
 │   ├── js/
-│   │   └── account.js     # 账户模块逻辑（从 index.html 拆分）
+│   │   ├── account.js             # 账户模块逻辑
+│   │   ├── account-templates.js   # 账户模块模板函数
+│   │   ├── seasons.js             # 赛季模块逻辑
+│   │   ├── seasons-templates.js   # 赛季模块模板函数
+│   │   └── sponsors.js            # 赞助商管理模块逻辑
 │   └── partials/
 │       ├── header.html    # 页头组件
 │       └── footer.html    # 页脚组件
