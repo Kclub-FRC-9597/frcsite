@@ -5,637 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Luban Robotics #FRC9597 - A Team From K CLUB</title>
     <link rel="icon" type="image/png" href="/favicon.png">
-    <style>
-        :root {
-            --bg-0: #0b1020;
-            --bg-1: #0f162a;
-            --panel: rgba(17, 25, 44, 0.9);
-            --panel-strong: rgba(20, 30, 50, 0.96);
-            --surface-soft: rgba(15, 23, 41, 0.92);
-            --surface-contrast: rgba(11, 18, 33, 0.95);
-            --header-bg: rgba(16, 24, 42, 0.9);
-            --footer-bg: rgba(16, 24, 42, 0.92);
-            --footer-text: #f3f8ff;
-            --text-main: #d5e0f5;
-            --text-muted: #93a6c8;
-            --line: rgba(176, 62, 62, 0.3);
-            --accent: #b8001f;
-            --accent-2: #990019;
-            --success: #16f2b3;
-            --bg-image: url('/bg-pattern.svg');
-            --bg-image-opacity: 0.28;
-        }
-
-        body.light-theme {
-            --bg-0: #eef2f9;
-            --bg-1: #f5f8fe;
-            --panel: rgba(255, 255, 255, 0.94);
-            --panel-strong: rgba(255, 255, 255, 0.98);
-            --surface-soft: rgba(247, 250, 255, 1);
-            --surface-contrast: rgba(241, 246, 255, 1);
-            --header-bg: rgba(255, 255, 255, 0.96);
-            --footer-bg: rgba(248, 251, 255, 0.98);
-            --footer-text: #2b3c62;
-            --text-main: #21314f;
-            --text-muted: #556b91;
-            --line: rgba(188, 104, 104, 0.34);
-            --accent: #b8001f;
-            --accent-2: #9f001b;
-            --success: #0ab57f;
-            --bg-image-opacity: 0.16;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-main);
-            background: var(--bg-1);
-            min-height: 100vh;
-            padding: 0;
-            position: relative;
-            overflow-x: hidden;
-            color-scheme: dark;
-        }
-
-        body.light-theme {
-            color-scheme: light;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background-image: var(--bg-image);
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: var(--bg-image-opacity);
-            z-index: 0;
-        }
-
-        body.light-theme::before {
-            opacity: var(--bg-image-opacity);
-        }
-
-        #app {
-            position: relative;
-            z-index: 1;
-        }
-
-        .container {
-            display: flex;
-            gap: 0;
-            max-width: none;
-            margin: 0;
-        }
-
-        .sidebar {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            backdrop-filter: blur(8px);
-            border-radius: 0;
-            padding: 20px;
-            box-shadow: none;
-            width: 250px;
-            flex-shrink: 0;
-        }
-
-        .sidebar h3 {
-            margin-bottom: 15px;
-            color: var(--accent);
-            letter-spacing: 0.4px;
-        }
-
-        .sidebar ul {
-            list-style: none;
-        }
-
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-
-        .sidebar a {
-            text-decoration: none;
-            color: var(--text-main);
-            display: block;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background 0.25s, box-shadow 0.25s;
-        }
-
-        .sidebar a:hover {
-            background: color-mix(in srgb, var(--accent) 12%, transparent);
-            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent);
-        }
-
-        .sidebar a.active {
-            background: color-mix(in srgb, var(--accent) 18%, transparent);
-            color: var(--text-main);
-            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent);
-        }
-
-        .content {
-            flex: 1;
-            background: var(--panel-strong);
-            border: 1px solid var(--line);
-            backdrop-filter: blur(8px);
-            border-radius: 0;
-            padding: 40px;
-            box-shadow: none;
-        }
-
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            background: var(--panel-strong);
-            border: 1px solid var(--line);
-            padding: 40px;
-            border-radius: 0;
-            box-shadow: none;
-        }
-
-        h1 {
-            color: var(--accent);
-            margin-bottom: 20px;
-            text-shadow: none;
-        }
-
-        h2 {
-            color: var(--accent-2);
-            margin-bottom: 15px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--line);
-            background: var(--surface-contrast);
-            color: var(--text-main);
-            border-radius: 4px;
-            font-size: 14px;
-            transition: border 0.3s, box-shadow 0.3s;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
-        }
-
-        button {
-            background: var(--accent);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: none;
-        }
-
-        button:hover {
-            transform: none;
-            filter: brightness(1.04);
-            box-shadow: none;
-        }
-
-        .entry-card {
-            background: var(--surface-soft);
-            border: 1px solid var(--line);
-            border-radius: 4px;
-            padding: 15px;
-            margin-bottom: 0;
-            border-left: 1px solid var(--line);
-        }
-
-        .entry-card:hover {
-            box-shadow: none;
-            cursor: pointer;
-        }
-
-        .entry-card h3 {
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-
-        .entry-detail {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 8px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .detail-item {
-            background: var(--surface-contrast);
-            border: 1px solid var(--line);
-            padding: 10px;
-            border-radius: 3px;
-            color: var(--text-muted);
-        }
-
-        .detail-item strong {
-            color: #d8e7ff;
-        }
-
-        .filter-section {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .mobile-toggle {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--accent);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-        }
-
-        .header {
-            background: var(--panel-strong);
-            border: 1px solid var(--line);
-            border-radius: 0;
-            padding: 30px 40px;
-            box-shadow: none;
-            max-width: 1400px;
-            margin: 0 auto 20px;
-            text-align: center;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 2.5em;
-        }
-
-        .header p {
-            margin: 10px 0 0;
-            color: var(--text-muted);
-            font-size: 1.1em;
-        }
-
-        .footer {
-            background: var(--panel-strong);
-            border: 1px solid var(--line);
-            border-radius: 0;
-            padding: 20px 40px;
-            box-shadow: none;
-            max-width: 1400px;
-            margin: 20px auto 0;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        /* Styles for external header.html */
-        .site-header {
-            background: var(--header-bg);
-            border: 1px solid var(--line);
-            backdrop-filter: blur(8px);
-            border-radius: 0;
-            padding: 20px 40px;
-            box-shadow: none;
-            max-width: none;
-            margin: 0;
-        }
-
-        .site-header .inner {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .site-header .brand {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: var(--accent);
-            text-decoration: none;
-            text-shadow: none;
-        }
-
-        .site-nav {
-            display: flex;
-            gap: 20px;
-        }
-
-        .site-nav a {
-            color: var(--text-main);
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: background 0.25s, box-shadow 0.25s;
-        }
-
-        .site-nav a:hover {
-            background: color-mix(in srgb, var(--accent) 12%, transparent);
-            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent);
-        }
-
-        .theme-toggle {
-            margin-left: 0;
-            padding: 8px 12px;
-            font-size: 13px;
-            line-height: 1;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            background: rgba(11, 20, 38, 0.78);
-            color: var(--text-main);
-            box-shadow: none;
-            white-space: nowrap;
-        }
-
-        .theme-toggle:hover {
-            transform: none;
-            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
-        }
-
-        body.light-theme .theme-toggle {
-            background: rgba(255, 255, 255, 0.92);
-        }
-
-        /* Styles for external footer.html */
-        .site-footer {
-            background: var(--footer-bg);
-            border: 1px solid var(--line);
-            border-radius: 0;
-            padding: 30px 40px;
-            box-shadow: none;
-            backdrop-filter: blur(8px);
-            max-width: none;
-            margin: 0;
-            color: var(--footer-text);
-            position: relative;
-            z-index: 2;
-        }
-
-        .site-footer::before {
-            content: '';
-            position: absolute;
-            left: 14px;
-            right: 14px;
-            top: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 26%, white 74%), transparent);
-            opacity: 0.25;
-            pointer-events: none;
-        }
-
-        .site-footer .inner {
-            max-width: 100%;
-        }
-
-        .footer-inner {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 40px;
-        }
-
-        .footer-left .brand-large {
-            font-size: 3em;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        .footer-left .slogan {
-            margin-top: 10px;
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .footer-columns {
-            display: flex;
-            gap: 60px;
-        }
-
-        .footer-column {
-            min-width: 150px;
-        }
-
-        .footer-column strong {
-            display: block;
-            margin-bottom: 12px;
-            font-size: 1.1em;
-        }
-
-        .footer-column ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-column li {
-            margin-bottom: 8px;
-        }
-
-        .footer-column a {
-            color: color-mix(in srgb, var(--footer-text) 86%, transparent);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-column a:hover {
-            color: var(--accent);
-        }
-
-        body.light-theme .site-footer,
-        body.light-theme .site-footer * {
-            color: var(--footer-text);
-        }
-
-        body.light-theme .site-footer a {
-            color: var(--accent) !important;
-        }
-
-        body.light-theme .site-footer [style*="color: rgba(255,255,255"],
-        body.light-theme .site-footer [style*="color: #fff"],
-        body.light-theme .site-footer [style*="color:#fff"] {
-            color: var(--footer-text) !important;
-        }
-
-        .content p,
-        .content li,
-        .content td,
-        .content th,
-        .content span,
-        .content div,
-        .content label {
-            color: var(--text-main);
-        }
-
-        .content [style*="background: #f8f9fa"],
-        .content [style*="background: #f9f9f9"],
-        .content [style*="background: #f5f5f5"],
-        .content [style*="background: #f0f8ff"],
-        .content [style*="background: #e8f4f8"],
-        .content [style*="background: #f2e8f8"],
-        .content [style*="background: #e8f8f4"],
-        .content [style*="background: #fef5e7"],
-        .content [style*="background: #fffbf0"],
-        .content [style*="background: #ffebee"],
-        .content [style*="background: #e8f5e9"],
-        .content [style*="background: #e8f0fe"] {
-            background: var(--surface-soft) !important;
-            border: 1px solid var(--line) !important;
-            color: var(--text-main) !important;
-        }
-
-        .content [style*="color: #333"],
-        .content [style*="color: #555"],
-        .content [style*="color: #666"],
-        .content [style*="color: #999"] {
-            color: var(--text-main) !important;
-        }
-
-        .content [style*="color: #667eea"],
-        .content [style*="color:#667eea"],
-        .content [style*="color: #764ba2"],
-        .content [style*="color:#764ba2"] {
-            color: var(--accent) !important;
-        }
-
-        .content [style*="background: #667eea"],
-        .content [style*="background:#667eea"],
-        .content [style*="background: #764ba2"],
-        .content [style*="background:#764ba2"] {
-            background: var(--accent) !important;
-            color: #fff !important;
-        }
-
-        .content [style*="border-left: 4px solid #667eea"],
-        .content [style*="border-left:4px solid #667eea"],
-        .content [style*="border-left: 4px solid #764ba2"],
-        .content [style*="border-left:4px solid #764ba2"] {
-            border-left-color: var(--accent) !important;
-        }
-
-        .content table,
-        .content th,
-        .content td {
-            border-color: rgba(96, 130, 194, 0.32) !important;
-        }
-
-        .content tr[onmouseover] {
-            transition: background 0.2s;
-        }
-
-        .content a {
-            color: #7fe9ff;
-        }
-
-        @media (max-width: 900px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -280px;
-                width: 250px;
-                height: 100vh;
-                transition: left 0.3s;
-                z-index: 999;
-                border-radius: 0;
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .mobile-toggle {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .content {
-                width: 100%;
-            }
-
-            .footer-inner {
-                flex-direction: column;
-                gap: 30px;
-            }
-
-            .footer-columns {
-                flex-direction: column;
-                gap: 30px;
-            }
-
-            .site-header .inner {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .site-nav {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .theme-toggle {
-                margin-left: 0;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .content {
-                padding: 20px;
-            }
-
-            .filter-section {
-                flex-direction: column;
-            }
-
-            .filter-group {
-                width: 100%;
-            }
-
-            .site-header {
-                padding: 20px;
-            }
-
-            .site-footer {
-                padding: 20px;
-            }
-
-            .footer-left .brand-large {
-                font-size: 2em;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div id="app"></div>
@@ -650,6 +20,8 @@
         const ADMIN_USER = 'admin';
         const ADMIN_PASS = 'admin123';
         const ADMIN_TOKEN = 'admin-token-2026';
+        const TESTER_USER = 'tester';
+        const TESTER_PASS = 'password123';
 
         const THEME_KEY = 'frc_theme';
 
@@ -690,6 +62,10 @@
 
         function isAdmin() {
             return currentRole === 'admin' && currentToken === ADMIN_TOKEN;
+        }
+
+        function isTesterUser(username = currentUser) {
+            return username === TESTER_USER;
         }
 
         function apiFetch(url, options = {}) {
@@ -736,8 +112,8 @@
         const DEFAULT_HOMEPAGE_CONTENT = {
             aboutUs: {
                 p1: '<strong>Luban Robotics（鲁班机器人）</strong>是一支隶属于 K CLUB 的年轻而富有朝气的 FRC 竞技机器人团队。我们以中国古代伟大工匠鲁班命名，以教育为核心使命，通过机器人竞赛这个平台，致力于激发学生的兴趣、提升学生的能力。',
-                p2: '我们的核心理念是：<strong style="color: #667eea;">基于兴趣，依托赛事，提升能力</strong>。自2024年成立以来，我们在学生的科学探索、工程实践和团队协作中，秉承精益求精的工匠精神，打造每一辆竞赛机器人。通过 FIRST Robotics Competition（国际机器人竞赛）的舞台，我们帮助学生在创新、协作和坚持中学会解决真实世界的问题。',
-                p3: '我们相信，<strong style="color: #667eea;">教育的价值超越赛场</strong>。无论在成败得失的淬炼中，还是在技术突破的欣喜中，我们都致力于培养学生对科学和工程的热情，铸造他们的领导力、责任感和创新思维，成为未来的技术引领者。'
+                p2: '我们的核心理念是：<strong class="home-inline-accent">基于兴趣，依托赛事，提升能力</strong>。自2024年成立以来，我们在学生的科学探索、工程实践和团队协作中，秉承精益求精的工匠精神，打造每一辆竞赛机器人。通过 FIRST Robotics Competition（国际机器人竞赛）的舞台，我们帮助学生在创新、协作和坚持中学会解决真实世界的问题。',
+                p3: '我们相信，<strong class="home-inline-accent">教育的价值超越赛场</strong>。无论在成败得失的淬炼中，还是在技术突破的欣喜中，我们都致力于培养学生对科学和工程的热情，铸造他们的领导力、责任感和创新思维，成为未来的技术引领者。'
             },
             features: [
                 {
@@ -874,7 +250,7 @@
             if (currentUser) {
                 header = headerHTML.replace(
                     '</nav>',
-                    `<a href="#account/profile" style="color: inherit;">👤 账户</a>${themeBtn}</nav>`
+                    `<a href="#account/profile" class="header-account-link">👤 账户</a>${themeBtn}</nav>`
                 );
             } else {
                 header = headerHTML.replace('</nav>', `${themeBtn}</nav>`);
@@ -963,8 +339,10 @@
                         <input type="password" id="password" placeholder="输入密码" onkeypress="if(event.key==='Enter')login('${returnTo}')">
                     </div>
                     <button onclick="login('${returnTo}')">登录</button>
-                    <div style="margin-top: 15px; text-align: center;">
-                        <a href="#home" style="color: #667eea; text-decoration: none;">返回主页</a>
+                    <div class="login-links">
+                        <a href="#home">返回主页</a>
+                        <span class="divider">|</span>
+                        <a href="#" onclick="loginAsTester('${returnTo}'); return false;">使用测试账户（tester）</a>
                     </div>
                 </div>
             `;
@@ -974,17 +352,19 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Check if password has been changed
-            const savedPassword = localStorage.getItem(`password_${username}`);
-            
-            if (username === ADMIN_USER && (password === ADMIN_PASS || password === savedPassword)) {
-                currentUser = username;
-                currentRole = 'admin';
-                currentToken = ADMIN_TOKEN;
-                localStorage.setItem('frc_user', username);
-                localStorage.setItem('frc_role', 'admin');
-                localStorage.setItem('frc_token', ADMIN_TOKEN);
-            } else if (username === 'tester' && (password === 'password123' || password === savedPassword)) {
+            if (!username || !password) {
+                alert('请输入用户名和密码');
+                return;
+            }
+
+            if (isTesterUser(username)) {
+                // tester continues to use local mode
+                const savedPassword = localStorage.getItem(`password_${username}`);
+                if (password !== TESTER_PASS && password !== savedPassword) {
+                    alert('用户名或密码错误');
+                    return;
+                }
+
                 currentUser = username;
                 currentRole = 'tester';
                 currentToken = '';
@@ -992,8 +372,29 @@
                 localStorage.setItem('frc_role', 'tester');
                 localStorage.removeItem('frc_token');
             } else {
-                alert('用户名或密码错误');
-                return;
+                // all non-tester accounts are database-backed
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result?.ok) {
+                    alert(result?.error || '用户名或密码错误');
+                    return;
+                }
+
+                currentUser = result.username;
+                currentRole = result.role || 'admin';
+                currentToken = result.token || '';
+                localStorage.setItem('frc_user', currentUser);
+                localStorage.setItem('frc_role', currentRole);
+                if (currentToken) {
+                    localStorage.setItem('frc_token', currentToken);
+                } else {
+                    localStorage.removeItem('frc_token');
+                }
             }
 
             // Redirect to prescouting if returnTo is login or tools
@@ -1003,6 +404,22 @@
                 window.location.hash = returnTo;
             }
             // Manually trigger render to ensure page updates
+            await renderApp();
+        }
+
+        async function loginAsTester(returnTo = '#home') {
+            currentUser = TESTER_USER;
+            currentRole = 'tester';
+            currentToken = '';
+            localStorage.setItem('frc_user', TESTER_USER);
+            localStorage.setItem('frc_role', 'tester');
+            localStorage.removeItem('frc_token');
+
+            if (returnTo === '#login' || returnTo === '#tools') {
+                window.location.hash = '#tools/prescouting';
+            } else {
+                window.location.hash = returnTo;
+            }
             await renderApp();
         }
 
@@ -1030,8 +447,7 @@
                             <li><a href="#account/password" class="${accountSection === '/password' ? 'active' : ''}">🔐 修改密码</a></li>
                             ${isAdmin() ? `<li><a href="#account/users" class="${accountSection === '/users' ? 'active' : ''}">👥 用户管理</a></li>` : ''}
                             ${isAdmin() ? `<li><a href="#account/content" class="${accountSection === '/content' ? 'active' : ''}">📝 编辑主页</a></li>` : ''}
-                            <li><a href="#account/danger" class="${accountSection === '/danger' ? 'active' : ''}">⚠️ 危险区域</a></li>
-                            <li style="border-top: 1px solid #e0e0e0; margin-top: 10px; padding-top: 10px;"><a href="#home">返回主页</a></li>
+                            <li class="sidebar-home-link"><a href="#home">返回主页</a></li>
                             <li><a href="#" onclick="logout()">登出</a></li>
                         </ul>
                     </div>
@@ -1055,11 +471,6 @@
                     setupContentEditorListeners();
                 } else if (accountSection === '/users') {
                     setupUserManagementListeners();
-                } else if (accountSection === '/danger') {
-                    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-                    if (deleteAccountBtn) {
-                        deleteAccountBtn.addEventListener('click', deleteAccount);
-                    }
                 }
             }, 100);
         }
@@ -1068,110 +479,110 @@
             if (section === '/password') {
                 return `
                     <h1>🔐 修改密码</h1>
-                    <div style="background: #fffbf0; padding: 20px; border-radius: 8px;">
+                    <div class="account-password-card">
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">当前密码</label>
-                            <input type="password" id="currentPassword" placeholder="输入当前密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            <label class="account-label-strong">当前密码</label>
+                            <input type="password" id="currentPassword" placeholder="输入当前密码" class="account-input">
                         </div>
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">新密码</label>
-                            <input type="password" id="newPassword" placeholder="输入新密码（至少6个字符）" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            <label class="account-label-strong">新密码</label>
+                            <input type="password" id="newPassword" placeholder="输入新密码（至少6个字符）" class="account-input">
                         </div>
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">确认新密码</label>
-                            <input type="password" id="confirmPassword" placeholder="确认新密码" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            <label class="account-label-strong">确认新密码</label>
+                            <input type="password" id="confirmPassword" placeholder="确认新密码" class="account-input">
                         </div>
-                        <button id="changePasswordBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">确认修改密码</button>
+                        <button id="changePasswordBtn" class="account-btn-primary">确认修改密码</button>
                     </div>
                 `;
             } else if (section === '/content') {
                 const content = getHomePageContent();
                 return `
                     <h1>📝 编辑主页内容</h1>
-                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px;">
+                    <div class="content-editor-card">
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">第一段</label>
-                            <textarea id="aboutP1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 80px;">${content.aboutUs.p1}</textarea>
+                            <label class="content-editor-label">第一段</label>
+                            <textarea id="aboutP1" class="content-editor-textarea">${content.aboutUs.p1}</textarea>
                         </div>
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">第二段</label>
-                            <textarea id="aboutP2" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 80px;">${content.aboutUs.p2}</textarea>
+                            <label class="content-editor-label">第二段</label>
+                            <textarea id="aboutP2" class="content-editor-textarea">${content.aboutUs.p2}</textarea>
                         </div>
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">第三段</label>
-                            <textarea id="aboutP3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 80px;">${content.aboutUs.p3}</textarea>
+                            <label class="content-editor-label">第三段</label>
+                            <textarea id="aboutP3" class="content-editor-textarea">${content.aboutUs.p3}</textarea>
                         </div>
                         
-                        <h2 style="color: #764ba2; margin-top: 30px;">特性卡片</h2>
+                        <h2 class="content-editor-subtitle content-editor-subtitle-feature">特性卡片</h2>
                         <div id="featuresEditor"></div>
                         
-                        <h2 style="color: #667eea; margin-top: 30px;">💡 我们的工具</h2>
+                        <h2 class="content-editor-subtitle content-editor-subtitle-tools">💡 我们的工具</h2>
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">工具描述</label>
-                            <textarea id="toolsDescription" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 60px;">${content.tools.description}</textarea>
+                            <label class="content-editor-label">工具描述</label>
+                            <textarea id="toolsDescription" class="content-editor-textarea content-editor-textarea-tools">${content.tools.description}</textarea>
                         </div>
                         <div id="toolsEditor"></div>
                         
-                        <div style="display: flex; gap: 10px; margin-top: 30px;">
-                            <button id="saveContentBtn" style="flex: 1; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">保存更改</button>
-                            <button id="resetContentBtn" style="flex: 1; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">重置为默认</button>
+                        <div class="content-editor-actions">
+                            <button id="saveContentBtn" class="content-editor-btn content-editor-btn-save">保存更改</button>
+                            <button id="resetContentBtn" class="content-editor-btn content-editor-btn-reset">重置为默认</button>
                         </div>
                     </div>
                 `;
             } else if (section === '/users') {
                 return `
                     <h1>👥 用户管理</h1>
-                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                        <h2 style="color: #667eea; margin-top: 0;">所有账户</h2>
+                    <div class="users-card">
+                        <h2 class="users-section-title">添加账户（数据库）</h2>
+                        <div class="users-add-grid">
+                            <input type="text" id="newUsername" placeholder="用户名（不能是 tester）" />
+                            <input type="password" id="newPassword" placeholder="初始密码" />
+                            <select id="newRole">
+                                <option value="admin">admin</option>
+                                <option value="tester">tester</option>
+                            </select>
+                            <button id="addUserBtn">添加账户</button>
+                        </div>
+                        <h2 class="users-section-title">所有账户</h2>
                         <div id="usersList"></div>
-                    </div>
-                `;
-            } else if (section === '/danger') {
-                return `
-                    <h1>⚠️ 危险区域</h1>
-                    <div style="background: #ffebee; padding: 20px; border-radius: 8px;">
-                        <p style="color: #d32f2f; font-weight: bold; margin-bottom: 15px;">🚨 警告：以下操作无法撤销。请谨慎操作。</p>
-                        <h2 style="color: #d32f2f; margin-top: 20px;">注销账户</h2>
-                        <p style="color: #666;">注销账户将删除所有相关数据，包括密码修改记录和个人配置。此操作无法恢复。</p>
-                        <button id="deleteAccountBtn" style="width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px;">注销账户</button>
                     </div>
                 `;
             } else { // /profile
                 const nickname = localStorage.getItem(`nickname_${currentUser}`) || '';
                 return `
                     <h1>👤 个人信息</h1>
-                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px;">
-                        <div style="margin-bottom: 20px;">
-                            <p style="color: #666; margin: 5px 0;">
+                    <div class="profile-card">
+                        <div class="profile-section">
+                            <p class="profile-label">
                                 <strong>用户名</strong>
                             </p>
-                            <p style="margin: 5px 0; font-size: 18px; color: #333;">${currentUser}</p>
+                            <p class="profile-value">${currentUser}</p>
                         </div>
-                        <div style="margin-bottom: 20px;">
-                            <p style="color: #666; margin: 5px 0;">
+                        <div class="profile-section">
+                            <p class="profile-label">
                                 <strong>昵称</strong>
                             </p>
-                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;" id="nicknameSection">
-                                <p style="margin: 0; font-size: 18px; color: #333; flex: 1;" id="nicknameDisplay">${nickname || '未设置'}</p>
-                                <button id="editNicknameBtn" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; white-space: nowrap;">编辑昵称</button>
+                            <div class="nickname-row" id="nicknameSection">
+                                <p class="nickname-display" id="nicknameDisplay">${nickname || '未设置'}</p>
+                                <button id="editNicknameBtn" class="btn-nickname btn-nickname-edit">编辑昵称</button>
                             </div>
                         </div>
-                        <div style="margin-bottom: 20px;">
-                            <p style="color: #666; margin: 5px 0;">
+                        <div class="profile-section">
+                            <p class="profile-label">
                                 <strong>账户角色</strong>
                             </p>
-                            <p style="margin: 5px 0; font-size: 18px; color: #333;">${currentRole === 'admin' ? '👑 管理员' : '👤 测试员'}</p>
+                            <p class="profile-value">${currentRole === 'admin' ? '👑 管理员' : '👤 测试员'}</p>
                         </div>
-                        <div style="margin-bottom: 20px;">
-                            <p style="color: #666; margin: 5px 0;">
+                        <div class="profile-section">
+                            <p class="profile-label">
                                 <strong>账户状态</strong>
                             </p>
-                            <p style="margin: 5px 0; font-size: 18px; color: #27ae60;">✅ 活跃</p>
+                            <p class="profile-value-success">✅ 活跃</p>
                         </div>
                     </div>
-                    <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                        <h2 style="color: #2e7d32; margin-top: 0;">💡 建议</h2>
-                        <ul style="color: #555; line-height: 1.8;">
+                    <div class="profile-tips-card">
+                        <h2 class="profile-tips-title">💡 建议</h2>
+                        <ul class="profile-tips-list">
                             <li>定期修改密码以保护账户安全</li>
                             <li>设置一个昵称来个性化您的账户</li>
                             <li>请勿与他人共享账户信息</li>
@@ -1193,9 +604,9 @@
             const nicknameSection = document.getElementById('nicknameSection');
             
             nicknameSection.innerHTML = `
-                <input type="text" id="nicknameInput" placeholder="输入昵称（1-20个字符）" value="${nickname}" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
-                <button id="saveNicknameBtn" style="padding: 8px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap;">保存</button>
-                <button id="cancelNicknameBtn" style="padding: 8px 16px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">取消</button>
+                <input type="text" id="nicknameInput" placeholder="输入昵称（1-20个字符）" value="${nickname}" class="nickname-input">
+                <button id="saveNicknameBtn" class="btn-nickname btn-nickname-save">保存</button>
+                <button id="cancelNicknameBtn" class="btn-nickname btn-nickname-cancel">取消</button>
             `;
             
             document.getElementById('nicknameInput').focus();
@@ -1224,8 +635,8 @@
             const nicknameDisplay = document.getElementById('nicknameDisplay');
             const nicknameSection = document.getElementById('nicknameSection');
             nicknameSection.innerHTML = `
-                <p style="margin: 0; font-size: 18px; color: #333; flex: 1;" id="nicknameDisplay">${nickname}</p>
-                <button id="editNicknameBtn" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; white-space: nowrap;">编辑昵称</button>
+                <p class="nickname-display" id="nicknameDisplay">${nickname}</p>
+                <button id="editNicknameBtn" class="btn-nickname btn-nickname-edit">编辑昵称</button>
             `;
             setupProfileEventListeners();
         }
@@ -1234,40 +645,56 @@
             const nickname = localStorage.getItem(`nickname_${currentUser}`) || '';
             const nicknameSection = document.getElementById('nicknameSection');
             nicknameSection.innerHTML = `
-                <p style="margin: 0; font-size: 18px; color: #333; flex: 1;" id="nicknameDisplay">${nickname || '未设置'}</p>
-                <button id="editNicknameBtn" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; white-space: nowrap;">编辑昵称</button>
+                <p class="nickname-display" id="nicknameDisplay">${nickname || '未设置'}</p>
+                <button id="editNicknameBtn" class="btn-nickname btn-nickname-edit">编辑昵称</button>
             `;
             setupProfileEventListeners();
         }
 
-        function getAllUsers() {
-            // Return list of all users (hardcoded system users + any custom users)
-            return [
-                { username: ADMIN_USER, role: 'admin', isSystemUser: true },
-                { username: 'tester', role: 'tester', isSystemUser: true }
-            ];
+        async function getAllUsers() {
+            try {
+                const response = await apiFetch('/api/users');
+                const dbUsers = response.ok ? await response.json() : [];
+                const normalized = Array.isArray(dbUsers) ? dbUsers.map(user => ({
+                    username: user.username,
+                    role: user.role || 'admin',
+                    isSystemUser: user.username === ADMIN_USER
+                })) : [];
+
+                const hasTester = normalized.some(user => user.username === TESTER_USER);
+                if (!hasTester) {
+                    normalized.push({ username: TESTER_USER, role: 'tester', isSystemUser: true });
+                }
+
+                return normalized;
+            } catch (err) {
+                console.error('Error loading users:', err);
+                return [
+                    { username: TESTER_USER, role: 'tester', isSystemUser: true }
+                ];
+            }
         }
 
-        function setupUserManagementListeners() {
+        async function setupUserManagementListeners() {
             const usersList = document.getElementById('usersList');
-            const users = getAllUsers();
+            const users = await getAllUsers();
             
-            let html = '<table style="width: 100%; border-collapse: collapse;">';
-            html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 10px;">用户名</th><th style="text-align: left; padding: 10px;">昵称</th><th style="text-align: left; padding: 10px;">角色</th><th style="text-align: left; padding: 10px;">操作</th></tr></thead>';
+            let html = '<table class="users-table">';
+            html += '<thead><tr class="users-table-head"><th>用户名</th><th>昵称</th><th>角色</th><th>操作</th></tr></thead>';
             html += '<tbody>';
             
             for (const user of users) {
                 const nickname = localStorage.getItem(`nickname_${user.username}`) || '未设置';
                 const roleDisplay = user.role === 'admin' ? '👑 管理员' : '👤 测试员';
                 
-                html += `<tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 12px;">${user.username}</td>
-                    <td style="padding: 12px;">${nickname}</td>
-                    <td style="padding: 12px;">${roleDisplay}</td>
-                    <td style="padding: 12px; display: flex; gap: 8px;">
-                        <button class="editUserBtn" data-username="${user.username}" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">编辑</button>
-                        <button class="resetPasswordBtn" data-username="${user.username}" style="padding: 6px 12px; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">重置密码</button>
-                        ${!user.isSystemUser ? `<button class="deleteUserBtn" data-username="${user.username}" style="padding: 6px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">删除</button>` : ''}
+                html += `<tr class="users-table-row">
+                    <td class="users-table-cell">${user.username}</td>
+                    <td class="users-table-cell">${nickname}</td>
+                    <td class="users-table-cell">${roleDisplay}</td>
+                    <td class="users-table-actions">
+                        <button class="editUserBtn user-action-btn user-action-edit" data-username="${user.username}">编辑</button>
+                        <button class="resetPasswordBtn user-action-btn user-action-reset" data-username="${user.username}">重置密码</button>
+                        ${!user.isSystemUser && !isTesterUser(user.username) ? `<button class="deleteUserBtn user-action-btn user-action-delete" data-username="${user.username}">删除</button>` : ''}
                     </td>
                 </tr>`;
             }
@@ -1295,6 +722,49 @@
                     deleteUser(this.dataset.username);
                 });
             });
+
+            const addUserBtn = document.getElementById('addUserBtn');
+            if (addUserBtn) {
+                addUserBtn.addEventListener('click', addUser);
+            }
+        }
+
+        async function addUser() {
+            const usernameInput = document.getElementById('newUsername');
+            const passwordInput = document.getElementById('newPassword');
+            const roleInput = document.getElementById('newRole');
+
+            const username = (usernameInput?.value || '').trim();
+            const password = passwordInput?.value || '';
+            const role = roleInput?.value || 'admin';
+
+            if (!username || !password) {
+                alert('请填写用户名和密码');
+                return;
+            }
+
+            if (isTesterUser(username)) {
+                alert('tester 为本地测试账户，不能添加到数据库');
+                return;
+            }
+
+            const response = await apiFetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, role })
+            });
+
+            const result = await response.json();
+            if (!response.ok || !result?.ok) {
+                alert(result?.error || '添加账户失败');
+                return;
+            }
+
+            usernameInput.value = '';
+            passwordInput.value = '';
+            roleInput.value = 'admin';
+            alert('账户添加成功');
+            await setupUserManagementListeners();
         }
 
         function editUserNickname(username) {
@@ -1320,18 +790,41 @@
             setupUserManagementListeners();
         }
 
-        function resetUserPassword(username) {
+        async function resetUserPassword(username) {
             if (!confirm(`确定要重置 ${username} 的密码吗？`)) {
                 return;
             }
-            
-            // Reset to default password
-            const defaultPassword = username === ADMIN_USER ? ADMIN_PASS : 'password123';
-            localStorage.removeItem(`password_${username}`);
+
+            if (isTesterUser(username)) {
+                localStorage.removeItem(`password_${username}`);
+                alert(`${username} 的密码已重置为默认密码`);
+                return;
+            }
+
+            const users = await getAllUsers();
+            const target = users.find(u => u.username === username);
+            if (!target) {
+                alert('用户不存在');
+                return;
+            }
+
+            const defaultPassword = username === ADMIN_USER ? ADMIN_PASS : TESTER_PASS;
+            const response = await apiFetch('/api/users', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, role: target.role || 'admin', password: defaultPassword })
+            });
+
+            const result = await response.json();
+            if (!response.ok || !result?.ok) {
+                alert(result?.error || '重置密码失败');
+                return;
+            }
+
             alert(`${username} 的密码已重置为默认密码`);
         }
 
-        function deleteUser(username) {
+        async function deleteUser(username) {
             if (!confirm(`确定要删除用户 ${username} 吗？此操作无法撤销！`)) {
                 return;
             }
@@ -1339,14 +832,27 @@
             if (!confirm(`再次确认：删除 ${username} 将清除其所有数据！`)) {
                 return;
             }
-            
-            // Delete user data
+
+            if (isTesterUser(username)) {
+                alert('tester 为系统本地测试账户，不能删除');
+                return;
+            }
+
+            const response = await apiFetch(`/api/users?username=${encodeURIComponent(username)}`, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+            if (!response.ok || !result?.ok) {
+                alert(result?.error || '删除失败');
+                return;
+            }
+
             localStorage.removeItem(`password_${username}`);
             localStorage.removeItem(`nickname_${username}`);
             alert(`用户 ${username} 已删除`);
             
             // Refresh the users list
-            setupUserManagementListeners();
+            await setupUserManagementListeners();
         }
 
         function setupContentEditorListeners() {
@@ -1359,14 +865,14 @@
             for (let i = 0; i < content.features.length; i++) {
                 const feature = content.features[i];
                 featuresHtml += `
-                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+                    <div class="content-edit-item-card">
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">特性 ${i + 1}: 标题</label>
-                            <input type="text" data-feature-index="${i}" data-field="title" class="featureInput" value="${feature.title}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            <label class="content-edit-item-label">特性 ${i + 1}: 标题</label>
+                            <input type="text" data-feature-index="${i}" data-field="title" class="featureInput content-edit-input" value="${feature.title}">
                         </div>
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">特性 ${i + 1}: 描述</label>
-                            <textarea data-feature-index="${i}" data-field="description" class="featureInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 60px;">${feature.description}</textarea>
+                            <label class="content-edit-item-label">特性 ${i + 1}: 描述</label>
+                            <textarea data-feature-index="${i}" data-field="description" class="featureInput content-edit-textarea">${feature.description}</textarea>
                         </div>
                     </div>
                 `;
@@ -1378,14 +884,14 @@
             for (let i = 0; i < content.tools.items.length; i++) {
                 const item = content.tools.items[i];
                 toolsHtml += `
-                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+                    <div class="content-edit-item-card">
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">工具 ${i + 1}: 名称</label>
-                            <input type="text" data-tool-index="${i}" data-field="name" class="toolInput" value="${item.name}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            <label class="content-edit-item-label">工具 ${i + 1}: 名称</label>
+                            <input type="text" data-tool-index="${i}" data-field="name" class="toolInput content-edit-input" value="${item.name}">
                         </div>
                         <div class="form-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: bold;">工具 ${i + 1}: 描述</label>
-                            <textarea data-tool-index="${i}" data-field="description" class="toolInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; min-height: 60px;">${item.description}</textarea>
+                            <label class="content-edit-item-label">工具 ${i + 1}: 描述</label>
+                            <textarea data-tool-index="${i}" data-field="description" class="toolInput content-edit-textarea">${item.description}</textarea>
                         </div>
                     </div>
                 `;
@@ -1504,53 +1010,37 @@
                 return;
             }
 
-            // Verify current password
-            const savedPassword = localStorage.getItem(`password_${currentUser}`);
-            const defaultPassword = currentUser === ADMIN_USER ? ADMIN_PASS : 'password123';
-            const isPasswordValid = currentPassword === defaultPassword || currentPassword === savedPassword;
-            
-            if (!isPasswordValid) {
-                alert('当前密码错误');
-                return;
-            }
+            if (isTesterUser(currentUser)) {
+                const savedPassword = localStorage.getItem(`password_${currentUser}`);
+                const defaultPassword = TESTER_PASS;
+                const isPasswordValid = currentPassword === defaultPassword || currentPassword === savedPassword;
 
-            // Save new password locally (for demo purposes)
-            // In production, this should be sent to backend and stored securely
-            localStorage.setItem(`password_${currentUser}`, newPassword);
-            alert('密码已成功修改');
+                if (!isPasswordValid) {
+                    alert('当前密码错误');
+                    return;
+                }
+
+                localStorage.setItem(`password_${currentUser}`, newPassword);
+                alert('密码已成功修改');
+            } else {
+                const response = await apiFetch('/api/users/password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, currentPassword, newPassword })
+                });
+                const result = await response.json();
+                if (!response.ok || !result?.ok) {
+                    alert(result?.error || '修改密码失败');
+                    return;
+                }
+                alert('密码已成功修改');
+            }
             
             // Clear password fields
             document.getElementById('currentPassword').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
         }
-
-        async function deleteAccount() {
-            if (!confirm('⚠️ 确定要注销账户吗？此操作无法撤销！')) {
-                return;
-            }
-
-            if (!confirm('⚠️ 再次确认：注销账户将删除所有相关数据！')) {
-                return;
-            }
-
-            // Save username before clearing
-            const username = currentUser;
-            
-            // Delete account data and logout
-            currentUser = null;
-            currentRole = null;
-            currentToken = null;
-            localStorage.removeItem('frc_user');
-            localStorage.removeItem('frc_role');
-            localStorage.removeItem('frc_token');
-            localStorage.removeItem(`password_${username}`);
-            
-            alert('账户已注销。将返回首页。');
-            window.location.hash = '#home';
-            await renderApp();
-        }
-
 
         // Sponsor Management Functions
         async function getSponsorsByYear(year) {
@@ -1628,25 +1118,25 @@
         async function renderSponsorsSection(year) {
             const sponsors = await getSponsorsByYear(year);
             if (!sponsors || sponsors.length === 0) {
-                return '<p style="color: #999; font-style: italic;">暂无赞助商信息</p>';
+                return '<p class="sponsor-empty-text">暂无赞助商信息</p>';
             }
 
-            let html = '<div style="display: flex; flex-wrap: wrap; gap: 15px;">';
+            let html = '<div class="sponsor-list">';
             for (const sponsor of sponsors) {
                 if (sponsor.logo_url) {
-                    html += `<div style="text-align: center;">
-                        <a href="${sponsor.website || '#'}" target="_blank" rel="noreferrer" style="text-decoration: none;">
-                            <img src="${sponsor.logo_url}" alt="${sponsor.name}" style="max-height: 60px; max-width: 150px; object-fit: contain;">
+                    html += `<div class="sponsor-logo-item">
+                        <a href="${sponsor.website || '#'}" target="_blank" rel="noreferrer" class="sponsor-logo-link">
+                            <img src="${sponsor.logo_url}" alt="${sponsor.name}" class="sponsor-logo-image">
                         </a>
                     </div>`;
                 } else {
                     if (sponsor.website) {
-                        html += `<div style="padding: 10px 15px; background: #f5f5f5; border-radius: 6px; border: 1px solid #ddd;">
-                            <a href="${sponsor.website}" target="_blank" rel="noreferrer" style="color: #667eea; text-decoration: none; font-weight: bold;">${sponsor.name}</a>
+                        html += `<div class="sponsor-name-chip">
+                            <a href="${sponsor.website}" target="_blank" rel="noreferrer" class="sponsor-name-link">${sponsor.name}</a>
                         </div>`;
                     } else {
-                        html += `<div style="padding: 10px 15px; background: #f5f5f5; border-radius: 6px; border: 1px solid #ddd;">
-                            <span style="color: #555; font-weight: bold;">${sponsor.name}</span>
+                        html += `<div class="sponsor-name-chip">
+                            <span class="sponsor-name-text">${sponsor.name}</span>
                         </div>`;
                     }
                 }
@@ -1654,7 +1144,7 @@
             html += '</div>';
 
             if (isAdmin()) {
-                html += `<button onclick="showSponsorsManagement(${year})" style="margin-top: 15px; padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">✏️ 编辑赞助商</button>`;
+                html += `<button onclick="showSponsorsManagement(${year})" class="sponsor-manage-btn">✏️ 编辑赞助商</button>`;
             }
 
             return html;
@@ -1670,65 +1160,65 @@
             const app = document.getElementById('app');
 
             let sponsorRows = sponsors.map(s => `
-                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 10px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: center;">
+                <div class="sponsor-row-card">
+                    <div class="sponsor-row-grid">
                         <div>
-                            <label style="font-size: 0.9em; color: #666;">名称:</label>
-                            <input type="text" value="${s.name}" id="sponsor_name_${s.id}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            <label class="sponsor-row-label">名称:</label>
+                            <input type="text" value="${s.name}" id="sponsor_name_${s.id}" class="sponsor-row-input">
                         </div>
                         <div>
-                            <label style="font-size: 0.9em; color: #666;">Logo URL:</label>
-                            <input type="text" value="${s.logo_url || ''}" id="sponsor_logo_${s.id}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            <label class="sponsor-row-label">Logo URL:</label>
+                            <input type="text" value="${s.logo_url || ''}" id="sponsor_logo_${s.id}" class="sponsor-row-input">
                         </div>
                         <div>
-                            <label style="font-size: 0.9em; color: #666;">网站:</label>
-                            <input type="text" value="${s.website || ''}" id="sponsor_website_${s.id}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                            <label class="sponsor-row-label">网站:</label>
+                            <input type="text" value="${s.website || ''}" id="sponsor_website_${s.id}" class="sponsor-row-input">
                         </div>
-                        <div style="display: flex; gap: 5px;">
-                            <button onclick="saveSponsorEdit('${s.id}', ${year})" style="padding: 8px 12px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">💾</button>
-                            <button onclick="deleteSponsorAndRefresh('${s.id}', ${year})" style="padding: 8px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑️</button>
+                        <div class="sponsor-row-actions">
+                            <button onclick="saveSponsorEdit('${s.id}', ${year})" class="sponsor-action-btn sponsor-action-save">💾</button>
+                            <button onclick="deleteSponsorAndRefresh('${s.id}', ${year})" class="sponsor-action-btn sponsor-action-delete">🗑️</button>
                         </div>
                     </div>
                 </div>
             `).join('');
 
             if (sponsorRows === '') {
-                sponsorRows = '<p style="color: #999; font-style: italic;">暂无赞助商，点击下方"添加赞助商"创建</p>';
+                sponsorRows = '<p class="sponsor-empty-text">暂无赞助商，点击下方"添加赞助商"创建</p>';
             }
 
             app.innerHTML = `
                 ${await loadHeader()}
-                <div class="content" style="max-width: 1000px; margin: 0 auto;">
+                <div class="content sponsor-manage-content">
                     <h1>📝 ${year}赛季赞助商管理</h1>
                     
-                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-                        <h3 style="margin-top: 0; color: #667eea;">当前赞助商列表</h3>
+                    <div class="sponsor-manage-section sponsor-manage-list-section">
+                        <h3 class="sponsor-manage-title sponsor-manage-title-list">当前赞助商列表</h3>
                         ${sponsorRows}
                     </div>
 
-                    <div style="background: #fffbf0; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-                        <h3 style="margin-top: 0; color: #f39c12;">➕ 添加新赞助商</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="sponsor-manage-section sponsor-manage-add-section">
+                        <h3 class="sponsor-manage-title sponsor-manage-title-add">➕ 添加新赞助商</h3>
+                        <div class="sponsor-add-grid">
                             <div>
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">赞助商名称 *</label>
-                                <input type="text" id="new_sponsor_name" placeholder="例如: SolidWorks" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                <label class="sponsor-add-label">赞助商名称 *</label>
+                                <input type="text" id="new_sponsor_name" placeholder="例如: SolidWorks" class="sponsor-add-input">
                             </div>
                             <div>
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Logo URL</label>
-                                <input type="text" id="new_sponsor_logo" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                <label class="sponsor-add-label">Logo URL</label>
+                                <input type="text" id="new_sponsor_logo" placeholder="https://..." class="sponsor-add-input">
                             </div>
                             <div>
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">公司网站</label>
-                                <input type="text" id="new_sponsor_website" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                <label class="sponsor-add-label">公司网站</label>
+                                <input type="text" id="new_sponsor_website" placeholder="https://..." class="sponsor-add-input">
                             </div>
-                            <div style="display: flex; align-items: flex-end;">
-                                <button onclick="addNewSponsor(${year})" style="width: 100%; padding: 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">添加赞助商</button>
+                            <div class="sponsor-add-action">
+                                <button onclick="addNewSponsor(${year})" class="sponsor-add-btn">添加赞助商</button>
                             </div>
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 10px;">
-                        <button id="backToSeasonBtn" style="padding: 10px 20px; background: #667eea !important; color: white !important; border: none !important; border-radius: 4px; cursor: pointer !important; pointer-events: auto !important; font-size: 16px !important; font-weight: bold !important; display: inline-block !important;">返回赛季页面</button>
+                    <div class="sponsor-back-wrap">
+                        <button id="backToSeasonBtn" class="sponsor-back-btn">返回赛季页面</button>
                     </div>
                 </div>
                 ${await loadFooter()}
@@ -1818,9 +1308,9 @@
             
             // Build features section HTML
             const featuresHtml = content.features.map(feature => `
-                <div style="background: var(--panel); border: 1px solid var(--line); border-left: 3px solid ${feature.color}; padding: 20px; border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);">
-                    <h3 style="color: ${feature.color}; margin-bottom: 10px;">${feature.icon} ${feature.title}</h3>
-                    <p style="color: var(--text-main); line-height: 1.6;">
+                <div class="home-feature-card">
+                    <h3 class="home-feature-title">${feature.icon} ${feature.title}</h3>
+                    <p class="home-feature-desc">
                         ${feature.description}
                     </p>
                 </div>
@@ -1828,25 +1318,31 @@
             
             app.innerHTML = `
                 ${header}
-                <div class="content" style="max-width: none; margin: 0; padding: 24px 40px;">
-                    <div style="padding: 0; margin-bottom: 20px;">
-                        <p style="line-height: 1.8; color: #555; margin-bottom: 15px;">
+                <div class="content home-content">
+                    <div class="home-about-wrap">
+                        <p class="home-about-text home-about-text-gap">
                             ${content.aboutUs.p1}
                         </p>
-                        <p style="line-height: 1.8; color: #555; margin-bottom: 15px;">
+                        <p class="home-about-text home-about-text-gap">
                             ${content.aboutUs.p2}
                         </p>
-                        <p style="line-height: 1.8; color: #555;">
+                        <p class="home-about-text">
                             ${content.aboutUs.p3}
                         </p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0; margin-bottom: 20px;">
+                    <div class="home-features-grid">
                         ${featuresHtml}
                     </div>
                 </div>
                 ${footer}
             `;
+
+            const featureCards = app.querySelectorAll('.home-feature-card');
+            featureCards.forEach((card, index) => {
+                const color = content.features[index]?.color || '#667eea';
+                card.style.setProperty('--feature-color', color);
+            });
         }
 
         async function renderSeasonsLayout(hash) {
@@ -1868,7 +1364,7 @@
                             <li><a href="#seasons/2026" class="${seasonPath === '/2026' ? 'active' : ''}">🏆 2026 赛季</a></li>
                             <li><a href="#seasons/2025" class="${seasonPath === '/2025' ? 'active' : ''}">📊 2025 赛季</a></li>
                             <li><a href="#seasons/2024" class="${seasonPath === '/2024' ? 'active' : ''}">🎊 2024 新秀年</a></li>
-                            <li style="border-top: 1px solid #e0e0e0; margin-top: 10px; padding-top: 10px;"><a href="#home">返回主页</a></li>
+                            <li class="sidebar-home-link"><a href="#home">返回主页</a></li>
                             ${logoutBtn}
                         </ul>
                     </div>
@@ -1895,25 +1391,25 @@
             const sponsorsHtml = await renderSponsorsSection(2026);
             return `
                 <h1>🏆 2026 赛季</h1>
-                <div style="color: #27ae60; margin-bottom: 20px; font-weight: bold;">⏳ 当前进行中</div>
+                <div class="season-status-active">⏳ 当前进行中</div>
                 
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-                    <p style="color: #666; font-size: 1.1em; margin: 20px 0;">📋 2026赛季赛事数据收集中...</p>
-                    <p style="color: #999; font-size: 0.95em;">请关注团队近期的比赛表现</p>
+                <div class="season-panel season-panel-center">
+                    <p class="season-panel-text-main">📋 2026赛季赛事数据收集中...</p>
+                    <p class="season-panel-text-sub">请关注团队近期的比赛表现</p>
                 </div>
 
-                <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
-                    <p style="margin: 0;"><strong>📍 赛季目标：</strong></p>
-                    <ul style="margin: 10px 0 0 20px; color: #555;">
+                <div class="season-highlight season-highlight-goal">
+                    <p class="season-highlight-title"><strong>📍 赛季目标：</strong></p>
+                    <ul class="season-highlight-list">
                         <li>延续上赛季的优秀表现，力争更好的赛区排名</li>
                         <li>积累更多比赛经验，提升团队技术实力</li>
                         <li>争取获得更多奖项认可</li>
                     </ul>
                 </div>
 
-                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-top: 20px;">
-                    <p style="margin: 0; color: #667eea; font-weight: bold; margin-bottom: 10px;">🤝 2026赛季赞助商</p>
-                    <div style="margin: 0; color: #555; line-height: 1.8;">${sponsorsHtml}</div>
+                <div class="season-highlight season-highlight-sponsor">
+                    <p class="season-sponsor-title">🤝 2026赛季赞助商</p>
+                    <div class="season-sponsor-content">${sponsorsHtml}</div>
                 </div>
             `;
         }
@@ -1922,58 +1418,58 @@
             const sponsorsHtml = await renderSponsorsSection(2025);
             return `
                 <h1>📊 2025 赛季</h1>
-                <div style="color: #998; margin-bottom: 20px;">赛季已完成</div>
+                <div class="season-status-muted">赛季已完成</div>
                 
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 2px solid #667eea;">
-                            <th style="text-align: left; padding: 12px; color: #667eea; font-weight: bold;">赛事</th>
-                            <th style="text-align: center; padding: 12px; color: #667eea; font-weight: bold;">排名</th>
-                            <th style="text-align: center; padding: 12px; color: #667eea; font-weight: bold;">成绩</th>
-                            <th style="text-align: center; padding: 12px; color: #667eea; font-weight: bold;">奖项</th>
-                            <th style="text-align: center; padding: 12px; color: #667eea; font-weight: bold;">联盟</th>
+                <div class="season-panel">
+                    <table class="season-table">
+                        <tr class="season-table-head-blue">
+                            <th>赛事</th>
+                            <th>排名</th>
+                            <th>成绩</th>
+                            <th>奖项</th>
+                            <th>联盟</th>
                         </tr>
-                        <tr style="border-bottom: 1px solid #e0e0e0;">
-                            <td style="padding: 12px; font-weight: bold; color: #333;">上海区域赛 (Shanghai Regional)</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">第 17 名</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">9-5-1</td>
-                            <td style="text-align: center; padding: 12px; color: #e74c3c; font-weight: bold;">🥊 分区决赛队伍</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">第 5 联队（主帅 4613）</td>
+                        <tr class="season-table-row-divider">
+                            <td class="season-cell-primary">上海区域赛 (Shanghai Regional)</td>
+                            <td>第 17 名</td>
+                            <td>9-5-1</td>
+                            <td class="season-cell-award-red">🥊 分区决赛队伍</td>
+                            <td>第 5 联队（主帅 4613）</td>
                         </tr>
                         <tr>
-                            <td style="padding: 12px; font-weight: bold; color: #333;">迈阿密谷区域赛 (Miami Valley Regional)</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">第 11 名</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">7-5-0</td>
-                            <td style="text-align: center; padding: 12px; color: #888;">-</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">第 7 联队（担任主帅）</td>
+                            <td class="season-cell-primary">迈阿密谷区域赛 (Miami Valley Regional)</td>
+                            <td>第 11 名</td>
+                            <td>7-5-0</td>
+                            <td class="season-cell-muted">-</td>
+                            <td>第 7 联队（担任主帅）</td>
                         </tr>
                     </table>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
-                        <p style="margin: 0; color: #667eea; font-weight: bold; margin-bottom: 5px;">总成绩</p>
-                        <p style="margin: 0; font-size: 1.4em; color: #333; font-weight: bold;">16-10-1</p>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">赛季战绩</p>
+                <div class="season-metrics-grid">
+                    <div class="season-metric-card season-metric-blue">
+                        <p class="season-metric-label season-metric-label-blue">总成绩</p>
+                        <p class="season-metric-value">16-10-1</p>
+                        <p class="season-metric-note">赛季战绩</p>
                     </div>
-                    <div style="background: #f2e8f8; padding: 15px; border-radius: 8px; border-left: 4px solid #764ba2;">
-                        <p style="margin: 0; color: #764ba2; font-weight: bold; margin-bottom: 5px;">全球排名</p>
-                        <p style="margin: 0; font-size: 1.4em; color: #333; font-weight: bold;">#398</p>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">区域排名赛积分池</p>
+                    <div class="season-metric-card season-metric-purple">
+                        <p class="season-metric-label season-metric-label-purple">全球排名</p>
+                        <p class="season-metric-value">#398</p>
+                        <p class="season-metric-note">区域排名赛积分池</p>
                     </div>
                 </div>
 
-                <div style="background: #fef5e7; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12; color: #555;">
-                    <p style="margin: 0;"><strong>📊 关键数据：</strong></p>
-                    <ul style="margin: 10px 0 0 20px; color: #555;">
+                <div class="season-highlight season-highlight-warning">
+                    <p class="season-highlight-title"><strong>📊 关键数据：</strong></p>
+                    <ul class="season-highlight-list">
                         <li>上海赛事：39 区域排名赛积分（14 资格赛 + 5 联队 + 20 淘汰赛）</li>
                         <li>迈阿密赛事：26 区域排名赛积分（16 资格赛 + 10 联队）</li>
                     </ul>
                 </div>
 
-                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-top: 20px;">
-                    <p style="margin: 0; color: #667eea; font-weight: bold; margin-bottom: 10px;">🤝 2025赛季赞助商</p>
-                    <div style="margin: 0; color: #555; line-height: 1.8;">${sponsorsHtml}</div>
+                <div class="season-highlight season-highlight-sponsor">
+                    <p class="season-sponsor-title">🤝 2025赛季赞助商</p>
+                    <div class="season-sponsor-content">${sponsorsHtml}</div>
                 </div>
             `;
         }
@@ -1982,50 +1478,50 @@
             const sponsorsHtml = await renderSponsorsSection(2024);
             return `
                 <h1>🎊 2024 赛季（新秀年）</h1>
-                <div style="color: #998; margin-bottom: 20px;">团队第一个赛季</div>
+                <div class="season-status-muted">团队第一个赛季</div>
                 
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 2px solid #764ba2;">
-                            <th style="text-align: left; padding: 12px; color: #764ba2; font-weight: bold;">赛事</th>
-                            <th style="text-align: center; padding: 12px; color: #764ba2; font-weight: bold;">排名</th>
-                            <th style="text-align: center; padding: 12px; color: #764ba2; font-weight: bold;">成绩</th>
-                            <th style="text-align: center; padding: 12px; color: #764ba2; font-weight: bold;">奖项</th>
-                            <th style="text-align: center; padding: 12px; color: #764ba2; font-weight: bold;">联盟</th>
+                <div class="season-panel">
+                    <table class="season-table">
+                        <tr class="season-table-head-purple">
+                            <th>赛事</th>
+                            <th>排名</th>
+                            <th>成绩</th>
+                            <th>奖项</th>
+                            <th>联盟</th>
                         </tr>
-                        <tr style="border-bottom: 1px solid #e0e0e0;">
-                            <td style="padding: 12px; font-weight: bold; color: #333;">七叶树区域赛 (Buckeye Regional)</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">第 9 名</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">9-4-0</td>
-                            <td style="text-align: center; padding: 12px; color: #27ae60; font-weight: bold;">🌟 新秀灵感奖</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">第 6 联队（选秀 2252, 5667）</td>
+                        <tr class="season-table-row-divider">
+                            <td class="season-cell-primary">七叶树区域赛 (Buckeye Regional)</td>
+                            <td>第 9 名</td>
+                            <td>9-4-0</td>
+                            <td class="season-cell-award-green">🌟 新秀灵感奖</td>
+                            <td>第 6 联队（选秀 2252, 5667）</td>
                         </tr>
                         <tr>
-                            <td style="padding: 12px; font-weight: bold; color: #333;">迈阿密谷区域赛 (Miami Valley Regional)</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">第 29 名</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">5-8-2</td>
-                            <td style="text-align: center; padding: 12px; color: #27ae60; font-weight: bold;">🌟 新秀灵感奖</td>
-                            <td style="text-align: center; padding: 12px; color: #666;">第 4 联队（主帅 5811）</td>
+                            <td class="season-cell-primary">迈阿密谷区域赛 (Miami Valley Regional)</td>
+                            <td>第 29 名</td>
+                            <td>5-8-2</td>
+                            <td class="season-cell-award-green">🌟 新秀灵感奖</td>
+                            <td>第 4 联队（主帅 5811）</td>
                         </tr>
                     </table>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div style="background: #e8f8f4; padding: 15px; border-radius: 8px; border-left: 4px solid #764ba2;">
-                        <p style="margin: 0; color: #764ba2; font-weight: bold; margin-bottom: 5px;">总成绩</p>
-                        <p style="margin: 0; font-size: 1.4em; color: #333; font-weight: bold;">14-12-2</p>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">赛季战绩（首赛季）</p>
+                <div class="season-metrics-grid">
+                    <div class="season-metric-card season-metric-green">
+                        <p class="season-metric-label season-metric-label-purple">总成绩</p>
+                        <p class="season-metric-value">14-12-2</p>
+                        <p class="season-metric-note">赛季战绩（首赛季）</p>
                     </div>
-                    <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
-                        <p style="margin: 0; color: #3498db; font-weight: bold; margin-bottom: 5px;">主要奖项</p>
-                        <p style="margin: 0; font-size: 1.4em; color: #333; font-weight: bold;">2 个</p>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">连获新秀灵感奖</p>
+                    <div class="season-metric-card season-metric-cyan">
+                        <p class="season-metric-label season-metric-label-cyan">主要奖项</p>
+                        <p class="season-metric-value">2 个</p>
+                        <p class="season-metric-note">连获新秀灵感奖</p>
                     </div>
                 </div>
 
-                <div style="background: #fef5e7; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12; color: #555;">
-                    <p style="margin: 0;"><strong>📊 关键成就：</strong></p>
-                    <ul style="margin: 10px 0 0 20px; color: #555;">
+                <div class="season-highlight season-highlight-warning">
+                    <p class="season-highlight-title"><strong>📊 关键成就：</strong></p>
+                    <ul class="season-highlight-list">
                         <li>🌟 两场地区赛均获得新秀灵感奖（Rookie Inspiration Award）</li>
                         <li>🎯 七叶树区域赛排名第 9，创造新秀年最佳排名</li>
                         <li>🤝 成功与多支优质队伍建立联队合作关系</li>
@@ -2033,9 +1529,9 @@
                     </ul>
                 </div>
 
-                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-top: 20px;">
-                    <p style="margin: 0; color: #667eea; font-weight: bold; margin-bottom: 10px;">🤝 2024赛季赞助商</p>
-                    <div style="margin: 0; color: #555; line-height: 1.8;">${sponsorsHtml}</div>
+                <div class="season-highlight season-highlight-sponsor">
+                    <p class="season-sponsor-title">🤝 2024赛季赞助商</p>
+                    <div class="season-sponsor-content">${sponsorsHtml}</div>
                 </div>
             `;
         }
@@ -2087,10 +1583,10 @@
         function renderScouting() {
             return `
                 <h1>Scouting</h1>
-                <div style="margin-bottom: 20px;">
-                    <button onclick="showScoutingConfig()" style="margin-right: 10px;">配置字段</button>
+                <div class="scouting-toolbar">
+                    <button onclick="showScoutingConfig()">配置字段</button>
                     <button onclick="showScoutingForm()">开始收集数据</button>
-                    <button onclick="showScoutingData()" style="margin-left: 10px;">查看数据</button>
+                    <button onclick="showScoutingData()">查看数据</button>
                 </div>
                 <div id="scouting-content">
                     <p>点击上方按钮开始配置或收集数据。</p>
@@ -2105,27 +1601,27 @@
             
             content.innerHTML = `
                 <h2>配置字段</h2>
-                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 200px;">
-                        <label style="display: block; margin-bottom: 5px;">快速加载模板</label>
-                        <select id="template-selector" onchange="if(this.value) loadTemplate(this.value)" style="width: 100%;">
+                <div class="scouting-toolbar scouting-toolbar-config">
+                    <div class="scouting-template-col">
+                        <label class="scouting-template-label">快速加载模板</label>
+                        <select id="template-selector" onchange="if(this.value) loadTemplate(this.value)" class="scouting-template-select">
                             <option value="">选择模板...</option>
                             <option value="默认比赛模板">默认比赛模板</option>
                             ${templates.map(t => `<option value="${t.name}">${t.name}</option>`).join('')}
                         </select>
                     </div>
-                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                    <div class="scouting-template-actions">
                         <button onclick="showTemplateManager()">管理模板</button>
                         <button onclick="saveAsTemplate()">保存为模板</button>
                     </div>
                 </div>
                 <div id="field-list">
                     ${config.fields.map((field, index) => `
-                        <div class="entry-card" style="cursor: default;">
+                        <div class="entry-card entry-card-static">
                             <h3>${field.label}</h3>
                             <p>类型: ${getFieldTypeText(field.type)}</p>
                             ${field.options ? `<p>选项: ${field.options.join(', ')}</p>` : ''}
-                            ${field.required ? '<p style="color: #667eea;">✓ 必填</p>' : ''}
+                            ${field.required ? '<p class="scouting-required">✓ 必填</p>' : ''}
                             <button onclick="editScoutingField(${index})">编辑</button>
                             <button onclick="deleteScoutingField(${index})">删除</button>
                         </div>
@@ -2225,7 +1721,7 @@
             
             content.innerHTML = `
                 <h2>模板管理</h2>
-                <div class="entry-card" style="background: #e8f0fe; border-left-color: #4285f4;">
+                <div class="entry-card template-default-card">
                     <h3>默认比赛模板</h3>
                     <p>系统内置模板，包含：Event、赛队队号、阶段、投球得分、挂车得分、记录者</p>
                     <button onclick="loadTemplate('默认比赛模板')">使用此模板</button>
@@ -2238,8 +1734,8 @@
                         <button onclick="deleteTemplate(${index})">删除</button>
                     </div>
                 `).join('')}
-                ${templates.length === 0 ? '<p style="color: #666; margin-top: 20px;">暂无自定义模板</p>' : ''}
-                <button onclick="showScoutingConfig()" style="margin-top: 20px;">返回配置</button>
+                ${templates.length === 0 ? '<p class="scouting-empty-top">暂无自定义模板</p>' : ''}
+                <button onclick="showScoutingConfig()" class="scouting-btn-top">返回配置</button>
             `;
         }
 
@@ -2277,7 +1773,7 @@
                         <option value="checkbox">多选</option>
                     </select>
                 </div>
-                <div class="form-group" id="options-group" style="display: none;">
+                <div class="form-group options-hidden" id="options-group">
                     <label>选项（用逗号分隔）</label>
                     <input type="text" id="field-options" placeholder="例如: 选项1, 选项2, 选项3">
                 </div>
@@ -2294,10 +1790,11 @@
         function toggleOptionsField() {
             const type = document.getElementById('field-type').value;
             const optionsGroup = document.getElementById('options-group');
+            if (!optionsGroup) return;
             if (type === 'radio' || type === 'checkbox') {
-                optionsGroup.style.display = 'block';
+                optionsGroup.classList.remove('options-hidden');
             } else {
-                optionsGroup.style.display = 'none';
+                optionsGroup.classList.add('options-hidden');
             }
         }
 
@@ -2343,7 +1840,7 @@
                 </div>
                 <div class="form-group">
                     <label>字段ID</label>
-                    <input type="text" id="field-id" value="${field.id}" readonly style="background: #f0f0f0;">
+                    <input type="text" id="field-id" value="${field.id}" readonly class="field-id-readonly">
                 </div>
                 <div class="form-group">
                     <label>字段类型</label>
@@ -2354,7 +1851,7 @@
                         <option value="checkbox" ${field.type === 'checkbox' ? 'selected' : ''}>多选</option>
                     </select>
                 </div>
-                <div class="form-group" id="options-group" style="display: ${field.type === 'radio' || field.type === 'checkbox' ? 'block' : 'none'};">
+                <div class="form-group${field.type === 'radio' || field.type === 'checkbox' ? '' : ' options-hidden'}" id="options-group">
                     <label>选项（用逗号分隔）</label>
                     <input type="text" id="field-options" value="${field.options ? field.options.join(', ') : ''}">
                 </div>
@@ -2425,7 +1922,7 @@
                     field.options.forEach((option, idx) => {
                         formHTML += `
                             <div>
-                                <label style="font-weight: normal;">
+                                <label class="label-normal">
                                     <input type="radio" name="field-${field.id}" value="${option}" ${field.required && idx === 0 ? 'required' : ''}>
                                     ${option}
                                 </label>
@@ -2435,7 +1932,7 @@
                     field.options.forEach(option => {
                         formHTML += `
                             <div>
-                                <label style="font-weight: normal;">
+                                <label class="label-normal">
                                     <input type="checkbox" name="field-${field.id}" value="${option}">
                                     ${option}
                                 </label>
@@ -2514,8 +2011,8 @@
 
             let html = `
                 <h2>收集的数据</h2>
-                <button onclick="showScoutingForm()" style="margin-bottom: 15px;">继续收集</button>
-                <button onclick="exportScoutingData()" style="margin-bottom: 15px; margin-left: 10px;">导出数据</button>
+                <button onclick="showScoutingForm()" class="btn-mb-15">继续收集</button>
+                <button onclick="exportScoutingData()" class="btn-mb-15 btn-ml-10">导出数据</button>
             `;
             
             scoutingData.reverse().forEach((entry, index) => {
@@ -2551,7 +2048,7 @@
                 if (localEntries.length === 0) return;
 
                 let localHtml = `
-                    <h3 style="margin-top: 24px;">本地数据（待提交）</h3>
+                    <h3 class="section-title-top-24">本地数据（待提交）</h3>
                 `;
 
                 localEntries.forEach((entry, index) => {
@@ -2574,7 +2071,7 @@
 
                     localHtml += `<div class="detail-item"><strong>提交时间:</strong> ${new Date(entry.ts || Date.now()).toLocaleString()}</div>`;
                     localHtml += `</div>`;
-                    localHtml += `<button onclick="submitLocalScouting('${entry.id}')" style="margin-top: 10px;">提交到服务器</button>`;
+                    localHtml += `<button onclick="submitLocalScouting('${entry.id}')" class="btn-mt-10">提交到服务器</button>`;
                     localHtml += `</div>`;
                 });
 
@@ -2625,9 +2122,9 @@
         function renderAnalysis() {
             return `
                 <h1>Analysis</h1>
-                <div style="margin-bottom: 20px;">
+                <div class="analysis-toolbar">
                     <button onclick="showAnalysisOverview()">数据总览</button>
-                    <button onclick="showTeamComparison()" style="margin-left: 10px;">赛队对比</button>
+                    <button onclick="showTeamComparison()">赛队对比</button>
                 </div>
                 <div id="analysis-content">
                     <p>点击上方按钮查看数据分析。</p>
@@ -2657,58 +2154,58 @@
                 <h2>数据总览</h2>
                 <p>共 ${teams.size} 支赛队 | PreScouting: ${preScoutData.length} 条记录 | Scouting: ${scoutingData.length} 条记录</p>
                 
-                <h3 style="margin-top: 30px;">PreScouting 数据</h3>
+                <h3 class="analysis-subtitle-30">PreScouting 数据</h3>
                 ${preScoutData.length > 0 ? `
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <div class="analysis-table-wrap">
+                        <table class="analysis-table analysis-table-gap">
                             <thead>
-                                <tr style="background: #667eea; color: white;">
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">队号</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">队名</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">赛事</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">练习时长</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">比赛次数</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">底盘</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">记录者</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">操作</th>
+                                <tr class="analysis-table-head-blue">
+                                    <th>队号</th>
+                                    <th>队名</th>
+                                    <th>赛事</th>
+                                    <th>练习时长</th>
+                                    <th>比赛次数</th>
+                                    <th>底盘</th>
+                                    <th>记录者</th>
+                                    <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${preScoutData.map(entry => `
-                                    <tr style="background: white; border-bottom: 1px solid #ddd;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
-                                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>${entry.teamNumber}</strong></td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.teamName}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.event}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.practice}h</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.compCount}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.chassis}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${entry.collector}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">
-                                            <button onclick="showTeamDetail('${entry.teamNumber}')" style="padding: 5px 10px; font-size: 12px;">查看详情</button>
+                                    <tr class="analysis-row">
+                                        <td class="analysis-cell analysis-cell-strong">${entry.teamNumber}</td>
+                                        <td class="analysis-cell">${entry.teamName}</td>
+                                        <td class="analysis-cell">${entry.event}</td>
+                                        <td class="analysis-cell">${entry.practice}h</td>
+                                        <td class="analysis-cell">${entry.compCount}</td>
+                                        <td class="analysis-cell">${entry.chassis}</td>
+                                        <td class="analysis-cell">${entry.collector}</td>
+                                        <td class="analysis-cell">
+                                            <button onclick="showTeamDetail('${entry.teamNumber}')" class="analysis-btn-sm">查看详情</button>
                                         </td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
                     </div>
-                ` : '<p style="color: #666;">暂无PreScouting数据</p>'}
+                ` : '<p class="analysis-empty">暂无PreScouting数据</p>'}
                 
-                <h3 style="margin-top: 40px;">Scouting 数据</h3>
+                <h3 class="analysis-subtitle-40">Scouting 数据</h3>
                 ${scoutingData.length > 0 ? `
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <div class="analysis-table-wrap">
+                        <table class="analysis-table analysis-table-gap">
                             <thead>
-                                <tr style="background: #764ba2; color: white;">
+                                <tr class="analysis-table-head-purple">
                                     ${scoutingConfig.fields.map(field => 
-                                        `<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">${field.label}</th>`
+                                        `<th>${field.label}</th>`
                                     ).join('')}
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">提交时间</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">操作</th>
+                                    <th>提交时间</th>
+                                    <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${scoutingData.map(entry => `
-                                    <tr style="background: white; border-bottom: 1px solid #ddd;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                                    <tr class="analysis-row">
                                         ${scoutingConfig.fields.map(field => {
                                             const value = entry[field.id];
                                             let displayValue = '';
@@ -2717,18 +2214,18 @@
                                             } else {
                                                 displayValue = value || '-';
                                             }
-                                            return `<td style="padding: 10px; border: 1px solid #ddd;">${displayValue}</td>`;
+                                            return `<td class="analysis-cell">${displayValue}</td>`;
                                         }).join('')}
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${new Date(entry.ts).toLocaleString()}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">
-                                            <button onclick="showTeamDetail('${entry.team || ''}')" style="padding: 5px 10px; font-size: 12px;">查看详情</button>
+                                        <td class="analysis-cell">${new Date(entry.ts).toLocaleString()}</td>
+                                        <td class="analysis-cell">
+                                            <button onclick="showTeamDetail('${entry.team || ''}')" class="analysis-btn-sm">查看详情</button>
                                         </td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
                     </div>
-                ` : '<p style="color: #666;">暂无Scouting数据</p>'}
+                ` : '<p class="analysis-empty">暂无Scouting数据</p>'}
             `;
             
             content.innerHTML = html;
@@ -2753,13 +2250,13 @@
             const scoutingConfig = getScoutingConfig();
             
             let html = `
-                <div style="margin-bottom: 20px;">
+                <div class="analysis-toolbar">
                     <button onclick="showAnalysisOverview()">← 返回总览</button>
                 </div>
                 <h2>赛队 ${teamNumber} 详细数据</h2>
                 <p>PreScouting: ${teamPreScout.length} 条 | Scouting: ${teamScouting.length} 条</p>
                 
-                <h3 style="margin-top: 30px;">PreScouting 阶段</h3>
+                <h3 class="analysis-subtitle-30">PreScouting 阶段</h3>
             `;
             
             if (teamPreScout.length > 0) {
@@ -2779,10 +2276,10 @@
                     `;
                 });
             } else {
-                html += '<p style="color: #666;">该赛队暂无PreScouting数据</p>';
+                html += '<p class="analysis-empty">该赛队暂无PreScouting数据</p>';
             }
             
-            html += '<h3 style="margin-top: 40px;">Scouting 阶段</h3>';
+            html += '<h3 class="analysis-subtitle-40">Scouting 阶段</h3>';
             
             if (teamScouting.length > 0) {
                 teamScouting.forEach((entry, index) => {
@@ -2810,7 +2307,7 @@
                     `;
                 });
             } else {
-                html += '<p style="color: #666;">该赛队暂无Scouting数据</p>';
+                html += '<p class="analysis-empty">该赛队暂无Scouting数据</p>';
             }
             
             content.innerHTML = html;
@@ -2864,30 +2361,30 @@
                 <h2>赛队对比</h2>
                 <p>共 ${teams.length} 支赛队</p>
                 
-                <div style="overflow-x: auto; margin-top: 20px;">
-                    <table style="width: 100%; border-collapse: collapse;">
+                <div class="analysis-table-wrap analysis-table-wrap-gap">
+                    <table class="analysis-table">
                         <thead>
-                            <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">队号</th>
-                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">队名</th>
-                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">PreScouting 记录</th>
-                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Scouting 记录</th>
-                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">总记录数</th>
-                                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">操作</th>
+                            <tr class="analysis-table-head-gradient">
+                                <th>队号</th>
+                                <th>队名</th>
+                                <th class="analysis-cell-center">PreScouting 记录</th>
+                                <th class="analysis-cell-center">Scouting 记录</th>
+                                <th class="analysis-cell-center">总记录数</th>
+                                <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${teams.map(team => {
                                 const total = team.preScoutCount + team.scoutingCount;
                                 return `
-                                    <tr style="background: white; border-bottom: 1px solid #ddd;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
-                                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>${team.number}</strong></td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${team.name}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${team.preScoutCount}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${team.scoutingCount}</td>
-                                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><strong>${total}</strong></td>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">
-                                            <button onclick="showTeamDetail('${team.number}')" style="padding: 5px 10px; font-size: 12px;">查看详情</button>
+                                    <tr class="analysis-row">
+                                        <td class="analysis-cell analysis-cell-strong">${team.number}</td>
+                                        <td class="analysis-cell">${team.name}</td>
+                                        <td class="analysis-cell analysis-cell-center">${team.preScoutCount}</td>
+                                        <td class="analysis-cell analysis-cell-center">${team.scoutingCount}</td>
+                                        <td class="analysis-cell analysis-cell-center analysis-cell-strong">${total}</td>
+                                        <td class="analysis-cell">
+                                            <button onclick="showTeamDetail('${team.number}')" class="analysis-btn-sm">查看详情</button>
                                         </td>
                                     </tr>
                                 `;
@@ -2946,7 +2443,7 @@
                 </div>
                 <button onclick="submitPreScouting()">提交</button>
 
-                <h2 style="margin-top: 30px;">已收集的数据</h2>
+                <h2 class="analysis-subtitle-30">已收集的数据</h2>
                 <div class="filter-section">
                     <div class="filter-group">
                         <label>Filter by Event</label>
@@ -3073,7 +2570,7 @@
                 const localEntries = getLocalPrescoutData();
                 if (localEntries.length > 0) {
                     html += `
-                        <h3 style="margin-top: 24px;">本地数据（待提交）</h3>
+                        <h3 class="section-title-top-24">本地数据（待提交）</h3>
                         ${localEntries.map(entry => `
                             <div class="entry-card">
                                 <h3>Team ${entry.teamNumber || '-'} - ${entry.teamName || '-'}</h3>
@@ -3084,7 +2581,7 @@
                                     <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount ?? '-'}</div>
                                     <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis || '-'}</div>
                                 </div>
-                                <button onclick="submitLocalPrescout('${entry.id}')" style="margin-top: 10px;">提交到服务器</button>
+                                <button onclick="submitLocalPrescout('${entry.id}')" class="btn-mt-10">提交到服务器</button>
                             </div>
                         `).join('')}
                     `;
