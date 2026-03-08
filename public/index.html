@@ -522,6 +522,8 @@
                     renderEntries();
                     // Load teams for Shanghai Regional
                     await updateTeamsList('Shanghai Regional');
+                    // Initialize prescouting form listeners
+                    initializePrescouttingForm();
                 }, 100);
             }
         }
@@ -1394,6 +1396,93 @@
                         <option value="other">Other</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>车的重量 (kg)</label>
+                    <input type="number" id="prescout-weight" placeholder="例如: 60" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>车的类型</label>
+                    <select id="prescout-car-type">
+                        <option value="">选择车的类型</option>
+                        <option value="shooter">Shooter</option>
+                        <option value="feeder">Feeder</option>
+                        <option value="lunatic">疯狗</option>
+                        <option value="other">其他</option>
+                    </select>
+                    <input type="text" id="prescout-car-type-other" placeholder="如果选择'其他'，请说明" style="display:none; margin-top: 5px;">
+                </div>
+                <div class="form-group">
+                    <label>车从下面走还是坡道</label>
+                    <select id="prescout-climb-path">
+                        <option value="">选择路径</option>
+                        <option value="low">下面</option>
+                        <option value="high">上面</option>
+                        <option value="both">都可</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>发射通道数量</label>
+                    <input type="number" id="prescout-shooter-channels" placeholder="数量" min="0">
+                </div>
+                <div class="form-group">
+                    <label>爬升爬几层</label>
+                    <select id="prescout-climb-level">
+                        <option value="">选择爬升等级</option>
+                        <option value="none">不爬</option>
+                        <option value="L1">L1</option>
+                        <option value="L2">L2</option>
+                        <option value="L3">L3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>存储满仓数量</label>
+                    <input type="number" id="prescout-storage-capacity" placeholder="数量" min="0">
+                </div>
+                <div class="form-group">
+                    <label>存储满仓发射时间 (秒)</label>
+                    <input type="number" id="prescout-storage-shoot-time" placeholder="时间" step="0.1" min="0">
+                </div>
+                <div class="form-group">
+                    <label>有几个自动</label>
+                    <input type="number" id="prescout-auto-count" placeholder="自动数量" min="0">
+                </div>
+                <div class="form-group">
+                    <label>自动路径概括</label>
+                    <textarea id="prescout-auto-path" placeholder="描述自动路径..." style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>自动准确率 (%)</label>
+                    <input type="number" id="prescout-auto-accuracy" placeholder="准确率" min="0" max="100" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>自动是否爬升</label>
+                    <select id="prescout-auto-climb">
+                        <option value="">选择</option>
+                        <option value="yes">是</option>
+                        <option value="no">否</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>自动爬升准确率 (%)</label>
+                    <input type="number" id="prescout-auto-climb-accuracy" placeholder="准确率" min="0" max="100" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>自动启动位置</label>
+                    <select id="prescout-auto-start-pos">
+                        <option value="">选择启动位置</option>
+                        <option value="pos1">一号位</option>
+                        <option value="pos2">二号位</option>
+                        <option value="pos3">三号位</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>手动发射准确率 (%)</label>
+                    <input type="number" id="prescout-manual-accuracy" placeholder="准确率" min="0" max="100" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>联系方式</label>
+                    <input type="text" id="prescout-contact" placeholder="电话或邮箱">
+                </div>
                 <button onclick="submitPreScouting()">提交</button>
 
                 <h2 class="analysis-subtitle-30">已收集的数据</h2>
@@ -1469,6 +1558,22 @@
             }
         }
 
+        function initializePrescouttingForm() {
+            const carTypeSelect = document.getElementById('prescout-car-type');
+            const carTypeOther = document.getElementById('prescout-car-type-other');
+            
+            if (carTypeSelect && carTypeOther) {
+                carTypeSelect.onchange = function() {
+                    if (this.value === 'other') {
+                        carTypeOther.style.display = 'block';
+                    } else {
+                        carTypeOther.style.display = 'none';
+                        carTypeOther.value = '';
+                    }
+                };
+            }
+        }
+
         function handleTeamNumberInput() {
             if (!currentEventTeams || currentEventTeams.length === 0) return;
             
@@ -1519,7 +1624,23 @@
                 teamName: document.getElementById('prescout-team-name').value,
                 practice: document.getElementById('prescout-practice').value,
                 compCount: parseInt(document.getElementById('prescout-comp-count').value),
-                chassis: document.getElementById('prescout-chassis').value
+                chassis: document.getElementById('prescout-chassis').value,
+                weight: document.getElementById('prescout-weight').value,
+                carType: document.getElementById('prescout-car-type').value,
+                carTypeOther: document.getElementById('prescout-car-type-other').value,
+                climbPath: document.getElementById('prescout-climb-path').value,
+                shooterChannels: parseInt(document.getElementById('prescout-shooter-channels').value) || 0,
+                climbLevel: document.getElementById('prescout-climb-level').value,
+                storageCapacity: parseInt(document.getElementById('prescout-storage-capacity').value) || 0,
+                storageShootTime: document.getElementById('prescout-storage-shoot-time').value,
+                autoCount: parseInt(document.getElementById('prescout-auto-count').value) || 0,
+                autoPath: document.getElementById('prescout-auto-path').value,
+                autoAccuracy: document.getElementById('prescout-auto-accuracy').value,
+                autoClimb: document.getElementById('prescout-auto-climb').value,
+                autoClimbAccuracy: document.getElementById('prescout-auto-climb-accuracy').value,
+                autoStartPos: document.getElementById('prescout-auto-start-pos').value,
+                manualAccuracy: document.getElementById('prescout-manual-accuracy').value,
+                contact: document.getElementById('prescout-contact').value
             };
 
             if (!data.event || !data.collector || !data.teamNumber || !data.teamName) {
@@ -1554,6 +1675,22 @@
             document.getElementById('prescout-practice').value = '';
             document.getElementById('prescout-comp-count').value = '';
             document.getElementById('prescout-chassis').value = '';
+            document.getElementById('prescout-weight').value = '';
+            document.getElementById('prescout-car-type').value = '';
+            document.getElementById('prescout-car-type-other').value = '';
+            document.getElementById('prescout-climb-path').value = '';
+            document.getElementById('prescout-shooter-channels').value = '';
+            document.getElementById('prescout-climb-level').value = '';
+            document.getElementById('prescout-storage-capacity').value = '';
+            document.getElementById('prescout-storage-shoot-time').value = '';
+            document.getElementById('prescout-auto-count').value = '';
+            document.getElementById('prescout-auto-path').value = '';
+            document.getElementById('prescout-auto-accuracy').value = '';
+            document.getElementById('prescout-auto-climb').value = '';
+            document.getElementById('prescout-auto-climb-accuracy').value = '';
+            document.getElementById('prescout-auto-start-pos').value = '';
+            document.getElementById('prescout-manual-accuracy').value = '';
+            document.getElementById('prescout-contact').value = '';
             
             // Refresh entries
             renderEntries();
