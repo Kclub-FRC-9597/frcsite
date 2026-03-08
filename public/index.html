@@ -520,11 +520,12 @@
             if (toolPath === '/prescouting') {
                 setTimeout(async () => {
                     renderEntries();
-                    const eventSelect = document.getElementById('prescout-event');
-                    if (eventSelect && eventSelect.value) {
-                        await updateTeamsList(eventSelect.value);
+                    // Load teams for default event
+                    const eventOptions = getEventOptions();
+                    if (eventOptions.length > 0) {
+                        await updateTeamsList(eventOptions[0]);
                     }
-                }, 0);
+                }, 100);
             }
         }
 
@@ -1561,7 +1562,6 @@
             } else {
                 numberInput.value = '';
             }
-        }
         }
 
         async function submitPreScouting() {
