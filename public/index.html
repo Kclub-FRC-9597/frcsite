@@ -1439,11 +1439,7 @@
         }
 
         async function updateTeamsList(eventName) {
-            const container = document.getElementById('teams-list-container');
-            if (!container) return;
-            
             if (!eventName) {
-                container.innerHTML = '<p style="color: #999; text-align: center;">选择赛事后将显示队伍列表</p>';
                 currentEventTeams = [];
                 attachTeamInputListeners();
                 return;
@@ -1451,23 +1447,6 @@
 
             const teams = await loadTeamsForEvent(eventName);
             currentEventTeams = teams;
-            
-            if (teams.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center;">该赛事暂无队伍数据</p>';
-                attachTeamInputListeners();
-                return;
-            }
-
-            const teamsHtml = teams.map(team => `
-                <div style="padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
-                     onmouseover="this.style.backgroundColor='#f5f5f5'" 
-                     onmouseout="this.style.backgroundColor='transparent'"
-                     onclick="selectTeam('${team.team_number}', '${team.team_name}')">
-                    <strong>${team.team_number}</strong> - ${team.team_name} <span style="color: #999; font-size: 0.9em;">(${team.city}, ${team.province})</span>
-                </div>
-            `).join('');
-            
-            container.innerHTML = teamsHtml;
             attachTeamInputListeners();
         }
 
