@@ -27,10 +27,11 @@ export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
 		// For non-GET requests to /api/, require authentication
-		// For GET requests to /api/sponsors, allow without authentication
+		// For GET requests to /api/sponsors and /api/teams, allow without authentication
 		// For other APIs, require authentication
 		if (url.pathname.startsWith('/api/')) {
-			const isPublicGetRequest = request.method === 'GET' && url.pathname === '/api/sponsors';
+			const isPublicGetRequest = (request.method === 'GET' && url.pathname === '/api/sponsors') || 
+				(request.method === 'GET' && url.pathname === '/api/teams');
 			const isPublicLoginRequest = request.method === 'POST' && url.pathname === '/api/auth/login';
 			if (!isPublicGetRequest && !isPublicLoginRequest) {
 				const authError = requireAuth(request);
