@@ -1720,14 +1720,29 @@
                 html += '<p>暂无数据</p>';
             } else {
                 html += filteredEntries.map(entry => `
-                    <div class="entry-card" onclick="showEntryDetail('${entry.id}')">
+                    <div class="entry-card">
                         <h3>Team ${entry.teamNumber} - ${entry.teamName}</h3>
                         <div class="entry-detail">
                             <div class="detail-item"><strong>Event:</strong> ${entry.event}</div>
                             <div class="detail-item"><strong>Collector:</strong> ${entry.collector}</div>
-                            <div class="detail-item"><strong>Practice:</strong> ${entry.practice}h</div>
-                            <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount}</div>
-                            <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis}</div>
+                            <div class="detail-item"><strong>Practice:</strong> ${entry.practice || '-'}h</div>
+                            <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount || '-'}</div>
+                            <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis || '-'}</div>
+                            ${entry.weight ? `<div class="detail-item"><strong>Weight:</strong> ${entry.weight} kg</div>` : ''}
+                            ${entry.carType ? `<div class="detail-item"><strong>Car Type:</strong> ${entry.carType}${entry.carTypeOther ? ` (${entry.carTypeOther})` : ''}</div>` : ''}
+                            ${entry.climbPath ? `<div class="detail-item"><strong>Climb Path:</strong> ${entry.climbPath}</div>` : ''}
+                            ${entry.shooterChannels ? `<div class="detail-item"><strong>Shooter Channels:</strong> ${entry.shooterChannels}</div>` : ''}
+                            ${entry.climbLevel ? `<div class="detail-item"><strong>Climb Level:</strong> ${entry.climbLevel}</div>` : ''}
+                            ${entry.storageCapacity ? `<div class="detail-item"><strong>Storage Capacity:</strong> ${entry.storageCapacity}</div>` : ''}
+                            ${entry.storageShootTime ? `<div class="detail-item"><strong>Storage Shoot Time:</strong> ${entry.storageShootTime}s</div>` : ''}
+                            ${entry.autoCount ? `<div class="detail-item"><strong>Auto Count:</strong> ${entry.autoCount}</div>` : ''}
+                            ${entry.autoPath ? `<div class="detail-item"><strong>Auto Path:</strong> ${entry.autoPath}</div>` : ''}
+                            ${entry.autoAccuracy ? `<div class="detail-item"><strong>Auto Accuracy:</strong> ${entry.autoAccuracy}%</div>` : ''}
+                            ${entry.autoClimb ? `<div class="detail-item"><strong>Auto Climb:</strong> ${entry.autoClimb}</div>` : ''}
+                            ${entry.autoClimbAccuracy ? `<div class="detail-item"><strong>Auto Climb Accuracy:</strong> ${entry.autoClimbAccuracy}%</div>` : ''}
+                            ${entry.autoStartPos ? `<div class="detail-item"><strong>Auto Start Position:</strong> ${entry.autoStartPos}</div>` : ''}
+                            ${entry.manualAccuracy ? `<div class="detail-item"><strong>Manual Accuracy:</strong> ${entry.manualAccuracy}%</div>` : ''}
+                            ${entry.contact ? `<div class="detail-item"><strong>Contact:</strong> ${entry.contact}</div>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -1747,6 +1762,21 @@
                                     <div class="detail-item"><strong>Practice:</strong> ${entry.practice || '-'}h</div>
                                     <div class="detail-item"><strong>Competitions:</strong> ${entry.compCount ?? '-'}</div>
                                     <div class="detail-item"><strong>Chassis:</strong> ${entry.chassis || '-'}</div>
+                                    ${entry.weight ? `<div class="detail-item"><strong>Weight:</strong> ${entry.weight} kg</div>` : ''}
+                                    ${entry.carType ? `<div class="detail-item"><strong>Car Type:</strong> ${entry.carType}${entry.carTypeOther ? ` (${entry.carTypeOther})` : ''}</div>` : ''}
+                                    ${entry.climbPath ? `<div class="detail-item"><strong>Climb Path:</strong> ${entry.climbPath}</div>` : ''}
+                                    ${entry.shooterChannels ? `<div class="detail-item"><strong>Shooter Channels:</strong> ${entry.shooterChannels}</div>` : ''}
+                                    ${entry.climbLevel ? `<div class="detail-item"><strong>Climb Level:</strong> ${entry.climbLevel}</div>` : ''}
+                                    ${entry.storageCapacity ? `<div class="detail-item"><strong>Storage Capacity:</strong> ${entry.storageCapacity}</div>` : ''}
+                                    ${entry.storageShootTime ? `<div class="detail-item"><strong>Storage Shoot Time:</strong> ${entry.storageShootTime}s</div>` : ''}
+                                    ${entry.autoCount ? `<div class="detail-item"><strong>Auto Count:</strong> ${entry.autoCount}</div>` : ''}
+                                    ${entry.autoPath ? `<div class="detail-item"><strong>Auto Path:</strong> ${entry.autoPath}</div>` : ''}
+                                    ${entry.autoAccuracy ? `<div class="detail-item"><strong>Auto Accuracy:</strong> ${entry.autoAccuracy}%</div>` : ''}
+                                    ${entry.autoClimb ? `<div class="detail-item"><strong>Auto Climb:</strong> ${entry.autoClimb}</div>` : ''}
+                                    ${entry.autoClimbAccuracy ? `<div class="detail-item"><strong>Auto Climb Accuracy:</strong> ${entry.autoClimbAccuracy}%</div>` : ''}
+                                    ${entry.autoStartPos ? `<div class="detail-item"><strong>Auto Start Position:</strong> ${entry.autoStartPos}</div>` : ''}
+                                    ${entry.manualAccuracy ? `<div class="detail-item"><strong>Manual Accuracy:</strong> ${entry.manualAccuracy}%</div>` : ''}
+                                    ${entry.contact ? `<div class="detail-item"><strong>Contact:</strong> ${entry.contact}</div>` : ''}
                                 </div>
                                 <button onclick="submitLocalPrescout('${entry.id}')" class="btn-mt-10">提交到服务器</button>
                             </div>
