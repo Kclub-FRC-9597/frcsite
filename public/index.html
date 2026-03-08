@@ -32,6 +32,9 @@
 
         const DEFAULT_EVENTS = ['2025-einstein'];
 
+        // Global variable to store current event's teams for quick lookup
+        let currentEventTeams = [];
+
         function getCurrentTheme() {
             return document.body.classList.contains('light-theme') ? 'light' : 'dark';
         }
@@ -1380,11 +1383,11 @@
                 </div>
                 <div class="form-group">
                     <label>Team Number</label>
-                    <input type="text" id="prescout-team-number" placeholder="队伍编号">
+                    <input type="text" id="prescout-team-number" placeholder="队伍编号" oninput="handleTeamNumberInput()">
                 </div>
                 <div class="form-group">
                     <label>Team Name</label>
-                    <input type="text" id="prescout-team-name" placeholder="队伍名称">
+                    <input type="text" id="prescout-team-name" placeholder="队伍名称" oninput="handleTeamNameInput()">
                 </div>
                 <div class="form-group">
                     <label>Operator Practice Duration (hours)</label>
@@ -1472,12 +1475,17 @@
             
             if (!eventName) {
                 container.innerHTML = '<p style="color: #999; text-align: center;">选择赛事后将显示队伍列表</p>';
+                currentEventTeams = [];
+                attachTeamInputListeners();
                 return;
             }
 
             const teams = await loadTeamsForEvent(eventName);
+            currentEventTeams = teams;
+            
             if (teams.length === 0) {
                 container.innerHTML = '<p style="color: #999; text-align: center;">该赛事暂无队伍数据</p>';
+                attachTeamInputListeners();
                 return;
             }
 
@@ -1491,6 +1499,7 @@
             `).join('');
             
             container.innerHTML = teamsHtml;
+            attachTeamInputListeners();
         }
 
         function selectTeam(teamNumber, teamName) {
@@ -1498,6 +1507,61 @@
             const nameInput = document.getElementById('prescout-team-name');
             if (numberInput) numberInput.value = teamNumber;
             if (nameInput) nameInput.value = teamName;
+        }
+
+        function attachTeamInputListeners() {
+            const numberInput = document.getElementById('prescout-team-number');
+            const nameInput = document.getElementById('prescout-team-name');
+            
+            if (numberInput) {
+                numberInput.oninput = handleTeamNumberInput;
+            }
+            if (nameInput) {
+                nameInput.oninput = handleTeamNameInput;
+            }
+        }
+
+        function handleTeamNumberInput() {
+            if (currentEventTeams.length === 0) return;
+            
+            const input = document.getElementById('prescout-team-number');
+            const nameInput = document.getElementById('prescout-team-name');
+            if (!input || !nameInput) return;
+            
+            const teamNumber = input.value.trim();
+            if (!teamNumber) {
+                nameInput.value = '';
+                return;
+            }
+            
+            const team = currentEventTeams.find(t => t.team_number.toString() === teamNumber);
+            if (team) {
+                nameInput.value = team.team_name;
+            } else {
+                nameInput.value = '';
+            }
+        }
+
+        function handleTeamNameInput() {
+            if (currentEventTeams.length === 0) return;
+            
+            const input = document.getElementById('prescout-team-name');
+            const numberInput = document.getElementById('prescout-team-number');
+            if (!input || !numberInput) return;
+            
+            const teamName = input.value.trim();
+            if (!teamName) {
+                numberInput.value = '';
+                return;
+            }
+            
+            const team = currentEventTeams.find(t => t.team_name.toLowerCase().includes(teamName.toLowerCase()));
+            if (team) {
+                numberInput.value = team.team_number;
+            } else {
+                numberInput.value = '';
+            }
+        }
         }
 
         async function submitPreScouting() {
