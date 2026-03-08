@@ -30,7 +30,7 @@
 
         const THEME_KEY = 'frc_theme';
 
-        const DEFAULT_EVENTS = ['2025-einstein', 'Shanghai Regional'];
+        const DEFAULT_EVENTS = ['2025-einstein'];
 
         function getCurrentTheme() {
             return document.body.classList.contains('light-theme') ? 'light' : 'dark';
@@ -515,7 +515,13 @@
             `;
 
             if (toolPath === '/prescouting') {
-                setTimeout(renderEntries, 0);
+                setTimeout(async () => {
+                    renderEntries();
+                    const eventSelect = document.getElementById('prescout-event');
+                    if (eventSelect && eventSelect.value) {
+                        await updateTeamsList(eventSelect.value);
+                    }
+                }, 0);
             }
         }
 
@@ -1367,6 +1373,12 @@
                     <input type="text" id="prescout-collector" placeholder="收集者姓名" value="${currentUser || ''}">
                 </div>
                 <div class="form-group">
+                    <label>Team Selection</label>
+                    <div id="teams-list-container" style="border: 1px solid #ccc; border-radius: 4px; padding: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 10px;">
+                        <p style="color: #999; text-align: center;">选择赛事后将显示队伍列表</p>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label>Team Number</label>
                     <input type="text" id="prescout-team-number" placeholder="队伍编号">
                 </div>
@@ -1415,9 +1427,25 @@
             `;
         }
 
-        function handleEventChange() {
+        async function loadTeamsForEvent(eventName) {
+            try {
+                const response = await fetch(`/api/teams?event=${encodeURIComponent(eventName)}&year=2026`);
+                if (!response.ok) {
+                    console.error('Failed to load teams');
+                    return [];
+                }
+                const teams = await response.json();
+                return teams;
+            } catch (err) {
+                console.error('Error loading teams:', err);
+                return [];
+            }
+        }
+
+        async function handleEventChange() {
             const select = document.getElementById('prescout-event');
             if (!select) return;
+            
             if (select.value === '__custom__') {
                 const name = prompt('请输入赛事名称：');
                 if (name) {
@@ -1426,10 +1454,50 @@
                         getEventOptions().map(e => `<option value="${e}">${e}</option>`).join('') +
                         '<option value="__custom__">添加自定义...</option>';
                     select.value = name;
+                    await updateTeamsList(name);
                 } else {
                     select.value = '';
+                    updateTeamsList('');
                 }
+            } else if (select.value) {
+                await updateTeamsList(select.value);
+            } else {
+                updateTeamsList('');
             }
+        }
+
+        async function updateTeamsList(eventName) {
+            const container = document.getElementById('teams-list-container');
+            if (!container) return;
+            
+            if (!eventName) {
+                container.innerHTML = '<p style="color: #999; text-align: center;">选择赛事后将显示队伍列表</p>';
+                return;
+            }
+
+            const teams = await loadTeamsForEvent(eventName);
+            if (teams.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center;">该赛事暂无队伍数据</p>';
+                return;
+            }
+
+            const teamsHtml = teams.map(team => `
+                <div style="padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;" 
+                     onmouseover="this.style.backgroundColor='#f5f5f5'" 
+                     onmouseout="this.style.backgroundColor='transparent'"
+                     onclick="selectTeam('${team.team_number}', '${team.team_name}')">
+                    <strong>${team.team_number}</strong> - ${team.team_name} <span style="color: #999; font-size: 0.9em;">(${team.city}, ${team.province})</span>
+                </div>
+            `).join('');
+            
+            container.innerHTML = teamsHtml;
+        }
+
+        function selectTeam(teamNumber, teamName) {
+            const numberInput = document.getElementById('prescout-team-number');
+            const nameInput = document.getElementById('prescout-team-name');
+            if (numberInput) numberInput.value = teamNumber;
+            if (nameInput) nameInput.value = teamName;
         }
 
         async function submitPreScouting() {
