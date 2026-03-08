@@ -520,11 +520,8 @@
             if (toolPath === '/prescouting') {
                 setTimeout(async () => {
                     renderEntries();
-                    // Load teams for default event
-                    const eventOptions = getEventOptions();
-                    if (eventOptions.length > 0) {
-                        await updateTeamsList(eventOptions[0]);
-                    }
+                    // Load teams for Shanghai Regional
+                    await updateTeamsList('Shanghai Regional');
                 }, 100);
             }
         }
@@ -1359,17 +1356,12 @@
         }
 
         function renderPreScouting() {
-            const eventOptions = getEventOptions();
-            const defaultEvent = eventOptions[0] || '';
-            const eventOptionsHtml = eventOptions.map(e => `<option value="${e}" ${e === defaultEvent ? 'selected' : ''}>${e}</option>`).join('');
             return `
                 <h1>PreScouting</h1>
                 <div class="form-group">
                     <label>Event</label>
                     <select id="prescout-event" onchange="handleEventChange()">
-                        <option value="">选择赛事</option>
-                        ${eventOptionsHtml}
-                        <option value="__custom__">添加自定义...</option>
+                        <option value="Shanghai Regional" selected>Shanghai Regional</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -1448,26 +1440,8 @@
 
         async function handleEventChange() {
             const select = document.getElementById('prescout-event');
-            if (!select) return;
-            
-            if (select.value === '__custom__') {
-                const name = prompt('请输入赛事名称：');
-                if (name) {
-                    addEventOption(name);
-                    select.innerHTML = '<option value="">选择赛事</option>' +
-                        getEventOptions().map(e => `<option value="${e}">${e}</option>`).join('') +
-                        '<option value="__custom__">添加自定义...</option>';
-                    select.value = name;
-                    await updateTeamsList(name);
-                } else {
-                    select.value = '';
-                    updateTeamsList('');
-                }
-            } else if (select.value) {
-                await updateTeamsList(select.value);
-            } else {
-                updateTeamsList('');
-            }
+            if (!select || !select.value) return;
+            await updateTeamsList(select.value);
         }
 
         async function updateTeamsList(eventName) {
