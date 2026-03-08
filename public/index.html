@@ -1439,6 +1439,7 @@
         }
 
         async function updateTeamsList(eventName) {
+            console.log('updateTeamsList called with event:', eventName);
             if (!eventName) {
                 currentEventTeams = [];
                 attachTeamInputListeners();
@@ -1446,7 +1447,9 @@
             }
 
             const teams = await loadTeamsForEvent(eventName);
+            console.log('Loaded teams:', teams);
             currentEventTeams = teams;
+            console.log('currentEventTeams set to:', currentEventTeams);
             attachTeamInputListeners();
         }
 
@@ -1470,19 +1473,28 @@
         }
 
         function handleTeamNumberInput() {
-            if (currentEventTeams.length === 0) return;
+            console.log('handleTeamNumberInput called, currentEventTeams:', currentEventTeams);
+            if (!currentEventTeams || currentEventTeams.length === 0) {
+                console.log('No teams available');
+                return;
+            }
             
             const input = document.getElementById('prescout-team-number');
             const nameInput = document.getElementById('prescout-team-name');
-            if (!input || !nameInput) return;
+            if (!input || !nameInput) {
+                console.log('Input elements not found');
+                return;
+            }
             
             const teamNumber = input.value.trim();
+            console.log('Searching for team number:', teamNumber);
             if (!teamNumber) {
                 nameInput.value = '';
                 return;
             }
             
-            const team = currentEventTeams.find(t => t.team_number.toString() === teamNumber);
+            const team = currentEventTeams.find(t => t.team_number === teamNumber);
+            console.log('Found team:', team);
             if (team) {
                 nameInput.value = team.team_name;
             } else {
@@ -1491,19 +1503,28 @@
         }
 
         function handleTeamNameInput() {
-            if (currentEventTeams.length === 0) return;
+            console.log('handleTeamNameInput called, currentEventTeams:', currentEventTeams);
+            if (!currentEventTeams || currentEventTeams.length === 0) {
+                console.log('No teams available');
+                return;
+            }
             
             const input = document.getElementById('prescout-team-name');
             const numberInput = document.getElementById('prescout-team-number');
-            if (!input || !numberInput) return;
+            if (!input || !numberInput) {
+                console.log('Input elements not found');
+                return;
+            }
             
             const teamName = input.value.trim();
+            console.log('Searching for team name:', teamName);
             if (!teamName) {
                 numberInput.value = '';
                 return;
             }
             
             const team = currentEventTeams.find(t => t.team_name.toLowerCase().includes(teamName.toLowerCase()));
+            console.log('Found team:', team);
             if (team) {
                 numberInput.value = team.team_number;
             } else {
