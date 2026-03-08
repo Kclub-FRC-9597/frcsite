@@ -1397,11 +1397,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>车的重量 (kg)</label>
+                    <label>车的重量 (kg) （可选）</label>
                     <input type="number" id="prescout-weight" placeholder="例如: 60" step="0.1">
                 </div>
                 <div class="form-group">
-                    <label>车的类型</label>
+                    <label>车的类型 （可选）</label>
                     <select id="prescout-car-type">
                         <option value="">选择车的类型</option>
                         <option value="shooter">Shooter</option>
@@ -1412,7 +1412,7 @@
                     <input type="text" id="prescout-car-type-other" placeholder="如果选择'其他'，请说明" style="display:none; margin-top: 5px;">
                 </div>
                 <div class="form-group">
-                    <label>车从下面走还是坡道</label>
+                    <label>车从下面走还是坡道 （可选）</label>
                     <select id="prescout-climb-path">
                         <option value="">选择路径</option>
                         <option value="low">下面</option>
@@ -1421,11 +1421,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>发射通道数量</label>
+                    <label>发射通道数量 （可选）</label>
                     <input type="number" id="prescout-shooter-channels" placeholder="数量" min="0">
                 </div>
                 <div class="form-group">
-                    <label>爬升爬几层</label>
+                    <label>爬升爬几层 （可选）</label>
                     <select id="prescout-climb-level">
                         <option value="">选择爬升等级</option>
                         <option value="none">不爬</option>
@@ -1435,27 +1435,27 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>存储满仓数量</label>
+                    <label>存储满仓数量 （可选）</label>
                     <input type="number" id="prescout-storage-capacity" placeholder="数量" min="0">
                 </div>
                 <div class="form-group">
-                    <label>存储满仓发射时间 (秒)</label>
+                    <label>存储满仓发射时间 (秒) （可选）</label>
                     <input type="number" id="prescout-storage-shoot-time" placeholder="时间" step="0.1" min="0">
                 </div>
                 <div class="form-group">
-                    <label>有几个自动</label>
+                    <label>有几个自动 （可选）</label>
                     <input type="number" id="prescout-auto-count" placeholder="自动数量" min="0">
                 </div>
                 <div class="form-group">
-                    <label>自动路径概括</label>
+                    <label>自动路径概括 （可选）</label>
                     <textarea id="prescout-auto-path" placeholder="描述自动路径..." style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>自动准确率 (%)</label>
+                    <label>自动准确率 (%) （可选）</label>
                     <input type="number" id="prescout-auto-accuracy" placeholder="准确率" min="0" max="100" step="0.1">
                 </div>
                 <div class="form-group">
-                    <label>自动是否爬升</label>
+                    <label>自动是否爬升 （可选）</label>
                     <select id="prescout-auto-climb">
                         <option value="">选择</option>
                         <option value="yes">是</option>
@@ -1463,11 +1463,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>自动爬升准确率 (%)</label>
+                    <label>自动爬升准确率 (%) （可选）</label>
                     <input type="number" id="prescout-auto-climb-accuracy" placeholder="准确率" min="0" max="100" step="0.1">
                 </div>
                 <div class="form-group">
-                    <label>自动启动位置</label>
+                    <label>自动启动位置 （可选）</label>
                     <select id="prescout-auto-start-pos">
                         <option value="">选择启动位置</option>
                         <option value="pos1">一号位</option>
@@ -1476,11 +1476,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>手动发射准确率 (%)</label>
+                    <label>手动发射准确率 (%) （可选）</label>
                     <input type="number" id="prescout-manual-accuracy" placeholder="准确率" min="0" max="100" step="0.1">
                 </div>
                 <div class="form-group">
-                    <label>联系方式</label>
+                    <label>联系方式 （可选）</label>
                     <input type="text" id="prescout-contact" placeholder="电话或邮箱">
                 </div>
                 <button onclick="submitPreScouting()">提交</button>
