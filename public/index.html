@@ -1419,9 +1419,9 @@
 
         async function loadTeamsForEvent(eventName) {
             try {
-                const response = await fetch(`/api/teams?event=${encodeURIComponent(eventName)}&year=2026`);
+                const response = await apiFetch(`/api/teams?event=${encodeURIComponent(eventName)}&year=2026`);
                 if (!response.ok) {
-                    console.error('Failed to load teams');
+                    console.error('Failed to load teams:', response.status);
                     return [];
                 }
                 const teams = await response.json();
