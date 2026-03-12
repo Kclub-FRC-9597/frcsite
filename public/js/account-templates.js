@@ -9,6 +9,7 @@
                             <li><a href="#account/profile" class="${accountSection === '/profile' ? 'active' : ''}">👤 个人信息</a></li>
                             <li><a href="#account/password" class="${accountSection === '/password' ? 'active' : ''}">🔐 修改密码</a></li>
                             ${adminEnabled ? `<li><a href="#account/users" class="${accountSection === '/users' ? 'active' : ''}">👥 用户管理</a></li>` : ''}
+                            ${adminEnabled ? `<li><a href="#account/teams" class="${accountSection === '/teams' ? 'active' : ''}">🎯 队伍分配</a></li>` : ''}
                             ${adminEnabled ? `<li><a href="#account/content" class="${accountSection === '/content' ? 'active' : ''}">📝 编辑主页</a></li>` : ''}
                             <li class="sidebar-home-link"><a href="#home">返回主页</a></li>
                             <li><a href="#" onclick="logout()">登出</a></li>
@@ -99,6 +100,27 @@
                 `;
     }
 
+    function renderTeamAssignmentTemplate() {
+        return `
+                    <h1>🎯 队伍分配</h1>
+                    <div class="users-card">
+                        <h2 class="users-section-title">为队员分配队伍</h2>
+                        <p style="color: #666; margin-bottom: 20px;">选择队员并为其分配需要收集数据的队伍。队员登录后将看到分配给他们的队伍。</p>
+                        <div class="users-add-grid" style="grid-template-columns: 1fr 1fr auto;">
+                            <select id="assignUsername">
+                                <option value="">选择队员...</option>
+                            </select>
+                            <select id="assignTeamNumber">
+                                <option value="">选择队伍...</option>
+                            </select>
+                            <button id="assignTeamBtn">分配</button>
+                        </div>
+                        <h2 class="users-section-title" style="margin-top: 30px;">当前分配</h2>
+                        <div id="assignmentsList"></div>
+                    </div>
+                `;
+    }
+
     function renderAccountProfileTemplate({ currentUser, currentRole, nickname }) {
         return `
                     <h1>👤 个人信息</h1>
@@ -156,6 +178,9 @@
         }
         if (section === '/users') {
             return renderAccountUsersTemplate();
+        }
+        if (section === '/teams') {
+            return renderTeamAssignmentTemplate();
         }
 
         const nickname = localStorage.getItem(`nickname_${currentUser}`) || '';

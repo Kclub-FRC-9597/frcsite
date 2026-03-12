@@ -564,6 +564,65 @@ export default {
 			}
 		}
 
+		// API: team assignments
+		if (url.pathname === '/api/team-assignments') {
+			if (!env.D1_PRESCOUT) {
+				return new Response(JSON.stringify({ error: 'D1_PRESCOUT binding not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+			}
+
+			try {
+				await ensureTeamAssignmentsTable(env);
+			} catch (err) {
+				return new Response(JSON.stringify({ error: 'DB Init Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+			}
+
+			if (request.method === 'GET') {
+				try {
+					const r = await env.D1_PRESCOUT.prepare('SELECT username, team_number FROM team_assignments ORDER BY username ASC').all();
+					const rows = (r && r.results) ? r.results : [];
+					return new Response(JSON.stringify(rows), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Read Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else if (request.method === 'POST') {
+				try {
+					const body = await request.json() as any;
+					const username = String(body?.username || '').trim();
+					const team_number = String(body?.team_number || '').trim();
+
+					if (!username || !team_number) {
+						return new Response(JSON.stringify({ error: 'Missing username or team_number' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+					}
+
+					// Delete existing assignment for this user
+					await env.D1_PRESCOUT.prepare('DELETE FROM team_assignments WHERE username = ?').bind(username).run();
+					
+					// Insert new assignment
+					await env.D1_PRESCOUT.prepare('INSERT INTO team_assignments (username, team_number) VALUES (?, ?)')
+						.bind(username, team_number)
+						.run();
+					
+					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Write Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else if (request.method === 'DELETE') {
+				try {
+					const url_obj = new URL(request.url);
+					const username = url_obj.searchParams.get('username');
+					if (!username) {
+						return new Response(JSON.stringify({ error: 'Missing username parameter' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+					}
+					await env.D1_PRESCOUT.prepare('DELETE FROM team_assignments WHERE username = ?').bind(username).run();
+					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Delete Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else {
+				return new Response('Method Not Allowed', { status: 405 });
+			}
+		}
+
 		// Otherwise fall back to serving static assets via Assets Binding
 		return env.ASSETS.fetch(request);
 	},
@@ -611,4 +670,13 @@ async function ensureUsersTable(env: Env): Promise<void> {
 			.bind('user', 'user123', 'user', now, now)
 			.run();
 	}
+}
+
+async function ensureTeamAssignmentsTable(env: Env): Promise<void> {
+	await env.D1_PRESCOUT.prepare(`
+		CREATE TABLE IF NOT EXISTS team_assignments (
+			username TEXT PRIMARY KEY,
+			team_number TEXT NOT NULL
+		)
+	`).run();
 }

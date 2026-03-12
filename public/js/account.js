@@ -26,6 +26,8 @@
                 setupContentEditorListeners();
             } else if (accountSection === '/users') {
                 setupUserManagementListeners();
+            } else if (accountSection === '/teams') {
+                setupTeamAssignmentListeners();
             }
         }, 100);
     }
@@ -489,6 +491,120 @@
         document.getElementById('confirmPassword').value = '';
     }
 
+    async function setupTeamAssignmentListeners() {
+        // Load teams
+        const teamsResponse = await fetch('/api/teams');
+        const teams = await teamsResponse.json();
+
+        // Load users
+        const users = await getAllUsers();
+
+        // Load current assignments
+        const assignmentsResponse = await apiFetch('/api/team-assignments');
+        const assignments = await assignmentsResponse.json();
+        const assignmentsMap = new Map(assignments.map(a => [a.username, a.team_number]));
+
+        // Populate username dropdown (exclude admin)
+        const usernameSelect = document.getElementById('assignUsername');
+        users.filter(u => u.username !== 'admin').forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.username;
+            option.textContent = `${user.username} (${user.role === 'admin' ? '管理员' : user.role === 'user' ? '用户' : '测试员'})`;
+            usernameSelect.appendChild(option);
+        });
+
+        // Populate team dropdown
+        const teamSelect = document.getElementById('assignTeamNumber');
+        teams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team.team_number;
+            option.textContent = `${team.team_number} - ${team.team_name}`;
+            teamSelect.appendChild(option);
+        });
+
+        // Setup assign button
+        const assignBtn = document.getElementById('assignTeamBtn');
+        if (assignBtn) {
+            assignBtn.addEventListener('click', assignTeam);
+        }
+
+        // Display current assignments
+        const assignmentsList = document.getElementById('assignmentsList');
+        if (assignmentsList) {
+            let html = '<table class="users-table">';
+            html += '<thead><tr class="users-table-head"><th>队员</th><th>分配队伍</th><th>队名</th><th>操作</th></tr></thead>';
+            html += '<tbody>';
+
+            for (const [username, teamNumber] of assignmentsMap) {
+                const team = teams.find(t => t.team_number === teamNumber);
+                html += `<tr class="users-table-row">
+                    <td class="users-table-cell">${username}</td>
+                    <td class="users-table-cell">${teamNumber}</td>
+                    <td class="users-table-cell">${team ? team.team_name : '未知'}</td>
+                    <td class="users-table-actions">
+                        <button class="removeAssignmentBtn user-action-btn user-action-delete" data-username="${username}">删除分配</button>
+                    </td>
+                </tr>`;
+            }
+
+            html += '</tbody></table>';
+            assignmentsList.innerHTML = html;
+
+            document.querySelectorAll('.removeAssignmentBtn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    removeTeamAssignment(this.dataset.username);
+                });
+            });
+        }
+    }
+
+    async function assignTeam() {
+        const usernameSelect = document.getElementById('assignUsername');
+        const teamSelect = document.getElementById('assignTeamNumber');
+
+        const username = usernameSelect?.value;
+        const teamNumber = teamSelect?.value;
+
+        if (!username || !teamNumber) {
+            alert('请选择队员和队伍');
+            return;
+        }
+
+        const response = await apiFetch('/api/team-assignments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, team_number: teamNumber })
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result?.ok) {
+            alert(result?.error || '分配队伍失败');
+            return;
+        }
+
+        alert(`已为 ${username} 分配队伍 ${teamNumber}`);
+        await setupTeamAssignmentListeners();
+    }
+
+    async function removeTeamAssignment(username) {
+        if (!confirm(`确定要删除 ${username} 的队伍分配吗？`)) {
+            return;
+        }
+
+        const response = await apiFetch(`/api/team-assignments?username=${username}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result?.ok) {
+            alert(result?.error || '删除分配失败');
+            return;
+        }
+
+        alert('队伍分配已删除');
+        await setupTeamAssignmentListeners();
+    }
+
     Object.assign(window, {
         renderAccountDashboard,
         setupProfileEventListeners,
@@ -501,6 +617,9 @@
         editUserNickname,
         resetUserPassword,
         deleteUser,
+        setupTeamAssignmentListeners,
+        assignTeam,
+        removeTeamAssignment,
         setupContentEditorListeners,
         saveHomepageContent,
         resetHomepageContent,
