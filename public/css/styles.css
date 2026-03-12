@@ -1004,6 +1004,10 @@
 
         .label-normal {
             font-weight: normal;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 15px;
         }
 
         h1 {
