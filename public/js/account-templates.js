@@ -105,16 +105,20 @@
                     <h1>🎯 队伍分配</h1>
                     <div class="users-card">
                         <h2 class="users-section-title">为队员分配队伍</h2>
-                        <p style="color: #666; margin-bottom: 20px;">选择队员并为其分配需要收集数据的队伍。队员登录后将看到分配给他们的队伍。</p>
-                        <div class="users-add-grid" style="grid-template-columns: 1fr 1fr auto;">
+                        <p style="color: #666; margin-bottom: 20px;">选择队员，然后勾选要分配的队伍，支持批量分配。队员登录后将看到分配给他们的队伍。</p>
+                        <div style="margin-bottom: 20px;">
+                            <label>选择队员</label>
                             <select id="assignUsername">
                                 <option value="">选择队员...</option>
                             </select>
-                            <select id="assignTeamNumber">
-                                <option value="">选择队伍...</option>
-                            </select>
-                            <button id="assignTeamBtn">分配</button>
                         </div>
+                        <div style="margin-bottom: 20px;">
+                            <label>选择要分配的队伍（可多选）</label>
+                            <div id="teamCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <!-- 动态生成的复选框 -->
+                            </div>
+                        </div>
+                        <button id="assignTeamBtn" style="width: 100%; padding: 10px; font-size: 16px;">批量分配</button>
                         <h2 class="users-section-title" style="margin-top: 30px;">当前分配</h2>
                         <div id="assignmentsList"></div>
                     </div>

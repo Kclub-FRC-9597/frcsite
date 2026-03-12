@@ -521,14 +521,27 @@
             usernameSelect.appendChild(option);
         });
 
-        // Populate team dropdown
-        const teamSelect = document.getElementById('assignTeamNumber');
-        teams.forEach(team => {
-            const option = document.createElement('option');
-            option.value = team.team_number;
-            option.textContent = `${team.team_number} - ${team.team_name}`;
-            teamSelect.appendChild(option);
-        });
+        // Populate team checkboxes (batched selection)
+        const teamCheckboxesDiv = document.getElementById('teamCheckboxes');
+        if (teamCheckboxesDiv) {
+            teamCheckboxesDiv.innerHTML = '';
+            teams.forEach(team => {
+                const label = document.createElement('label');
+                label.style.cursor = 'pointer';
+                label.style.display = 'flex';
+                label.style.alignItems = 'center';
+                label.style.gap = '8px';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = team.team_number;
+                checkbox.className = 'team-checkbox';
+                
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(`${team.team_number} - ${team.team_name}`));
+                teamCheckboxesDiv.appendChild(label);
+            });
+        }
 
         // Setup assign button
         const assignBtn = document.getElementById('assignTeamBtn');
@@ -570,29 +583,59 @@
 
     async function assignTeam() {
         const usernameSelect = document.getElementById('assignUsername');
-        const teamSelect = document.getElementById('assignTeamNumber');
-
         const username = usernameSelect?.value;
-        const teamNumber = teamSelect?.value;
 
-        if (!username || !teamNumber) {
-            alert('请选择队员和队伍');
+        if (!username) {
+            alert('请选择队员');
             return;
         }
 
-        const response = await apiFetch('/api/team-assignments', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, team_number: teamNumber })
-        });
+        // Get all checked team checkboxes
+        const checkedTeams = Array.from(document.querySelectorAll('.team-checkbox:checked')).map(cb => cb.value);
 
-        const result = await response.json();
-        if (!response.ok || !result?.ok) {
-            alert(result?.error || '分配队伍失败');
+        if (checkedTeams.length === 0) {
+            alert('请选择至少一个队伍');
             return;
         }
 
-        alert(`已为 ${username} 分配队伍 ${teamNumber}`);
+        // Batch assign teams to the selected user
+        let successCount = 0;
+        let failureCount = 0;
+        const failedTeams = [];
+
+        for (const teamNumber of checkedTeams) {
+            const response = await apiFetch('/api/team-assignments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, team_number: teamNumber })
+            });
+
+            const result = await response.json();
+            if (response.ok && result?.ok) {
+                successCount++;
+            } else {
+                failureCount++;
+                failedTeams.push(`${teamNumber}: ${result?.error || '未知错误'}`);
+            }
+        }
+
+        // Clear checkboxes after batch assignment
+        document.querySelectorAll('.team-checkbox').forEach(cb => cb.checked = false);
+
+        // Show result
+        if (failureCount === 0) {
+            alert(`成功为 ${username} 分配了 ${successCount} 个队伍`);
+        } else {
+            let msg = `为 ${username} 分配完成\n成功: ${successCount} 个队伍\n失败: ${failureCount} 个队伍`;
+            if (failedTeams.length > 0) {
+                msg += '\n\n失败的队伍:\n' + failedTeams.slice(0, 5).join('\n');
+                if (failedTeams.length > 5) {
+                    msg += `\n... 还有 ${failedTeams.length - 5} 个失败`;
+                }
+            }
+            alert(msg);
+        }
+        
         await setupTeamAssignmentListeners();
     }
 
