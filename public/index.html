@@ -27,6 +27,8 @@
         const ADMIN_TOKEN = 'admin-token-2026';
         const TESTER_USER = 'tester';
         const TESTER_PASS = 'password123';
+        const USER_USER = 'user';
+        const USER_PASS = 'user123';
 
         const THEME_KEY = 'frc_theme';
 
@@ -74,6 +76,10 @@
 
         function isTesterUser(username = currentUser) {
             return username === TESTER_USER;
+        }
+
+        function isSystemUser(username = currentUser) {
+            return username === TESTER_USER || username === USER_USER;
         }
 
         function apiFetch(url, options = {}) {

@@ -102,11 +102,17 @@
                 normalized.push({ username: TESTER_USER, role: 'tester', isSystemUser: true });
             }
 
+            const hasUser = normalized.some(user => user.username === USER_USER);
+            if (!hasUser) {
+                normalized.push({ username: USER_USER, role: 'user', isSystemUser: true });
+            }
+
             return normalized;
         } catch (err) {
             console.error('Error loading users:', err);
             return [
-                { username: TESTER_USER, role: 'tester', isSystemUser: true }
+                { username: TESTER_USER, role: 'tester', isSystemUser: true },
+                { username: USER_USER, role: 'user', isSystemUser: true }
             ];
         }
     }
@@ -121,7 +127,14 @@
 
         for (const user of users) {
             const nickname = localStorage.getItem(`nickname_${user.username}`) || '未设置';
-            const roleDisplay = user.role === 'admin' ? '👑 管理员' : '👤 测试员';
+            let roleDisplay = '👤 未知';
+            if (user.role === 'admin') {
+                roleDisplay = '👑 管理员';
+            } else if (user.role === 'user') {
+                roleDisplay = '👤 用户';
+            } else if (user.role === 'tester') {
+                roleDisplay = '🧪 测试员';
+            }
 
             html += `<tr class="users-table-row">
                     <td class="users-table-cell">${user.username}</td>
@@ -130,7 +143,7 @@
                     <td class="users-table-actions">
                         <button class="editUserBtn user-action-btn user-action-edit" data-username="${user.username}">编辑</button>
                         <button class="resetPasswordBtn user-action-btn user-action-reset" data-username="${user.username}">重置密码</button>
-                        ${!user.isSystemUser && !isTesterUser(user.username) ? `<button class="deleteUserBtn user-action-btn user-action-delete" data-username="${user.username}">删除</button>` : ''}
+                        ${!user.isSystemUser && !isSystemUser(user.username) ? `<button class="deleteUserBtn user-action-btn user-action-delete" data-username="${user.username}">删除</button>` : ''}
                     </td>
                 </tr>`;
         }
@@ -176,8 +189,8 @@
             return;
         }
 
-        if (isTesterUser(username)) {
-            alert('tester 为本地测试账户，不能添加到数据库');
+        if (isSystemUser(username)) {
+            alert(`${username} 为本地测试账户，不能添加到数据库`);
             return;
         }
 
@@ -227,7 +240,7 @@
             return;
         }
 
-        if (isTesterUser(username)) {
+        if (isSystemUser(username)) {
             localStorage.removeItem(`password_${username}`);
             alert(`${username} 的密码已重置为默认密码`);
             return;
@@ -240,7 +253,19 @@
             return;
         }
 
-        const defaultPassword = username === ADMIN_USER ? ADMIN_PASS : TESTER_PASS;
+        let defaultPassword = ADMIN_PASS;
+        if (username === ADMIN_USER) {
+            defaultPassword = ADMIN_PASS;
+        } else if (username === USER_USER) {
+            defaultPassword = USER_PASS;
+        } else if (username === TESTER_USER) {
+            defaultPassword = TESTER_PASS;
+        } else if (target.role === 'user') {
+            defaultPassword = USER_PASS;
+        } else if (target.role === 'tester') {
+            defaultPassword = TESTER_PASS;
+        }
+
         const response = await apiFetch('/api/users', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },

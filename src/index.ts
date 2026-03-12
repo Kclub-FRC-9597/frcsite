@@ -106,12 +106,8 @@ export default {
 						return new Response(JSON.stringify({ error: 'Missing username or password' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 					}
 
-					if (username === 'tester') {
-						return new Response(JSON.stringify({ error: 'tester 账户保留为本地测试账户，不能写入数据库' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-					}
-
-					const now = Date.now();
-					await env.D1_PRESCOUT.prepare('INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+				if (username === 'tester' || username === 'user') {
+					return new Response(JSON.stringify({ error: `${username} 账户保留为本地测试账户，不能写入数据库` }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 						.bind(username, password, role, now, now)
 						.run();
 
@@ -132,12 +128,8 @@ export default {
 						return new Response(JSON.stringify({ error: 'Missing username' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 					}
 
-					if (username === 'tester') {
-						return new Response(JSON.stringify({ error: 'tester 账户保留为本地测试账户，不能写入数据库' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-					}
-
-					const now = Date.now();
-					if (password) {
+				if (username === 'tester' || username === 'user') {
+					return new Response(JSON.stringify({ error: `${username} 账户保留为本地测试账户，不能写入数据库` }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 						await env.D1_PRESCOUT.prepare('UPDATE users SET password = ?, role = ?, updated_at = ? WHERE username = ?')
 							.bind(password, role, now, username)
 							.run();
@@ -160,12 +152,8 @@ export default {
 						return new Response(JSON.stringify({ error: 'Missing username parameter' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 					}
 
-					if (username === 'tester') {
-						return new Response(JSON.stringify({ error: 'tester 账户保留为本地测试账户，不能删除' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-					}
-
-					await env.D1_PRESCOUT.prepare('DELETE FROM users WHERE username = ?').bind(username).run();
-					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+				if (username === 'tester' || username === 'user') {
+					return new Response(JSON.stringify({ error: `${username} 账户保留为本地测试账户，不能删除` }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 				} catch (err) {
 					return new Response(JSON.stringify({ error: 'DB Delete Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
 				}
@@ -573,6 +561,18 @@ async function ensureUsersTable(env: Env): Promise<void> {
 		const now = Date.now();
 		await env.D1_PRESCOUT.prepare('INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
 			.bind('admin', 'admin123', 'admin', now, now)
+			.run();
+	}
+
+	const userUser = await env.D1_PRESCOUT
+		.prepare('SELECT username FROM users WHERE username = ? LIMIT 1')
+		.bind('user')
+		.first();
+
+	if (!userUser) {
+		const now = Date.now();
+		await env.D1_PRESCOUT.prepare('INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+			.bind('user', 'user123', 'user', now, now)
 			.run();
 	}
 }

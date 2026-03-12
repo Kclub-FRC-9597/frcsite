@@ -84,10 +84,11 @@
                     <div class="users-card">
                         <h2 class="users-section-title">添加账户（数据库）</h2>
                         <div class="users-add-grid">
-                            <input type="text" id="newUsername" placeholder="用户名（不能是 tester）" />
+                            <input type="text" id="newUsername" placeholder="用户名（不能是 tester 或 user）" />
                             <input type="password" id="newPassword" placeholder="初始密码" />
                             <select id="newRole">
                                 <option value="admin">admin</option>
+                                <option value="user">user</option>
                                 <option value="tester">tester</option>
                             </select>
                             <button id="addUserBtn">添加账户</button>
@@ -121,7 +122,12 @@
                             <p class="profile-label">
                                 <strong>账户角色</strong>
                             </p>
-                            <p class="profile-value">${currentRole === 'admin' ? '👑 管理员' : '👤 测试员'}</p>
+                            <p class="profile-value">${
+                                currentRole === 'admin' ? '👑 管理员' :
+                                currentRole === 'user' ? '👤 用户' :
+                                currentRole === 'tester' ? '🧪 测试员' :
+                                '👤 未知'
+                            }</p>
                         </div>
                         <div class="profile-section">
                             <p class="profile-label">
