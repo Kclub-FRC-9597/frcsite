@@ -1335,7 +1335,7 @@
             const preScoutData = await getPrescoutEntries('');
             const scoutingData = await getScoutingEntries('');
             
-            // Build team list
+            // Build team list with PreScouting details
             const teamsMap = new Map();
             
             preScoutData.forEach(entry => {
@@ -1344,10 +1344,19 @@
                         number: entry.teamNumber,
                         name: entry.teamName,
                         preScoutCount: 0,
-                        scoutingCount: 0
+                        scoutingCount: 0,
+                        practices: [],
+                        compCounts: [],
+                        chassis: {}
                     });
                 }
-                teamsMap.get(entry.teamNumber).preScoutCount++;
+                const team = teamsMap.get(entry.teamNumber);
+                team.preScoutCount++;
+                if (entry.practice) team.practices.push(parseInt(entry.practice) || 0);
+                if (entry.compCount) team.compCounts.push(entry.compCount);
+                if (entry.chassis) {
+                    team.chassis[entry.chassis] = (team.chassis[entry.chassis] || 0) + 1;
+                }
             });
             
             scoutingData.forEach(entry => {
@@ -1358,7 +1367,10 @@
                             number: teamNum,
                             name: '-',
                             preScoutCount: 0,
-                            scoutingCount: 0
+                            scoutingCount: 0,
+                            practices: [],
+                            compCounts: [],
+                            chassis: {}
                         });
                     }
                     teamsMap.get(teamNum).scoutingCount++;
@@ -1381,20 +1393,36 @@
                             <tr class="analysis-table-head-gradient">
                                 <th>队号</th>
                                 <th>队名</th>
-                                <th class="analysis-cell-center">PreScouting 记录</th>
-                                <th class="analysis-cell-center">Scouting 记录</th>
-                                <th class="analysis-cell-center">总记录数</th>
+                                <th class="analysis-cell-center">PreScouting</th>
+                                <th class="analysis-cell-center">平均练习时长</th>
+                                <th class="analysis-cell-center">平均比赛次数</th>
+                                <th class="analysis-cell-center">常用底盘</th>
+                                <th class="analysis-cell-center">Scouting</th>
+                                <th class="analysis-cell-center">总计</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${teams.map(team => {
                                 const total = team.preScoutCount + team.scoutingCount;
+                                const avgPractice = team.practices.length > 0 
+                                    ? (team.practices.reduce((a, b) => a + b, 0) / team.practices.length).toFixed(1) 
+                                    : '-';
+                                const avgComp = team.compCounts.length > 0 
+                                    ? (team.compCounts.reduce((a, b) => a + b, 0) / team.compCounts.length).toFixed(1) 
+                                    : '-';
+                                const commonChassis = Object.keys(team.chassis).length > 0 
+                                    ? Object.keys(team.chassis).sort((a, b) => team.chassis[b] - team.chassis[a])[0]
+                                    : '-';
+                                
                                 return `
                                     <tr class="analysis-row">
                                         <td class="analysis-cell analysis-cell-strong">${team.number}</td>
                                         <td class="analysis-cell">${team.name}</td>
                                         <td class="analysis-cell analysis-cell-center">${team.preScoutCount}</td>
+                                        <td class="analysis-cell analysis-cell-center">${avgPractice}h</td>
+                                        <td class="analysis-cell analysis-cell-center">${avgComp}</td>
+                                        <td class="analysis-cell analysis-cell-center">${commonChassis}</td>
                                         <td class="analysis-cell analysis-cell-center">${team.scoutingCount}</td>
                                         <td class="analysis-cell analysis-cell-center analysis-cell-strong">${total}</td>
                                         <td class="analysis-cell">
