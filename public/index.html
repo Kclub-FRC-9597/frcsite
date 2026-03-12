@@ -1611,6 +1611,11 @@
                     <label>联系方式</label>
                     <input type="text" id="prescout-contact" placeholder="电话或邮箱">
                 </div>
+                <div class="form-group">
+                    <label>队伍照片</label>
+                    <input type="file" id="prescout-photo" accept="image/*" placeholder="选择照片">
+                    <div id="photo-preview" style="margin-top: 10px; max-width: 200px;"></div>
+                </div>
                 <button onclick="submitPreScouting()">提交</button>
 
                 <h2 class="analysis-subtitle-30">已收集的数据</h2>
@@ -1797,8 +1802,30 @@
                 autoClimbAccuracy: document.getElementById('prescout-auto-climb-accuracy').value,
                 autoStartPos: document.getElementById('prescout-auto-start-pos').value,
                 manualAccuracy: document.getElementById('prescout-manual-accuracy').value,
-                contact: document.getElementById('prescout-contact').value
+                contact: document.getElementById('prescout-contact').value,
+                photo: null
             };
+
+            // Handle photo upload
+            const photoInput = document.getElementById('prescout-photo');
+            if (photoInput && photoInput.files && photoInput.files[0]) {
+                const file = photoInput.files[0];
+                // Limit file size to 5MB
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('照片文件过大，请选择小于5MB的照片');
+                    return;
+                }
+                // Convert to base64
+                const reader = new FileReader();
+                await new Promise((resolve, reject) => {
+                    reader.onload = function() {
+                        data.photo = reader.result;
+                        resolve();
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
 
             if (!data.event || !data.collector || !data.teamNumber || !data.teamName) {
                 alert('请填写所有必填字段');

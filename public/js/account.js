@@ -144,7 +144,7 @@
                     <td class="users-table-cell">${roleDisplay}</td>
                     <td class="users-table-actions">
                         <button class="editUserBtn user-action-btn user-action-edit" data-username="${user.username}">编辑</button>
-                        <button class="resetPasswordBtn user-action-btn user-action-reset" data-username="${user.username}">重置密码</button>
+                        <button class="changePasswordBtn user-action-btn user-action-reset" data-username="${user.username}">修改密码</button>
                         ${!user.isSystemUser && !isSystemUser(user.username) ? `<button class="deleteUserBtn user-action-btn user-action-delete" data-username="${user.username}">删除</button>` : ''}
                     </td>
                 </tr>`;
@@ -159,7 +159,7 @@
             });
         });
 
-        document.querySelectorAll('.resetPasswordBtn').forEach(btn => {
+        document.querySelectorAll('.changePasswordBtn').forEach(btn => {
             btn.addEventListener('click', function() {
                 resetUserPassword(this.dataset.username);
             });
@@ -238,13 +238,40 @@
     }
 
     async function resetUserPassword(username) {
-        if (!confirm(`确定要重置 ${username} 的密码吗？`)) {
+        const newPassword = prompt(`请输入 ${username} 的新密码（至少6个字符）：`);
+        
+        if (newPassword === null) {
+            return; // 用户点击了取消
+        }
+
+        if (!newPassword || newPassword.trim() === '') {
+            alert('密码不能为空');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            alert('密码至少需要6个字符');
+            return;
+        }
+
+        const confirmPassword = prompt(`再次输入密码以确认：`);
+        
+        if (confirmPassword === null) {
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('两次输入的密码不一致');
+            return;
+        }
+
+        if (!confirm(`确定要修改 ${username} 的密码吗？`)) {
             return;
         }
 
         if (isSystemUser(username)) {
-            localStorage.removeItem(`password_${username}`);
-            alert(`${username} 的密码已重置为默认密码`);
+            localStorage.setItem(`password_${username}`, newPassword);
+            alert(`${username} 的密码已修改`);
             return;
         }
 
@@ -255,32 +282,19 @@
             return;
         }
 
-        let defaultPassword = ADMIN_PASS;
-        if (username === ADMIN_USER) {
-            defaultPassword = ADMIN_PASS;
-        } else if (username === USER_USER) {
-            defaultPassword = USER_PASS;
-        } else if (username === TESTER_USER) {
-            defaultPassword = TESTER_PASS;
-        } else if (target.role === 'user') {
-            defaultPassword = USER_PASS;
-        } else if (target.role === 'tester') {
-            defaultPassword = TESTER_PASS;
-        }
-
         const response = await apiFetch('/api/users', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, role: target.role || 'admin', password: defaultPassword })
+            body: JSON.stringify({ username, role: target.role || 'admin', password: newPassword })
         });
 
         const result = await response.json();
         if (!response.ok || !result?.ok) {
-            alert(result?.error || '重置密码失败');
+            alert(result?.error || '修改密码失败');
             return;
         }
 
-        alert(`${username} 的密码已重置为默认密码`);
+        alert(`${username} 的密码已修改`);
     }
 
     async function deleteUser(username) {
