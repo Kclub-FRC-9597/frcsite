@@ -610,12 +610,11 @@
         }
 
         function getScoutingConfig() {
-            const SCOUTING_VERSION = 2; // 版本号，新字段时需要递增
+            const SCOUTING_VERSION = 2;
             const defaultTemplate = getDefaultTemplate();
             const savedConfigStr = localStorage.getItem('scouting_config');
             const savedVersion = parseInt(localStorage.getItem('scouting_config_version') || '0');
             
-            // 如果版本不匹配或没有保存的配置，使用默认配置
             if (!savedConfigStr || savedVersion !== SCOUTING_VERSION) {
                 const newConfig = { fields: defaultTemplate.fields };
                 saveScoutingConfig(newConfig);
@@ -624,7 +623,6 @@
             }
             
             const config = JSON.parse(savedConfigStr);
-            // 即使版本相同，也检查是否有新字段需要合并（以防万一）
             const existingIds = new Set(config.fields.map(f => f.id));
             const newFields = defaultTemplate.fields.filter(f => !existingIds.has(f.id));
             if (newFields.length > 0) {
@@ -632,10 +630,6 @@
                 saveScoutingConfig(config);
             }
             return config;
-            }
-            // Load default template on first use
-            saveScoutingConfig({ fields: defaultTemplate.fields });
-            return { fields: defaultTemplate.fields };
         }
 
         function getDefaultTemplate() {
