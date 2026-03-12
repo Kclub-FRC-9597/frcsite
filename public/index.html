@@ -1148,6 +1148,7 @@
                                         <td class="analysis-cell">${entry.collector}</td>
                                         <td class="analysis-cell">
                                             <button onclick="showTeamDetail('${entry.teamNumber}')" class="analysis-btn-sm">查看详情</button>
+                                            ${currentRole === 'admin' ? `<button onclick="deletePrescoutEntry('${entry.id}')" class="analysis-btn-sm" style="background: #dc3545;">删除</button>` : ''}
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -1185,6 +1186,7 @@
                                         <td class="analysis-cell">${new Date(entry.ts).toLocaleString()}</td>
                                         <td class="analysis-cell">
                                             <button onclick="showTeamDetail('${entry.team || ''}')" class="analysis-btn-sm">查看详情</button>
+                                            ${currentRole === 'admin' ? `<button onclick="deleteScoutingEntry('${entry.id}')" class="analysis-btn-sm" style="background: #dc3545;">删除</button>` : ''}
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -1195,6 +1197,52 @@
             `;
             
             content.innerHTML = html;
+        }
+
+        async function deletePrescoutEntry(entryId) {
+            if (!confirm('确定要删除此 PreScouting 记录吗？此操作不可逆。')) {
+                return;
+            }
+            try {
+                const response = await fetch(`/api/prescout?id=${entryId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken || ''}`
+                    }
+                });
+                if (response.ok) {
+                    alert('记录已删除');
+                    showAnalysisOverview();
+                } else {
+                    const error = await response.json();
+                    alert('删除失败: ' + (error.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('删除失败: ' + (err as any).message);
+            }
+        }
+
+        async function deleteScoutingEntry(entryId) {
+            if (!confirm('确定要删除此 Scouting 记录吗？此操作不可逆。')) {
+                return;
+            }
+            try {
+                const response = await fetch(`/api/scouting?id=${entryId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken || ''}`
+                    }
+                });
+                if (response.ok) {
+                    alert('记录已删除');
+                    showAnalysisOverview();
+                } else {
+                    const error = await response.json();
+                    alert('删除失败: ' + (error.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('删除失败: ' + (err as any).message);
+            }
         }
 
         async function showTeamDetail(teamNumber) {

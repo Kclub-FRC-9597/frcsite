@@ -265,6 +265,18 @@ export default {
 				} catch (err) {
 					return new Response(JSON.stringify({ error: 'DB Write Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
 				}
+			} else if (request.method === 'DELETE') {
+				try {
+					const url_obj = new URL(request.url);
+					const id = url_obj.searchParams.get('id');
+					if (!id) {
+						return new Response(JSON.stringify({ error: 'Missing id parameter' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+					}
+					await env.D1_PRESCOUT.prepare('DELETE FROM prescout WHERE id = ?').bind(id).run();
+					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Delete Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
 			} else {
 				return new Response('Method Not Allowed', { status: 405 });
 			}
@@ -327,6 +339,18 @@ export default {
 					return new Response(JSON.stringify({ ok: true, id }), { headers: { 'Content-Type': 'application/json' } });
 				} catch (err) {
 					return new Response(JSON.stringify({ error: 'DB Write Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+				}
+			} else if (request.method === 'DELETE') {
+				try {
+					const url_obj = new URL(request.url);
+					const id = url_obj.searchParams.get('id');
+					if (!id) {
+						return new Response(JSON.stringify({ error: 'Missing id parameter' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+					}
+					await env.D1_PRESCOUT.prepare('DELETE FROM scouting WHERE id = ?').bind(id).run();
+					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+				} catch (err) {
+					return new Response(JSON.stringify({ error: 'DB Delete Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
 				}
 			} else {
 				return new Response('Method Not Allowed', { status: 405 });
