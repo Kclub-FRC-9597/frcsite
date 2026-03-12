@@ -1220,7 +1220,7 @@
                     alert('删除失败: ' + (error.error || 'Unknown error'));
                 }
             } catch (err) {
-                alert('删除失败: ' + (err as any).message);
+                alert('删除失败: ' + (err && err.message ? err.message : 'Unknown error'));
             }
         }
 
@@ -1243,7 +1243,7 @@
                     alert('删除失败: ' + (error.error || 'Unknown error'));
                 }
             } catch (err) {
-                alert('删除失败: ' + (err as any).message);
+                alert('删除失败: ' + (err && err.message ? err.message : 'Unknown error'));
             }
         }
 
