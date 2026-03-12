@@ -319,7 +319,7 @@
                 if (mobileToggle) mobileToggle.style.display = 'none';
                 renderLogin();
             } else if (hash.startsWith('#account')) {
-                if (mobileToggle) mobileToggle.style.display = 'none';
+                if (mobileToggle) mobileToggle.style.display = 'flex';
                 if (currentUser) {
                     await renderAccountDashboard();
                 } else {
@@ -329,7 +329,7 @@
                 if (mobileToggle) mobileToggle.style.display = 'flex';
                 await renderToolsLayout(hash);
             } else if (hash.startsWith('#seasons')) {
-                if (mobileToggle) mobileToggle.style.display = 'none';
+                if (mobileToggle) mobileToggle.style.display = 'flex';
                 await renderSeasonsLayout(hash);
             } else {
                 if (mobileToggle) mobileToggle.style.display = 'none';
@@ -2013,7 +2013,13 @@ Submitted: ${new Date(entry.ts).toLocaleString()}
         }
 
         function toggleMobileSidebar() {
-            const sidebar = document.getElementById('toolsSidebar');
+            let sidebar = document.getElementById('accountSidebar');
+            if (!sidebar) {
+                sidebar = document.getElementById('toolsSidebar');
+            }
+            if (!sidebar) {
+                sidebar = document.getElementById('seasonsSidebar');
+            }
             if (sidebar) {
                 sidebar.classList.toggle('active');
             }
