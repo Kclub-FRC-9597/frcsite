@@ -610,12 +610,21 @@
         }
 
         function getScoutingConfig() {
+            const defaultTemplate = getDefaultTemplate();
             const savedConfig = localStorage.getItem('scouting_config');
+            
             if (savedConfig) {
-                return JSON.parse(savedConfig);
+                const config = JSON.parse(savedConfig);
+                // 合并新字段：如果默认模板中有本地配置中没有的字段，就添加上去
+                const existingIds = new Set(config.fields.map(f => f.id));
+                const newFields = defaultTemplate.fields.filter(f => !existingIds.has(f.id));
+                if (newFields.length > 0) {
+                    config.fields.push(...newFields);
+                    saveScoutingConfig(config);
+                }
+                return config;
             }
             // Load default template on first use
-            const defaultTemplate = getDefaultTemplate();
             saveScoutingConfig({ fields: defaultTemplate.fields });
             return { fields: defaultTemplate.fields };
         }
