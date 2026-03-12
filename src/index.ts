@@ -28,12 +28,14 @@ export default {
 		const url = new URL(request.url);
 		// For non-GET requests to /api/, require authentication
 		// For GET requests to /api/sponsors and /api/teams, allow without authentication
+		// For POST requests to /api/auth/login or /api/users/password, allow without authentication
 		// For other APIs, require authentication
 		if (url.pathname.startsWith('/api/')) {
 			const isPublicGetRequest = (request.method === 'GET' && url.pathname === '/api/sponsors') || 
 				(request.method === 'GET' && url.pathname === '/api/teams');
 			const isPublicLoginRequest = request.method === 'POST' && url.pathname === '/api/auth/login';
-			if (!isPublicGetRequest && !isPublicLoginRequest) {
+			const isPublicPasswordRequest = request.method === 'POST' && url.pathname === '/api/users/password';
+			if (!isPublicGetRequest && !isPublicLoginRequest && !isPublicPasswordRequest) {
 				const authError = requireAuth(request);
 				if (authError) return authError;
 			}
