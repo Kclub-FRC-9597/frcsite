@@ -610,19 +610,28 @@
         }
 
         function getScoutingConfig() {
+            const SCOUTING_VERSION = 2; // 版本号，新字段时需要递增
             const defaultTemplate = getDefaultTemplate();
-            const savedConfig = localStorage.getItem('scouting_config');
+            const savedConfigStr = localStorage.getItem('scouting_config');
+            const savedVersion = parseInt(localStorage.getItem('scouting_config_version') || '0');
             
-            if (savedConfig) {
-                const config = JSON.parse(savedConfig);
-                // 合并新字段：如果默认模板中有本地配置中没有的字段，就添加上去
-                const existingIds = new Set(config.fields.map(f => f.id));
-                const newFields = defaultTemplate.fields.filter(f => !existingIds.has(f.id));
-                if (newFields.length > 0) {
-                    config.fields.push(...newFields);
-                    saveScoutingConfig(config);
-                }
-                return config;
+            // 如果版本不匹配或没有保存的配置，使用默认配置
+            if (!savedConfigStr || savedVersion !== SCOUTING_VERSION) {
+                const newConfig = { fields: defaultTemplate.fields };
+                saveScoutingConfig(newConfig);
+                localStorage.setItem('scouting_config_version', SCOUTING_VERSION.toString());
+                return newConfig;
+            }
+            
+            const config = JSON.parse(savedConfigStr);
+            // 即使版本相同，也检查是否有新字段需要合并（以防万一）
+            const existingIds = new Set(config.fields.map(f => f.id));
+            const newFields = defaultTemplate.fields.filter(f => !existingIds.has(f.id));
+            if (newFields.length > 0) {
+                config.fields.push(...newFields);
+                saveScoutingConfig(config);
+            }
+            return config;
             }
             // Load default template on first use
             saveScoutingConfig({ fields: defaultTemplate.fields });
