@@ -1021,6 +1021,29 @@
             margin-bottom: 20px;
         }
 
+        .scouting-section {
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .scouting-section:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .scouting-section-title {
+            color: var(--accent);
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent);
+        }
+
         label {
             display: block;
             margin-bottom: 5px;

@@ -912,43 +912,83 @@
             showScoutingConfig();
         }
 
+        function getFieldSection(fieldId) {
+            const sections = {
+                'auto_tasks': 'auto',
+                'auto_efficiency': 'auto',
+                'teleop_switch_tasks': 'teleop',
+                'teleop_switch_efficiency': 'teleop',
+                'shift1_furnace': 'shift1',
+                'shift1_tasks': 'shift1',
+                'shift1_efficiency': 'shift1',
+                'shift2_furnace': 'shift2',
+                'shift2_tasks': 'shift2',
+                'shift2_efficiency': 'shift2',
+                'shift3_furnace': 'shift3',
+                'shift3_tasks': 'shift3',
+                'shift3_efficiency': 'shift3',
+                'shift4_furnace': 'shift4',
+                'shift4_tasks': 'shift4',
+                'shift4_efficiency': 'shift4',
+                'endgame_tasks': 'endgame',
+                'endgame_efficiency': 'endgame'
+            };
+            return sections[fieldId] || 'basic';
+        }
+
+        function getSectionTitle(section) {
+            const titles = {
+                'auto': '⚙️ 自动阶段',
+                'teleop': '🔄 过度切换',
+                'shift1': '🎯 Shift 1',
+                'shift2': '🎯 Shift 2',
+                'shift3': '🎯 Shift 3',
+                'shift4': '🎯 Shift 4',
+                'endgame': '🏁 End Game'
+            };
+            return titles[section] || '';
+        }
+
         function showScoutingForm() {
             const config = getScoutingConfig();
             const content = document.getElementById('scouting-content');
             
             let formHTML = '<h2>数据收集</h2><form id="scouting-form">';
             
+            // Group fields by section
+            const fieldsBySection = {};
+            const sections = [];
+            
             config.fields.forEach(field => {
-                formHTML += `<div class="form-group">`;
-                formHTML += `<label>${field.label}${field.required ? ' *' : ''}</label>`;
-                
-                if (field.type === 'text') {
-                    formHTML += `<input type="text" id="field-${field.id}" ${field.required ? 'required' : ''}>`;
-                } else if (field.type === 'number') {
-                    formHTML += `<input type="number" step="any" id="field-${field.id}" ${field.required ? 'required' : ''}>`;
-                } else if (field.type === 'radio' && field.options) {
-                    field.options.forEach((option, idx) => {
-                        formHTML += `
-                            <div>
-                                <label class="label-normal">
-                                    <input type="radio" name="field-${field.id}" value="${option}" ${field.required && idx === 0 ? 'required' : ''}>
-                                    ${option}
-                                </label>
-                            </div>`;
-                    });
-                } else if (field.type === 'checkbox' && field.options) {
-                    field.options.forEach(option => {
-                        formHTML += `
-                            <div>
-                                <label class="label-normal">
-                                    <input type="checkbox" name="field-${field.id}" value="${option}">
-                                    ${option}
-                                </label>
-                            </div>`;
-                    });
+                const section = getFieldSection(field.id);
+                if (!fieldsBySection[section]) {
+                    fieldsBySection[section] = [];
+                    sections.push(section);
                 }
+                fieldsBySection[section].push(field);
+            });
+            
+            // Render fields grouped by section
+            sections.forEach(section => {
+                const fields = fieldsBySection[section];
+                const sectionTitle = getSectionTitle(section);
                 
-                formHTML += `</div>`;
+                if (section === 'basic') {
+                    // Basic fields without section wrapper
+                    fields.forEach(field => {
+                        formHTML += renderFormField(field);
+                    });
+                } else {
+                    // Grouped fields with section wrapper
+                    formHTML += `<div class="scouting-section">`;
+                    if (sectionTitle) {
+                        formHTML += `<div class="scouting-section-title">${sectionTitle}</div>`;
+                    }
+                    fields.forEach(field => {
+                        formHTML += renderFormField(field);
+                    });
+                    formHTML += `</div>`;
+                }
             });
             
             formHTML += `
@@ -957,6 +997,40 @@
             </form>`;
             
             content.innerHTML = formHTML;
+        }
+
+        function renderFormField(field) {
+            let fieldHTML = `<div class="form-group">`;
+            fieldHTML += `<label>${field.label}${field.required ? ' *' : ''}</label>`;
+            
+            if (field.type === 'text') {
+                fieldHTML += `<input type="text" id="field-${field.id}" ${field.required ? 'required' : ''}>`;
+            } else if (field.type === 'number') {
+                fieldHTML += `<input type="number" step="any" id="field-${field.id}" ${field.required ? 'required' : ''}>`;
+            } else if (field.type === 'radio' && field.options) {
+                field.options.forEach((option, idx) => {
+                    fieldHTML += `
+                        <div>
+                            <label class="label-normal">
+                                <input type="radio" name="field-${field.id}" value="${option}" ${field.required && idx === 0 ? 'required' : ''}>
+                                ${option}
+                            </label>
+                        </div>`;
+                });
+            } else if (field.type === 'checkbox' && field.options) {
+                field.options.forEach(option => {
+                    fieldHTML += `
+                        <div>
+                            <label class="label-normal">
+                                <input type="checkbox" name="field-${field.id}" value="${option}">
+                                ${option}
+                            </label>
+                        </div>`;
+                });
+            }
+            
+            fieldHTML += `</div>`;
+            return fieldHTML;
         }
 
         async function submitScoutingData() {
