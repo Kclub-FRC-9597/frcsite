@@ -530,6 +530,8 @@
                     await updateTeamsList('Shanghai Regional');
                     // Initialize prescouting form listeners
                     initializePrescouttingForm();
+                    // Load user's assigned teams
+                    await loadUserAssignedTeams();
                 }, 100);
             }
         }
@@ -1439,6 +1441,9 @@
             content.innerHTML = html;
         }
 
+        // Global variable to store current user's assigned teams
+        let userAssignedTeams = [];
+
         function renderPreScouting() {
             return `
                 <h1>PreScouting</h1>
@@ -1455,6 +1460,7 @@
                 <div class="form-group">
                     <label>Team Number</label>
                     <input type="text" id="prescout-team-number" placeholder="队伍编号" oninput="handleTeamNumberInput()">
+                    <div id="team-assignment-hint" style="font-size: 12px; margin-top: 5px; color: #999;"></div>
                 </div>
                 <div class="form-group">
                     <label>Team Name</label>
@@ -1656,16 +1662,36 @@
             }
         }
 
+        async function loadUserAssignedTeams() {
+            try {
+                if (!isAdmin()) {
+                    userAssignedTeams = [];
+                    return;
+                }
+                const response = await apiFetch('/api/team-assignments');
+                const assignments = await response.json();
+                // Filter assignments for current user
+                userAssignedTeams = assignments
+                    .filter(a => a.username === currentUser)
+                    .map(a => a.team_number);
+            } catch (err) {
+                console.error('Error loading user assigned teams:', err);
+                userAssignedTeams = [];
+            }
+        }
+
         function handleTeamNumberInput() {
             if (!currentEventTeams || currentEventTeams.length === 0) return;
             
             const input = document.getElementById('prescout-team-number');
             const nameInput = document.getElementById('prescout-team-name');
+            const hintDiv = document.getElementById('team-assignment-hint');
             if (!input || !nameInput) return;
             
             const teamNumber = input.value.trim();
             if (!teamNumber) {
                 nameInput.value = '';
+                if (hintDiv) hintDiv.innerText = '';
                 return;
             }
             
@@ -1674,6 +1700,15 @@
                 nameInput.value = team.team_name;
             } else {
                 nameInput.value = '';
+            }
+            
+            // Check if team is assigned to current user
+            if (hintDiv) {
+                if (userAssignedTeams.includes(teamNumber)) {
+                    hintDiv.innerHTML = '<span style="color: #28a745;">✓ 已分配给你</span>';
+                } else {
+                    hintDiv.innerHTML = '<span style="color: #999;">自由填写</span>';
+                }
             }
         }
 

@@ -578,7 +578,7 @@ export default {
 
 			if (request.method === 'GET') {
 				try {
-					const r = await env.D1_PRESCOUT.prepare('SELECT username, team_number FROM team_assignments ORDER BY username ASC').all();
+					const r = await env.D1_PRESCOUT.prepare('SELECT username, team_number FROM team_assignments ORDER BY username ASC, team_number ASC').all();
 					const rows = (r && r.results) ? r.results : [];
 					return new Response(JSON.stringify(rows), { headers: { 'Content-Type': 'application/json' } });
 				} catch (err) {
@@ -594,12 +594,19 @@ export default {
 						return new Response(JSON.stringify({ error: 'Missing username or team_number' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 					}
 
-					// Delete existing assignment for this user
-					await env.D1_PRESCOUT.prepare('DELETE FROM team_assignments WHERE username = ?').bind(username).run();
+					// Check if assignment already exists
+					const existing = await env.D1_PRESCOUT.prepare('SELECT id FROM team_assignments WHERE username = ? AND team_number = ? LIMIT 1')
+						.bind(username, team_number)
+						.first() as any;
+					
+					if (existing) {
+						return new Response(JSON.stringify({ error: `${username} 已被分配给队伍 ${team_number}` }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+					}
 					
 					// Insert new assignment
-					await env.D1_PRESCOUT.prepare('INSERT INTO team_assignments (username, team_number) VALUES (?, ?)')
-						.bind(username, team_number)
+					const id = crypto.randomUUID();
+					await env.D1_PRESCOUT.prepare('INSERT INTO team_assignments (id, username, team_number) VALUES (?, ?, ?)')
+						.bind(id, username, team_number)
 						.run();
 					
 					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
@@ -610,10 +617,13 @@ export default {
 				try {
 					const url_obj = new URL(request.url);
 					const username = url_obj.searchParams.get('username');
-					if (!username) {
-						return new Response(JSON.stringify({ error: 'Missing username parameter' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+					const team_number = url_obj.searchParams.get('team_number');
+					
+					if (!username || !team_number) {
+						return new Response(JSON.stringify({ error: 'Missing username or team_number parameter' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 					}
-					await env.D1_PRESCOUT.prepare('DELETE FROM team_assignments WHERE username = ?').bind(username).run();
+					
+					await env.D1_PRESCOUT.prepare('DELETE FROM team_assignments WHERE username = ? AND team_number = ?').bind(username, team_number).run();
 					return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
 				} catch (err) {
 					return new Response(JSON.stringify({ error: 'DB Delete Error: ' + (err as any).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
@@ -675,8 +685,10 @@ async function ensureUsersTable(env: Env): Promise<void> {
 async function ensureTeamAssignmentsTable(env: Env): Promise<void> {
 	await env.D1_PRESCOUT.prepare(`
 		CREATE TABLE IF NOT EXISTS team_assignments (
-			username TEXT PRIMARY KEY,
-			team_number TEXT NOT NULL
+			id TEXT PRIMARY KEY,
+			username TEXT NOT NULL,
+			team_number TEXT NOT NULL,
+			UNIQUE(username, team_number)
 		)
 	`).run();
 }

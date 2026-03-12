@@ -502,7 +502,15 @@
         // Load current assignments
         const assignmentsResponse = await apiFetch('/api/team-assignments');
         const assignments = await assignmentsResponse.json();
-        const assignmentsMap = new Map(assignments.map(a => [a.username, a.team_number]));
+        
+        // Group assignments by username: username -> [team_number1, team_number2, ...]
+        const assignmentsMap = new Map();
+        assignments.forEach(a => {
+            if (!assignmentsMap.has(a.username)) {
+                assignmentsMap.set(a.username, []);
+            }
+            assignmentsMap.get(a.username).push(a.team_number);
+        });
 
         // Populate username dropdown (exclude admin)
         const usernameSelect = document.getElementById('assignUsername');
@@ -535,16 +543,18 @@
             html += '<thead><tr class="users-table-head"><th>队员</th><th>分配队伍</th><th>队名</th><th>操作</th></tr></thead>';
             html += '<tbody>';
 
-            for (const [username, teamNumber] of assignmentsMap) {
-                const team = teams.find(t => t.team_number === teamNumber);
-                html += `<tr class="users-table-row">
-                    <td class="users-table-cell">${username}</td>
-                    <td class="users-table-cell">${teamNumber}</td>
-                    <td class="users-table-cell">${team ? team.team_name : '未知'}</td>
-                    <td class="users-table-actions">
-                        <button class="removeAssignmentBtn user-action-btn user-action-delete" data-username="${username}">删除分配</button>
-                    </td>
-                </tr>`;
+            for (const [username, teamNumbers] of assignmentsMap) {
+                for (const teamNumber of teamNumbers) {
+                    const team = teams.find(t => t.team_number === teamNumber);
+                    html += `<tr class="users-table-row">
+                        <td class="users-table-cell">${username}</td>
+                        <td class="users-table-cell">${teamNumber}</td>
+                        <td class="users-table-cell">${team ? team.team_name : '未知'}</td>
+                        <td class="users-table-actions">
+                            <button class="removeAssignmentBtn user-action-btn user-action-delete" data-username="${username}" data-team-number="${teamNumber}">删除分配</button>
+                        </td>
+                    </tr>`;
+                }
             }
 
             html += '</tbody></table>';
@@ -552,7 +562,7 @@
 
             document.querySelectorAll('.removeAssignmentBtn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    removeTeamAssignment(this.dataset.username);
+                    removeTeamAssignment(this.dataset.username, this.dataset.teamNumber);
                 });
             });
         }
@@ -586,12 +596,12 @@
         await setupTeamAssignmentListeners();
     }
 
-    async function removeTeamAssignment(username) {
-        if (!confirm(`确定要删除 ${username} 的队伍分配吗？`)) {
+    async function removeTeamAssignment(username, teamNumber) {
+        if (!confirm(`确定要删除 ${username} 对队伍 ${teamNumber} 的分配吗？`)) {
             return;
         }
 
-        const response = await apiFetch(`/api/team-assignments?username=${username}`, {
+        const response = await apiFetch(`/api/team-assignments?username=${username}&team_number=${teamNumber}`, {
             method: 'DELETE'
         });
 
