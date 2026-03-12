@@ -610,7 +610,7 @@
         }
 
         function getScoutingConfig() {
-            const SCOUTING_VERSION = 2;
+            const SCOUTING_VERSION = 3;
             const defaultTemplate = getDefaultTemplate();
             const savedConfigStr = localStorage.getItem('scouting_config');
             const savedVersion = parseInt(localStorage.getItem('scouting_config_version') || '0');
@@ -636,9 +636,8 @@
             return {
                 name: '默认比赛模板',
                 fields: [
-                    { id: 'event', label: 'Event', type: 'text', required: true },
                     { id: 'team', label: '赛队队号', type: 'text', required: true },
-                    { id: 'stage', label: '阶段', type: 'radio', required: true, options: ['排位', '淘汰'] },
+                    { id: 'stage', label: '阶段', type: 'radio', required: true, options: ['排位', '淘汰', '练习赛'] },
                     
                     // Auto Phase
                     { id: 'auto_tasks', label: '自动阶段任务', type: 'checkbox', required: false, options: ['shooting', 'feeding', '干扰', '离开起始线', '挂车'] },
@@ -670,12 +669,7 @@
                     
                     // End Game
                     { id: 'endgame_tasks', label: 'End game任务', type: 'checkbox', required: false, options: ['shooting', 'feeding', '干扰', '瞎逛', '挂车'] },
-                    { id: 'endgame_efficiency', label: 'End game效率', type: 'radio', required: false, options: ['低', '中', '高'] },
-                    
-                    // Original fields
-                    { id: 'ball_score', label: '投球得分', type: 'number', required: false },
-                    { id: 'hang_score', label: '挂车得分', type: 'number', required: false },
-                    { id: 'collector', label: '记录者', type: 'text', required: true }
+                    { id: 'endgame_efficiency', label: 'End game效率', type: 'radio', required: false, options: ['低', '中', '高'] }
                 ]
             };
         }
