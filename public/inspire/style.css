@@ -123,6 +123,69 @@ header .logo {
     gap: 0.4rem;
     margin-right: 0.5rem;
 }
+.logo-dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.logo-dropdown-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-family: inherit;
+    color: inherit;
+}
+.logo-dropdown-toggle .caret {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.7);
+    transition: transform 0.2s;
+}
+.logo-dropdown-toggle[aria-expanded="true"] .caret {
+    transform: rotate(180deg);
+}
+.logo-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 210px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    padding: 0.4rem;
+    display: none;
+    z-index: 130;
+}
+.logo-dropdown-menu.open {
+    display: block;
+}
+.logo-dd-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--gray-800);
+    transition: background 0.15s;
+}
+.logo-dd-item:hover {
+    background: var(--gray-100);
+    text-decoration: none;
+}
+.logo-dd-item .dd-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.logo-dd-item .dd-sub {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
 .header-tabs {
     display: flex;
     gap: 0.25rem;
