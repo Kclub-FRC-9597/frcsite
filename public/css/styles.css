@@ -1751,6 +1751,25 @@
             transform: scaleX(1);
         }
 
+        .site-nav .header-inspire-btn {
+            background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent) 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 8px 18px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+        }
+
+        .site-nav .header-inspire-btn::after {
+            display: none;
+        }
+
+        .site-nav .header-inspire-btn:hover {
+            color: #fff !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.24);
+        }
+
 
 
         /* Styles for external footer.html */

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DB Manager — STS_DB 开发者工具</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; }
+        body { font-family: Menlo, Consolas, monospace; background: #1e1e2e; color: #cdd6f4; padding: 1.5rem; max-width: 960px; margin: 0 auto; }
+        h1 { font-size: 1.1rem; color: #cba6f7; margin-bottom: 0.25rem; }
+        .sub { font-size: 0.75rem; color: #6c7086; margin-bottom: 1.5rem; }
+        .card { background: #313244; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .card-title { font-size: 0.85rem; font-weight: 600; color: #89b4fa; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+        th { text-align: left; padding: 0.4rem 0.6rem; background: #45475a; color: #bac2de; font-weight: 600; }
+        td { padding: 0.35rem 0.6rem; border-top: 1px solid #45475a; word-break: break-all; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+        tr:hover { background: #363850; }
+        .btn { padding: 0.3rem 0.8rem; border: 1px solid #585b70; background: #45475a; color: #cdd6f4; border-radius: 5px; cursor: pointer; font-size: 0.75rem; font-family: inherit; }
+        .btn:hover { background: #585b70; }
+        .btn-danger { background: #e5534b33; border-color: #e5534b; color: #e5534b; }
+        .btn-danger:hover { background: #e5534b55; }
+        .badge { display: inline-block; padding: 0.1rem 0.45rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+        .badge-ok { background: #a6e3a133; color: #a6e3a1; }
+        .badge-old { background: #f38ba833; color: #f38ba8; }
+        .log { background: #181825; padding: 0.6rem 0.8rem; border-radius: 6px; font-size: 0.75rem; margin-top: 0.75rem; white-space: pre-wrap; line-height: 1.5; max-height: 200px; overflow-y: auto; }
+        .flex-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <h1>🗄️ STS_DB Manager</h1>
+    <p class="sub">开发者工具 — 上线时可移除整个 tools/ 目录</p>
+
+    <!-- 数据库信息 -->
+    <div class="card">
+        <div class="card-title">📊 数据库信息</div>
+        <div id="dbInfo">🔍 检测中...</div>
+    </div>
+
+    <!-- Schema 校验 -->
+    <div class="card">
+        <div class="card-title">✅ Schema 校验
+            <span style="font-weight:400;font-size:0.7rem;color:#6c7086;">(运行时预期 vs 实际)</span>
+        </div>
+        <div id="schemaCheck">🔍 检测中...</div>
+    </div>
+
+    <!-- 表列表 -->
+    <div class="card">
+        <div class="card-title">📋 表结构
+            <button class="btn" id="refreshBtn">🔄 刷新</button>
+        </div>
+        <table id="tableList"><tbody><tr><td>🔍 检测中...</td></tr></tbody></table>
+    </div>
+
+    <!-- 表管理 -->
+    <div class="card">
+        <div class="card-title">🛠 表管理 (与 _initIDB 一致)</div>
+        <div id="schemaPanel">🔍 检测中...</div>
+    </div>
+
+    <!-- 查看数据 -->
+    <div class="card" id="dataCard" style="display:none;">
+        <div class="card-title">🔎 查看数据</div>
+        <div class="flex-row" style="margin-bottom:0.5rem;">
+            <select id="tableSelect"><option value="">选择表...</option></select>
+            <button class="btn" id="viewDataBtn">查看</button>
+            <button class="btn btn-danger" id="deleteTableBtn">🗑 删除此表</button>
+        </div>
+        <div id="dataView"></div>
+    </div>
+
+    <!-- 旧表清理 -->
+    <div class="card" id="actionCard" style="display:none;">
+        <div class="card-title">🛠 维护操作</div>
+        <div class="flex-row">
+            <button class="btn btn-danger" id="deleteGroupsBtn">🗑 删除旧 groups 表</button>
+            <span style="font-size:0.72rem;color:#6c7086;">(旧数据已迁移至 classes + enrollments)</span>
+        </div>
+        <div class="log" id="actionLog" style="display:none;"></div>
+    </div>
+
+    <script>
+    const DB_NAME = 'STS_DB';
+
+    function openDB(version) {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, version);
+            req.onsuccess = e => resolve(e.target.result);
+            req.onerror = e => reject(e.target.error);
+            req.onblocked = () => reject(new Error('数据库被其他标签页占用，请关闭后重试'));
+        });
+    }
+
+    async function getTableData(storeName) {
+        const db = await openDB();
+        const data = await new Promise(r => {
+            const q = db.transaction(storeName).objectStore(storeName).getAll();
+            q.onsuccess = () => r(q.result);
+        });
+        db.close();
+        return data;
+    }
+
+    async function deleteTable(storeName) {
+        const db = await openDB();
+        const oldVer = db.version;
+        db.close();
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, oldVer + 1);
+            req.onupgradeneeded = (e) => {
+                const d = e.target.result;
+                if (d.objectStoreNames.contains(storeName)) d.deleteObjectStore(storeName);
+            };
+            req.onsuccess = e => { e.target.result.close(); resolve(true); };
+            req.onerror = e => reject(e.target.error);
+            req.onblocked = () => reject(new Error('数据库被占用'));
+        });
+    }
+
+    // ========== Schema 校验 & 面板 ==========
+    const EXPECTED_SCHEMA = {
+        students:    { indexes: [] },
+        classes:     { indexes: [] },
+        enrollments: { indexes: ['by_student', 'by_class', 'by_status'] },
+    };
+
+    async function createTable(name) {
+        const spec = EXPECTED_SCHEMA[name];
+        if (!spec) return;
+        try {
+            const db = await openDB();
+            const oldVer = db.version;
+            db.close();
+            await new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, oldVer + 1);
+                req.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    if (!d.objectStoreNames.contains(name)) {
+                        const store = d.createObjectStore(name, { keyPath: 'id' });
+                        spec.indexes.forEach(i => store.createIndex(i, i, { unique: false }));
+                    }
+                };
+                req.onsuccess = e => { e.target.result.close(); resolve(); };
+                req.onerror = e => reject(e.target.error);
+                req.onblocked = () => reject(new Error('数据库被占用'));
+            });
+            alert(`✅ 表 "${name}" 已创建`);
+            await renderAll();
+        } catch (e) { alert(`❌ 创建失败: ${e.message}`); }
+    }
+    window.createTable = createTable;
+
+    async function renderAll() {
+        // 只开一次 DB
+        const db = await openDB();
+        if (!db) {
+            document.getElementById('dbInfo').innerHTML = '❌ 无法连接';
+            return;
+        }
+
+        const names = Array.from(db.objectStoreNames);
+
+        // 统计各表记录数（并行）
+        const counts = {};
+        await Promise.all(names.map(async (name) => {
+            counts[name] = await new Promise(r => {
+                const q = db.transaction(name).objectStore(name).count();
+                q.onsuccess = () => r(q.result);
+            });
+        }));
+
+        // ① 数据库信息
+        document.getElementById('dbInfo').innerHTML =
+            `<span>版本: <strong>v${db.version}</strong></span>` +
+            `<span style="margin-left:1rem;">表数量: <strong>${names.length}</strong></span>`;
+
+        // ② Schema 校验
+        const expected = Object.keys(EXPECTED_SCHEMA);
+        const warnings = [];
+        for (const name of expected) {
+            if (!names.includes(name)) warnings.push({ cls: 'bad', msg: `缺失表: ${name}` });
+        }
+        for (const name of names) {
+            const spec = EXPECTED_SCHEMA[name];
+            if (!spec) {
+                warnings.push({ cls: 'bad', msg: `多余表: ${name}` });
+                continue;
+            }
+            const store = db.transaction(name).objectStore(name);
+            for (const idx of spec.indexes) {
+                if (!store.indexNames.contains(idx))
+                    warnings.push({ cls: 'bad', msg: `表 ${name} 缺失索引: ${idx}` });
+            }
+        }
+        document.getElementById('schemaCheck').innerHTML = warnings.length === 0
+            ? '✅ Schema 与预期一致'
+            : warnings.map(w => `<span class="${w.cls}">⚠ ${w.msg}</span>`).join('<br>');
+
+        // ③ 表列表
+        let rows = '';
+        for (const name of names) {
+            const badge = name === 'groups' ? '<span class="badge badge-old">旧表</span>'
+                : `<span class="badge badge-ok">v${db.version}</span>`;
+            rows += `<tr><td>${name}</td><td style="text-align:center;">${counts[name] ?? 0}</td><td>${badge}</td></tr>`;
+        }
+        document.getElementById('tableList').innerHTML =
+            `<thead><tr><th>表名</th><th style="text-align:center;">记录数</th><th>状态</th></tr></thead>` +
+            `<tbody>${rows || '<tr><td colspan="3">无表</td></tr>'}</tbody>`;
+
+        // ④ 数据查看下拉
+        const sel = document.getElementById('tableSelect');
+        sel.innerHTML = '<option value="">选择表...</option>' +
+            names.map(n => `<option value="${n}">${n}</option>`).join('');
+        document.getElementById('dataCard').style.display = names.length ? '' : 'none';
+
+        // ⑤ 逐表创建面板
+        let panelHtml = '<table><thead><tr><th>表名</th><th>索引</th><th style="text-align:center;">状态</th><th>操作</th></tr></thead><tbody>';
+        for (const [name, spec] of Object.entries(EXPECTED_SCHEMA)) {
+            const exists = names.includes(name);
+            const idxInfo = spec.indexes.length ? spec.indexes.join(', ') : '—';
+            if (exists) {
+                panelHtml += `<tr><td>${name}</td><td style="font-size:0.72rem;color:#6c7086;">${idxInfo}</td><td style="text-align:center;">✅</td><td></td></tr>`;
+            } else {
+                panelHtml += `<tr><td>${name}</td><td style="font-size:0.72rem;color:#6c7086;">${idxInfo}</td><td style="text-align:center;color:#f38ba8;">❌ 缺失</td><td><button class="btn" onclick="createTable('${name}')">创建此表</button></td></tr>`;
+            }
+        }
+        panelHtml += '</tbody></table>';
+        document.getElementById('schemaPanel').innerHTML = panelHtml;
+
+        // ⑥ 旧表清理按钮
+        document.getElementById('deleteGroupsBtn').style.display =
+            names.includes('groups') ? '' : 'none';
+
+        db.close(); // 只关一次
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', renderAll);
+
+    document.getElementById('viewDataBtn').addEventListener('click', async () => {
+        const store = document.getElementById('tableSelect').value;
+        if (!store) return;
+        const data = await getTableData(store);
+        const view = document.getElementById('dataView');
+        if (data.length === 0) {
+            view.innerHTML = '<div style="padding:1rem;text-align:center;color:#6c7086;">空表</div>';
+            return;
+        }
+        const keys = Object.keys(data[0]);
+        let html = `<table><thead><tr>${keys.map(k => `<th>${k}</th>`).join('')}</tr></thead><tbody>`;
+        for (const row of data) {
+            html += '<tr>' + keys.map(k => {
+                const v = row[k];
+                const display = typeof v === 'object' ? JSON.stringify(v) : String(v ?? '');
+                return `<td title="${this.escapeHtml ? '' : display}">${display}</td>`;
+            }).join('') + '</tr>';
+        }
+        html += '</tbody></table>';
+        view.innerHTML = html;
+    });
+
+    document.getElementById('deleteTableBtn').addEventListener('click', async () => {
+        const store = document.getElementById('tableSelect').value;
+        if (!store || !confirm(`确定删除表 "${store}" 吗？\n数据不可恢复！`)) return;
+        try {
+            await deleteTable(store);
+            alert(`已删除 "${store}"`);
+            await renderAll();
+        } catch (e) { alert('失败: ' + e.message); }
+    });
+
+    document.getElementById('deleteGroupsBtn').addEventListener('click', async () => {
+        if (!confirm('确定删除旧 groups 表吗？\n数据已迁移至 classes + enrollments。')) return;
+        const log = document.getElementById('actionLog');
+        log.style.display = 'block';
+        log.textContent = '⏳ 删除 groups 表...\n';
+        try {
+            await deleteTable('groups');
+            log.textContent += '✅ groups 表已删除\n💡 现在可移除此工具';
+            document.getElementById('actionCard').style.display = 'none';
+        } catch (e) {
+            log.textContent += `❌ 失败: ${e.message}\n`;
+        }
+        await renderAll();
+    });
+
+    renderAll();
+    </script>
+</body>
+</html>
