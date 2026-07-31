@@ -265,6 +265,24 @@
             }
         });
 
+        // Load any external scripts the target page needs that aren't loaded yet
+        // (e.g. analysis.js / schedule.js used by training.html), so globals like
+        // Analysis/Schedule exist before the page's inline app script runs.
+        async function ensurePageScripts(doc) {
+            const loaded = new Set(
+                Array.from(document.querySelectorAll('script[src]')).map(s => s.getAttribute('src'))
+            );
+            const needed = Array.from(doc.querySelectorAll('script[src]'))
+                .map(s => s.getAttribute('src'))
+                .filter(src => src && !loaded.has(src));
+            await Promise.all([...new Set(needed)].map(src => new Promise(resolve => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = s.onerror = resolve;
+                document.head.appendChild(s);
+            })));
+        }
+
         async function navigateTo(href) {
             // Cross-category: full reload
             const isCompetition = href.includes('stats.html') || href.includes('training.html') || href.includes('tasks.html');
@@ -311,6 +329,8 @@
                     contentNodes.forEach(node => main.appendChild(node.cloneNode(true)));
                     // Update URL BEFORE executing page scripts, so init() reads the new id/tab params
                     history.pushState({ page: href }, '', href);
+                    // Load any external scripts the target page needs (e.g. analysis.js) first
+                    await ensurePageScripts(doc);
                     // Remove scripts appended by previous SPA navigations (avoid DOM accumulation)
                     document.querySelectorAll('script[data-spa-app]').forEach(s => s.remove());
                     scripts.forEach(oldScript => {
