@@ -52,22 +52,7 @@
     <div class="header-inner">
         <button class="sidebar-toggle" id="sidebarToggle" aria-label="切换菜单">☰</button>
         <a href="/" class="back-home" title="返回 9597 主站">← 主页</a>
-        <div class="logo-dropdown" id="logoDropdown">
-            <button type="button" class="logo-dropdown-toggle" id="logoDropdownToggle" aria-haspopup="true" aria-expanded="false">
-                <span class="logo">🏆 其他赛事</span>
-                <span class="caret">▾</span>
-            </button>
-            <div class="logo-dropdown-menu" id="logoDropdownMenu">
-                <a href="https://supergary75.github.io/MakeXRank/" target="_blank" rel="noopener" class="logo-dd-item">
-                    <span class="dd-label">MAKEX</span>
-                    <span class="dd-sub">KCLUB MakeXRank</span>
-                </a>
-                <a href="stats.html" class="logo-dd-item">
-                    <span class="dd-label">当前的 MakeX Inspire</span>
-                    <span class="dd-sub">成绩统计系统</span>
-                </a>
-            </div>
-        </div>
+        <span class="logo">🏆 MakeX Inspire</span>
         <div class="header-tabs">
             ${categoryTabs.map(t =>
                 `<a href="${t.href}" class="header-tab${category === t.key ? ' active' : ''}">${t.label}</a>`
@@ -390,23 +375,6 @@
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.page) navigateTo(e.state.page);
         });
-
-        // ---- Logo dropdown (其他赛事) ----
-        const logoToggle = document.getElementById('logoDropdownToggle');
-        const logoMenu = document.getElementById('logoDropdownMenu');
-        if (logoToggle && logoMenu) {
-            logoToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const open = logoMenu.classList.toggle('open');
-                logoToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-            });
-            document.addEventListener('click', (e) => {
-                if (!logoMenu.contains(e.target) && !logoToggle.contains(e.target)) {
-                    logoMenu.classList.remove('open');
-                    logoToggle.setAttribute('aria-expanded', 'false');
-                }
-            });
-        }
 
         // ---- Sidebar toggle (mobile) ----
         const overlayEl = document.getElementById('sidebarOverlay');
