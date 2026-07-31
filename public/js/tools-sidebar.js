@@ -1,86 +1,147 @@
 // tools-sidebar.js — 赛事页布局（FRC / MakeX / 赛项管理）
 (function () {
 
-function sidebarHtml(toolPath) {
-    var isAdmin = window.isAdmin ? window.isAdmin() : false;
-    var links = [
-        { href: '#tools/frc',          label: 'FRC',               active: toolPath === '/frc' || toolPath === '/prescouting' || toolPath === '/scouting' || toolPath === '/analysis' || toolPath === '/team-assignments' },
-        { href: '#tools/makex-inspire',label: 'MakeX Inspire',     active: toolPath === '/makex-inspire' },
-        { href: '#tools/makex-explore',label: 'MakeX Explore',     active: toolPath === '/makex-explore' },
-        { href: '#tools/makex-challenger',label:'MakeX Challenger', active: toolPath === '/makex-challenger' },
-    ];
-    var html = '<div class="sidebar" id="toolsSidebar"><h3>赛事</h3><ul>';
-    for (var i = 0; i < links.length; i++) {
-        html += '<li><a href="' + links[i].href + '" class="' + (links[i].active ? 'active' : '') + '">' + links[i].label + '</a></li>';
+// 赛项与工具入口（布局层数据：赛项 → 工具菜单）
+var PROGRAMS = [
+    { code: 'frc', label: 'FRC', icon: '🔧',
+      desc: 'FRC（FIRST Robotics Competition）—— 机器人赛前侦查、现场记录与数据分析。',
+      tools: [
+        { href: '#tools/prescouting', label: 'PreScouting', icon: '📋' },
+        { href: '#tools/scouting',     label: 'Scouting',    icon: '📊' },
+        { href: '#tools/analysis',     label: 'Analysis',    icon: '📈' },
+        { href: '#tools/team-assignments', label: '队伍分配', icon: '🎯' },
+        { href: '#tools/events/frc',   label: '赛事管理',     icon: '🏆' },
+        { href: '#tools/trainings/frc',label: '集训管理',     icon: '🏋️' },
+        { action: 'task', label: '任务管理', icon: '📝' },
+      ] },
+    { code: 'makex-inspire', label: 'MakeX Inspire', icon: '🤖',
+      desc: 'MakeX Inspire —— 机器人启蒙赛项数据与活动管理。',
+      tools: [
+        { href: '#tools/events/makex-in',   label: '赛事管理', icon: '🏆' },
+        { href: '#tools/trainings/makex-in',label: '集训管理', icon: '🏋️' },
+        { action: 'task', label: '任务管理', icon: '📝' },
+      ] },
+    { code: 'makex-explore', label: 'MakeX Explore', icon: '🚀',
+      desc: 'MakeX Explore —— 探索类赛项数据与活动管理。',
+      tools: [
+        { href: '#tools/events/makex-ex',   label: '赛事管理', icon: '🏆' },
+        { href: '#tools/trainings/makex-ex',label: '集训管理', icon: '🏋️' },
+        { action: 'task', label: '任务管理', icon: '📝' },
+      ] },
+    { code: 'makex-challenger', label: 'MakeX Challenger', icon: '⚙️',
+      desc: 'MakeX Challenger —— 挑战类赛项数据与活动管理。',
+      tools: [
+        { href: '#tools/events/makex-ch',   label: '赛事管理', icon: '🏆' },
+        { href: '#tools/trainings/makex-ch',label: '集训管理', icon: '🏋️' },
+        { action: 'task', label: '任务管理', icon: '📝' },
+      ] },
+];
+
+var PROG_BY_CODE = {};
+PROGRAMS.forEach(function (p) { PROG_BY_CODE[p.code] = p; });
+
+function parseToolPath(tp) {
+    if (!tp || tp === '/' || tp === '/preview') return { program: null, tool: null };
+    var m = tp.match(/^\/(events|trainings)\/(.+)$/);
+    if (m) {
+        var p = PROG_BY_CODE[m[2]];
+        return p ? { program: p, tool: m[1] } : { program: null, tool: null };
     }
+    var pp = PROG_BY_CODE[tp.slice(1)];
+    if (pp) return { program: pp, tool: null };
+    if (tp === '/prescouting' || tp === '/scouting' || tp === '/analysis' || tp === '/team-assignments') {
+        return { program: PROG_BY_CODE.frc, tool: tp.slice(1) };
+    }
+    return { program: null, tool: null };
+}
+
+function sidebarHtml(toolPath) {
+    var st = parseToolPath(toolPath);
+    var sel = st.program ? st.program.code : 'preview';
+    var opts = [{ v: 'preview', l: '🏁 赛事预览' }].concat(PROGRAMS.map(function (p) {
+        return { v: p.code, l: p.icon + ' ' + p.label };
+    }));
+    var html = '<div class="sidebar" id="toolsSidebar">';
+    html += '<h3>赛事</h3>';
+    // 选择赛项 下拉
+    html += '<div class="tools-program-select"><label>选择赛项</label>';
+    html += '<select id="toolsProgramSelect" onchange="window.navigate(\'#tools/\'+this.value)">';
+    opts.forEach(function (o) {
+        html += '<option value="' + o.v + '"' + (o.v === sel ? ' selected' : '') + '>' + o.l + '</option>';
+    });
+    html += '</select></div>';
+    // 工具菜单（选择赛项 与 返回主页 之间）
+    if (st.program) {
+        html += '<div class="tools-menu"><h4>工具菜单</h4><ul>';
+        st.program.tools.forEach(function (t) {
+            if (t.action === 'task') {
+                html += '<li><a href="#" class="tool-link tm-task-card" data-program="' + st.program.code + '" data-pname="' + st.program.label + '">' + t.icon + ' ' + t.label + '</a></li>';
+            } else {
+                html += '<li><a href="' + t.href + '" class="tool-link' + (t.href === '#tools' + toolPath ? ' active' : '') + '">' + t.icon + ' ' + t.label + '</a></li>';
+            }
+        });
+        html += '</ul></div>';
+    } else {
+        html += '<div class="tools-menu tools-menu-empty"><h4>工具菜单</h4><p>请先选择赛项</p></div>';
+    }
+    html += '<ul class="tools-footer-links">';
     html += '<li class="sidebar-home-link"><a href="#home">返回主页</a></li>';
-    html += '<li><a href="#" onclick="logout()">登出</a></li></ul></div>';
+    html += '<li><a href="#" onclick="logout()">登出</a></li></ul>';
+    html += '</div>';
     return html;
 }
 
 window.renderToolsLayout = async function (hash) {
-    var toolPath = hash.replace('#tools', '') || '/frc';
+    var toolPath = hash.replace('#tools', '') || '/preview';
+    if (toolPath === '') toolPath = '/preview';
     var app = document.getElementById('app');
     var header = await window.loadHeader();
     var footer = await window.loadFooter();
+    var st = parseToolPath(toolPath);
+    var content = '';
+    var after = null;
 
-    // ——— FRC 子页面 ———
-    if (toolPath === '/frc' || toolPath === '/prescouting' || toolPath === '/scouting' || toolPath === '/analysis' || toolPath === '/team-assignments') {
-        app.innerHTML = header +
-            '<div class="container">' + sidebarHtml(toolPath) +
-            '<div class="content home-content">' +
-            '<h1 style="margin-bottom:28px;">🔧 FRC</h1>' +
+    if (!st.program) {
+        // ——— 赛事预览：各赛事快速入口 ———
+        content = '<h1 style="margin-bottom:28px;">🏁 赛事预览</h1>' +
+            '<p class="tools-preview-hint">选择下方赛事进入对应工具；也可使用侧栏「选择赛项」。</p>' +
             '<div class="home-tools-grid">' +
-            card('📋', 'PreScouting', '赛前数据收集与团队评估', '#tools/prescouting') +
-            card('📊', 'Scouting', '现场实时数据记录与分析', '#tools/scouting') +
-            card('📈', 'Analysis', '数据可视化与战略决策', '#tools/analysis') +
-            card('🎯', '队伍分配', '分配队员到赛队', '#tools/team-assignments') +
-            card('🏆', '赛事管理', '管理 FRC 比赛安排', '#tools/events/frc') +
-            card('🏋️', '集训管理', '管理 FRC 集训', '#tools/trainings/frc') +
-            '<div class="home-tool-card tm-task-card" data-program="frc" data-pname="FRC" style="cursor:pointer;">' +
-            '<span class="tool-icon">📝</span><h4>任务管理</h4><p>管理 FRC 评分任务</p>' +
-            '<span class="tool-link" style="color:var(--accent-blue);">进入</span></div>' +
-            '</div></div></div>' + footer;
-        return;
+            PROGRAMS.map(function (p) {
+                return card(p.icon, p.label, p.desc, '#tools/' + p.code);
+            }).join('') +
+            '</div>';
+    } else if (st.tool === 'events' || st.tool === 'trainings') {
+        // ——— 赛事/集训管理（event-manager 填充 .content） ———
+        content = '<h1 style="margin-bottom:28px;">' + (st.tool === 'events' ? '📅 赛事管理' : '🏋️ 集训管理') + '</h1><p>加载中...</p>';
+        after = function () { if (typeof window.setupEventList === 'function') window.setupEventList(); };
+    } else if (st.tool) {
+        // ——— FRC 子工具内容（激活 renderToolsContent 分发） ———
+        content = window.renderToolsContent('/' + st.tool) || '<p>功能开发中...</p>';
+        if (st.tool === 'prescouting') {
+            after = function () {
+                if (typeof window.initializePrescouttingForm === 'function') window.initializePrescouttingForm();
+                if (typeof window.renderEntries === 'function') window.renderEntries();
+            };
+        }
+    } else {
+        // ——— 赛项预览落地页 ———
+        content = '<h1 style="margin-bottom:28px;">' + st.program.icon + ' ' + st.program.label + '</h1>' +
+            '<p>' + st.program.desc + '</p>' +
+            '<p class="tools-preview-hint">工具入口见侧栏「工具菜单」。</p>';
     }
 
-    // ——— MakeX 子页面 ———
-    if (toolPath === '/makex-inspire' || toolPath === '/makex-explore' || toolPath === '/makex-challenger') {
-        var name = toolPath === '/makex-inspire' ? 'Inspire' : toolPath === '/makex-explore' ? 'Explore' : 'Challenger';
-        var code = toolPath === '/makex-inspire' ? 'makex-in' : toolPath === '/makex-explore' ? 'makex-ex' : 'makex-ch';
-        app.innerHTML = header +
-            '<div class="container">' + sidebarHtml(toolPath) +
-            '<div class="content home-content">' +
-            '<h1 style="margin-bottom:28px;">MakeX ' + name + '</h1>' +
-            '<div class="home-tools-grid">' +
-            card('🏆', '赛事管理', '管理 MakeX ' + name + ' 比赛', '#tools/events/' + code) +
-            card('🏋️', '集训管理', '管理 ' + name + ' 集训', '#tools/trainings/' + code) +
-            '<div class="home-tool-card tm-task-card" data-program="' + code + '" data-pname="MakeX ' + name + '" style="cursor:pointer;">' +
-            '<span class="tool-icon">📝</span><h4>任务管理</h4><p>管理 ' + name + ' 评分任务</p>' +
-            '<span class="tool-link" style="color:var(--accent-blue);">进入</span></div>' +
-            '</div></div></div>' + footer;
-        return;
-    }
+    app.innerHTML = header +
+        '<div class="container">' + sidebarHtml(toolPath) +
+        '<div class="content">' + content + '</div></div>' + footer;
 
-    // ——— 赛事/集训管理（通用） ———
-    if (toolPath.indexOf('/events/') === 0 || toolPath.indexOf('/trainings/') === 0) {
-        var html = header + '<div class="container">' + sidebarHtml(toolPath) +
-            '<div class="content">' +
-            '<h1>📋 ' + (toolPath.indexOf('/events/') === 0 ? '赛事管理' : '集训管理') + '</h1><p>加载中...</p>' +
-            '</div></div>' + footer;
-        app.innerHTML = html;
-        return;
-    }
-
-    // ——— 兜底 ———
-    app.innerHTML = header + '<div class="container">' + sidebarHtml(toolPath) +
-        '<div class="content"><p>功能开发中...</p></div></div>' + footer;
+    if (after) setTimeout(after, 50);
 };
 
 // ——— 事件委托：任务管理卡片点击（全局绑定，不依赖 DOM 创建时机） ———
 document.addEventListener('click', function (e) {
     var card = e.target.closest('.tm-task-card');
     if (!card) return;
+    e.preventDefault();
     var code = card.dataset.program;
     var name = card.dataset.pname;
     if (code && typeof window.showTaskManager === 'function') {

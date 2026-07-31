@@ -10,7 +10,7 @@ window.renderApp = async function () {
     var hash = window.location.hash || '#home';
     var mobileToggle = document.getElementById('mobileToggle');
 
-    if (hash === '#tools') { hash = '#tools/frc'; window.history.replaceState(null, '', hash); }
+    if (hash === '#tools') { hash = '#tools/preview'; window.history.replaceState(null, '', hash); }
     if (hash === '#account') { hash = '#account/profile'; window.history.replaceState(null, '', hash); }
     if (hash === '#seasons') { hash = '#seasons/2026'; window.history.replaceState(null, '', hash); }
 
