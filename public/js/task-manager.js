@@ -2,6 +2,12 @@
 (function () {
 
 window.showTaskManager = async function (programCode, programName) {
+    // 单例：若已有任务弹窗则先彻底关闭（含 hashchange 监听清理）
+    var prev = document.getElementById('tmOverlay');
+    if (prev) {
+        if (prev._closeOverlay) prev._closeOverlay();
+        else prev.remove();
+    }
     // 加载该赛项全部任务
     var allTasks = [];
     try {
@@ -24,7 +30,7 @@ window.showTaskManager = async function (programCode, programName) {
     if (years.length === 0) years = [String(currentYear)];
 
     var overlay = document.createElement('div');
-    overlay.className = 'modal';
+    overlay.className = 'modal-overlay'; // 修复：固定全屏居中遮罩，而非普通 inline 元素
     overlay.id = 'tmOverlay';
     overlay.innerHTML =
         '<div class="modal-content" style="max-width:550px;">' +
@@ -47,7 +53,6 @@ window.showTaskManager = async function (programCode, programName) {
         '<button class="user-action-btn user-action-delete" id="tmClose">关闭</button>' +
         '<button class="user-action-btn user-action-edit" id="tmAdd">➕ 添加</button>' +
         '</div></div>';
-    document.body.appendChild(overlay);
 
     var taskList = overlay.querySelector('#tmTaskList');
     var yearSel = overlay.querySelector('#tmYear');
@@ -95,8 +100,29 @@ window.showTaskManager = async function (programCode, programName) {
         maxScoreInp.style.display = this.value === 'score' ? '' : 'none';
     });
 
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
-    overlay.querySelector('#tmClose').addEventListener('click', function () { overlay.remove(); });
+    // 路由切换(hashchange)时自动关闭，避免弹窗残留在其它页面（#app 重渲染不会清 body 级节点）
+    var closed = false;
+    function closeOverlay() {
+        if (closed) return;
+        closed = true;
+        overlay.remove();
+        window.removeEventListener('hashchange', onHash);
+    }
+    var onHash = function () { closeOverlay(); };
+    window.addEventListener('hashchange', onHash);
+    // 挂到元素上，供单例校验时彻底关闭旧弹窗（连同监听一起清理）
+    overlay._closeOverlay = closeOverlay;
+
+    // 单例（插入 DOM 前再校验一次，同步执行，杜绝并发/连点叠加两个弹窗）
+    prev = document.getElementById('tmOverlay');
+    if (prev) {
+        if (prev._closeOverlay) prev._closeOverlay();
+        else prev.remove();
+    }
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeOverlay(); });
+    overlay.querySelector('#tmClose').addEventListener('click', function () { closeOverlay(); });
 
     overlay.querySelector('#tmAdd').addEventListener('click', async function () {
         var name = overlay.querySelector('#tmNewName').value.trim();
