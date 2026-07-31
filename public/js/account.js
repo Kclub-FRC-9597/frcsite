@@ -18,6 +18,11 @@
             if (accountSection === '/profile') {
                 setupProfileEventListeners();
             } else if (accountSection === '/password') {
+                // Tester accounts cannot change password
+                if (typeof isTesterUser === 'function' && isTesterUser()) {
+                    window.location.hash = '#account/profile';
+                    return;
+                }
                 const changePasswordBtn = document.getElementById('changePasswordBtn');
                 if (changePasswordBtn) {
                     changePasswordBtn.addEventListener('click', changePassword);
@@ -26,8 +31,14 @@
                 setupContentEditorListeners();
             } else if (accountSection === '/users') {
                 setupUserManagementListeners();
-            } else if (accountSection === '/teams') {
-                setupTeamAssignmentListeners();
+            } else if (accountSection === '/students') {
+                if (typeof isTesterUser === 'function' && isTesterUser()) {
+                    window.location.hash = '#account/profile';
+                    return;
+                }
+                if (typeof setupStudentListeners === 'function') {
+                    setupStudentListeners();
+                }
             }
         }, 100);
     }
@@ -684,9 +695,6 @@
         editUserNickname,
         resetUserPassword,
         deleteUser,
-        setupTeamAssignmentListeners,
-        assignTeam,
-        removeTeamAssignment,
         setupContentEditorListeners,
         saveHomepageContent,
         resetHomepageContent,

@@ -29,7 +29,8 @@
 		{
 			"binding": "D1_PRESCOUT",
 			"database_name": "prescout_db",
-			"database_id": "0e52c877-b1fa-4149-9c57-8d1150223fe2"
+			"database_id": "0e52c877-b1fa-4149-9c57-8d1150223fe2",
+			"migrations_dir": "src/db/migrations"
 		}
 	]
 	/**

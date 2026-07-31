@@ -1,5 +1,5 @@
-// Worker 入口 · 路由分发
-import { DurableObject } from 'cloudflare:workers';
+// Worker 入口 · 仅做路由分发
+import { DurableObject } from ""cloudflare:workers"";
 import { Env } from './types';
 import { requireAuth } from './auth';
 import { handleAuthLogin } from './routes/auth';
@@ -8,14 +8,11 @@ import { handlePrescout } from './routes/prescout';
 import { handleScouting } from './routes/scouting';
 import { handleSponsors } from './routes/sponsors';
 import { handleTeams, handleTeamAssignments } from './routes/teams';
-import { handleStudents } from './routes/students';
-import { handleTasks } from './routes/tasks';
-import { handleEvents } from './routes/events';
 
 export class MyDurableObject extends DurableObject {
     constructor(state: DurableObjectState, env: Env) { super(state, env); }
     async fetch(request: Request): Promise<Response> {
-        return new Response('Not Found', { status: 404 });
+        return new Response(""Not Found"", { status: 404 });
     }
 }
 
@@ -39,9 +36,6 @@ export default {
         if (url.pathname === '/api/sponsors') return handleSponsors(request, env);
         if (url.pathname === '/api/teams') return handleTeams(request);
         if (url.pathname === '/api/team-assignments') return handleTeamAssignments(request, env);
-        if (url.pathname === '/api/students') return handleStudents(request, env);
-        if (url.pathname === '/api/tasks') return handleTasks(request, env);
-        if (url.pathname === '/api/events') return handleEvents(request, env);
 
         return env.ASSETS.fetch(request);
     },

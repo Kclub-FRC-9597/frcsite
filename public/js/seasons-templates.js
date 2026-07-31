@@ -23,19 +23,62 @@ function renderSeasonsLayoutTemplate({ header, footer, seasonPath, content, logo
 function renderSeason2026Template(sponsorsHtml) {
     return `
         <h1>🏆 2026 赛季</h1>
-        <div class="season-status-active">⏳ 当前进行中</div>
 
-        <div class="season-panel season-panel-center">
-            <p class="season-panel-text-main">📋 2026赛季赛事数据收集中...</p>
-            <p class="season-panel-text-sub">请关注团队近期的比赛表现</p>
+        <div class="season-panel">
+            <table class="season-table">
+                <tr class="season-table-head-blue">
+                    <th>赛事</th>
+                    <th>排名</th>
+                    <th>成绩</th>
+                    <th>奖项</th>
+                    <th>联盟</th>
+                </tr>
+                <tr class="season-table-row-divider">
+                    <td class="season-cell-primary">上海区域赛 (Shanghai Regional)</td>
+                    <td>资格赛第 3 名</td>
+                    <td>8-5-0</td>
+                    <td class="season-cell-award-red">🥈 区域决赛入围奖</td>
+                    <td>第 2 联队主帅（9635, 8806）</td>
+                </tr>
+                <tr>
+                    <td class="season-cell-primary">休斯顿世锦赛 · Johnson Division</td>
+                    <td>资格赛第 31 名</td>
+                    <td>5-5-0</td>
+                    <td class="season-cell-muted">-</td>
+                    <td>-</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="season-metrics-grid">
+            <div class="season-metric-card season-metric-blue">
+                <p class="season-metric-label season-metric-label-blue">总成绩</p>
+                <p class="season-metric-value">13-10-0</p>
+                <p class="season-metric-note">赛季战绩</p>
+            </div>
+            <div class="season-metric-card season-metric-purple">
+                <p class="season-metric-label season-metric-label-purple">区域排名</p>
+                <p class="season-metric-value">#127</p>
+                <p class="season-metric-note">区域冠军赛积分池（104 分）</p>
+            </div>
         </div>
 
         <div class="season-highlight season-highlight-goal">
-            <p class="season-highlight-title"><strong>📍 赛季目标：</strong></p>
+            <p class="season-highlight-title"><strong>🏅 上海区域赛表现：</strong></p>
             <ul class="season-highlight-list">
-                <li>延续上赛季的优秀表现，力争更好的赛区排名</li>
-                <li>积累更多比赛经验，提升团队技术实力</li>
-                <li>争取获得更多奖项认可</li>
+                <li>资格赛排名第 3，8 胜 5 负，资格赛积分 21 分</li>
+                <li>担任第 2 联队主帅，选秀 9635（Visionary）、8806（Falcon Robotics）</li>
+                <li>半决赛 2-1 胜出，决赛 0-2 惜败，荣获区域决赛入围奖</li>
+                <li>最高单场得分 478 分（资格赛第 54 场）</li>
+            </ul>
+        </div>
+
+        <div class="season-highlight season-highlight-warning">
+            <p class="season-highlight-title"><strong>🌎 休斯顿世锦赛：</strong></p>
+            <ul class="season-highlight-list">
+                <li>首次晋级世锦赛，参加 Johnson Division</li>
+                <li>资格赛排名第 31，5 胜 5 负，最高单场 583 分</li>
+                <li>未晋级淘汰赛，积累了宝贵的国际赛场经验</li>
             </ul>
         </div>
 

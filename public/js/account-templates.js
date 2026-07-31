@@ -1,5 +1,6 @@
 (function () {
     function renderAccountDashboardTemplate({ header, footer, accountSection, contentHtml, adminEnabled }) {
+        const isTester = typeof isTesterUser === 'function' && isTesterUser();
         return `
                 ${header}
                 <div class="container">
@@ -7,9 +8,9 @@
                         <h3>账户</h3>
                         <ul>
                             <li><a href="#account/profile" class="${accountSection === '/profile' ? 'active' : ''}">👤 个人信息</a></li>
-                            <li><a href="#account/password" class="${accountSection === '/password' ? 'active' : ''}">🔐 修改密码</a></li>
+                            ${isTester ? '' : `<li><a href="#account/password" class="${accountSection === '/password' ? 'active' : ''}">🔐 修改密码</a></li>`}
                             ${adminEnabled ? `<li><a href="#account/users" class="${accountSection === '/users' ? 'active' : ''}">👥 用户管理</a></li>` : ''}
-                            ${adminEnabled ? `<li><a href="#account/teams" class="${accountSection === '/teams' ? 'active' : ''}">🎯 队伍分配</a></li>` : ''}
+                            ${adminEnabled ? `<li><a href="#account/students" class="${accountSection === '/students' ? 'active' : ''}">🎓 学生管理</a></li>` : ''}
                             ${adminEnabled ? `<li><a href="#account/content" class="${accountSection === '/content' ? 'active' : ''}">📝 编辑主页</a></li>` : ''}
                             <li class="sidebar-home-link"><a href="#home">返回主页</a></li>
                             <li><a href="#" onclick="logout()">登出</a></li>
@@ -183,8 +184,8 @@
         if (section === '/users') {
             return renderAccountUsersTemplate();
         }
-        if (section === '/teams') {
-            return renderTeamAssignmentTemplate();
+        if (section === '/students') {
+            return window.renderStudentsContent ? window.renderStudentsContent() : '<h1>🎓 学生管理</h1><p>加载中...</p>';
         }
 
         const nickname = localStorage.getItem(`nickname_${currentUser}`) || '';

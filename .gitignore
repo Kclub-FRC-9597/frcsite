@@ -119,6 +119,12 @@ dist
 
 # vuepress build output
 
+# Cloudflare / Wrangler
+
+.env
+.wrangler/
+worker-configuration.d.ts
+
 .vuepress/dist
 
 # vuepress v2.x temp and cache directory
