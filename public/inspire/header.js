@@ -296,16 +296,26 @@
                 }
                 if (newContent) {
                     const main = document.querySelector('.main-content');
-                    // Extract and re-execute scripts from the new content area
-                    const scripts = newContent.querySelectorAll('script');
+                    // Extract ALL inline scripts from the fetched page (body-level too),
+                    // because page app code (e.g. StatsApp/TrainingApp) lives OUTSIDE .container.
+                    const scripts = Array.from(doc.querySelectorAll('script:not([src])'));
+                    // Swap ALL of the target page's body content (not just .container):
+                    // modals & toast-container live OUTSIDE .container but are required by init().
+                    const contentNodes = Array.from(doc.body.children).filter(
+                        c => c.tagName !== 'SCRIPT' && c.tagName !== 'STYLE'
+                    );
                     main.innerHTML = '';
-                    main.appendChild(newContent.cloneNode(true));
+                    contentNodes.forEach(node => main.appendChild(node.cloneNode(true)));
+                    // Update URL BEFORE executing page scripts, so init() reads the new id/tab params
+                    history.pushState({ page: href }, '', href);
+                    // Remove scripts appended by previous SPA navigations (avoid DOM accumulation)
+                    document.querySelectorAll('script[data-spa-app]').forEach(s => s.remove());
                     scripts.forEach(oldScript => {
                         const script = document.createElement('script');
+                        script.dataset.spaApp = '1';
                         script.textContent = oldScript.textContent;
                         document.body.appendChild(script);
                     });
-                    history.pushState({ page: href }, '', href);
                     if (window.updateHeaderStats) setTimeout(window.updateHeaderStats, 100);
                     // Pre-fetch adjacent pages after navigation
                     setTimeout(() => {

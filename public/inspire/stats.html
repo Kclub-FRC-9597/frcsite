@@ -42,6 +42,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
+    if (!window.StatsApp) {
     // =================================================================
     //  Stats App — 成绩统计
     // =================================================================
@@ -220,7 +221,13 @@
         },
     };
 
-    document.addEventListener('DOMContentLoaded', () => StatsApp.init());
+    window.StatsApp = StatsApp;
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => window.StatsApp.init());
+    } else {
+        window.StatsApp.init();
+    }
     </script>
 </body>
 </html>

@@ -67,6 +67,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
+    if (!window.TasksApp) {
     // =================================================================
     //  Tasks App — 任务管理
     // =================================================================
@@ -249,7 +250,13 @@
         },
     };
 
-    document.addEventListener('DOMContentLoaded', () => TasksApp.init());
+    window.TasksApp = TasksApp;
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => window.TasksApp.init());
+    } else {
+        window.TasksApp.init();
+    }
     </script>
 </body>
 </html>

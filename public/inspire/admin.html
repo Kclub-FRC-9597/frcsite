@@ -133,6 +133,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
+    if (!window.AdminApp) {
     // =================================================================
     //  Admin App — 教务管理 (班级管理 + 学员管理)
     //  通过左侧栏菜单切换（班级管理→admin.html, 学员管理→admin.html?tab=students）
@@ -556,7 +557,13 @@
         },
     };
 
-    document.addEventListener('DOMContentLoaded', () => AdminApp.init());
+    window.AdminApp = AdminApp;
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => window.AdminApp.init());
+    } else {
+        window.AdminApp.init();
+    }
     </script>
 </body>
 </html>

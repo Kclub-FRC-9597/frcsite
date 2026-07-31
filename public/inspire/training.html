@@ -222,6 +222,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
+    if (!window.TrainingApp) {
     // =================================================================
     //  Training App — 集训管理
     // =================================================================
@@ -2447,7 +2448,12 @@
     };
 
     window.TrainingApp = TrainingApp;
-    document.addEventListener('DOMContentLoaded', () => TrainingApp.init());
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => window.TrainingApp.init());
+    } else {
+        window.TrainingApp.init();
+    }
     </script>
 </body>
 </html>
