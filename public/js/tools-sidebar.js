@@ -126,7 +126,7 @@ window.renderToolsLayout = async function (hash) {
     } else {
         // ——— 赛项预览落地页 ———
         content = '<h1 style="margin-bottom:28px;">' + st.program.icon + ' ' + st.program.label + '</h1>' +
-            '<p>' + st.program.desc + '</p>' +
+            '<p style="margin-bottom:22px;">' + st.program.desc + '</p>' +
             '<p class="tools-preview-hint">工具入口见侧栏「工具菜单」。</p>';
     }
 
