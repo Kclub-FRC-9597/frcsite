@@ -5,7 +5,10 @@
 // =================================================================
 (function () {
     // ---- Page mapping ----
-    const path = window.location.pathname.split('/').pop() || 'stats.html';
+    let path = window.location.pathname.split('/').pop() || 'stats.html';
+    // Normalize clean URLs (e.g. npx serve redirects /admin.html -> /admin) so the
+    // switch below matches even when the .html suffix is stripped.
+    if (!path.endsWith('.html')) path += '.html';
     const searchParams = new URLSearchParams(window.location.search);
     const tabParam = searchParams.get('tab');
     const trainingIdParam = searchParams.get('id');
