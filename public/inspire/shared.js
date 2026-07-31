@@ -48,6 +48,21 @@ const Shared = {
                     this._migrateGroupIdToEnrollments(rawGroups, parsed.students || []);
                     changed = true;
                 }
+                // Migrate old per-training scheduleOrder → per-mock mock.schedule
+                const legacySchedule = parsed.scheduleOrder;
+                if (legacySchedule && typeof legacySchedule === 'object') {
+                    (this.data.trainings || []).forEach(t => {
+                        const entry = legacySchedule[t.id];
+                        if (!entry) return;
+                        (t.mockCompetitions || []).forEach(m => {
+                            if (!m.schedule) m.schedule = {};
+                            if (entry.list) m.schedule.list = entry.list;
+                            if (entry.roundId) m.schedule.roundId = entry.roundId;
+                        });
+                    });
+                    delete this.data.scheduleOrder;
+                    changed = true;
+                }
                 if (changed) this.saveData();
             }
         } catch (e) {

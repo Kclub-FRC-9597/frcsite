@@ -1,38 +1,29 @@
 // =================================================================
 //  Schedule — 共享赛程模块
-//  数据存入 Shared.data.scheduleOrder，与成绩走同一通知通路
+//  排位顺序按比赛（mock）记录，存于 mock.schedule（list + roundId）
 //  加载顺序：shared.js → schedule.js → 页面脚本
 // =================================================================
 const Schedule = {
     // ============ Data Access ============
-    loadOrder(trainingId, defaultIds) {
-        if (!trainingId) return [...(defaultIds || [])];
-        const S = window.Shared;
-        if (!S || !S.data) return [...(defaultIds || [])];
-        if (!S.data.scheduleOrder) S.data.scheduleOrder = {};
-        const entry = S.data.scheduleOrder[trainingId];
+    loadOrder(mock, defaultIds) {
+        if (!mock || !mock.id) return [...(defaultIds || [])];
+        const entry = mock.schedule;
         const validIds = defaultIds || [];
         return (entry && entry.list && entry.list.length === validIds.length &&
                 entry.list.every(id => validIds.includes(id))) ? entry.list : [...validIds];
     },
 
-    saveOrder(trainingId, list, roundId) {
-        if (!trainingId || !window.Shared) return;
-        const S = window.Shared;
-        if (!S.data.scheduleOrder) S.data.scheduleOrder = {};
-        const entry = S.data.scheduleOrder[trainingId] || {};
-        if (list !== null && list !== undefined) entry.list = list;
-        if (roundId !== undefined) entry.roundId = roundId;
-        S.data.scheduleOrder[trainingId] = entry;
-        S.saveData();
+    saveOrder(mock, list, roundId) {
+        if (!mock || !window.Shared) return;
+        if (!mock.schedule) mock.schedule = {};
+        if (list !== null && list !== undefined) mock.schedule.list = list;
+        if (roundId !== undefined) mock.schedule.roundId = roundId;
+        Shared.saveData();
     },
 
-    loadRoundId(trainingId) {
-        if (!trainingId || !window.Shared) return null;
-        const S = window.Shared;
-        if (!S.data || !S.data.scheduleOrder) return null;
-        const entry = S.data.scheduleOrder[trainingId];
-        return (entry && entry.roundId) || null;
+    loadRoundId(mock) {
+        if (!mock || !mock.schedule) return null;
+        return mock.schedule.roundId || null;
     },
 
     shuffle(list) {

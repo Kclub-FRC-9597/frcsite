@@ -914,13 +914,13 @@
         _loadOrder() {
             const tid = this._selectedTrainingId;
             const training = tid ? Shared.data.trainings.find(t => t.id === tid) : null;
-            this._orderList = Schedule.loadOrder(tid, training ? (training.studentIds || []) : []);
+            const mocks = training ? (training.mockCompetitions || []) : [];
+            const selMock = this._selectedMockId ? mocks.find(m => m.id === this._selectedMockId) : (mocks[mocks.length - 1] || null);
+            this._orderList = Schedule.loadOrder(selMock, training ? (training.studentIds || []) : []);
             // Sync round selection from training page
-            const syncedRound = Schedule.loadRoundId(tid);
+            const syncedRound = Schedule.loadRoundId(selMock);
             if (syncedRound) this._orderRoundId = syncedRound;
             if (!this._orderRoundId && training) {
-                const mocks = training.mockCompetitions || [];
-                const selMock = this._selectedMockId ? mocks.find(m => m.id === this._selectedMockId) : (mocks[mocks.length - 1] || null);
                 if (selMock && selMock.tasks && selMock.tasks.length > 0) {
                     this._orderRoundId = selMock.tasks[0].taskId + '_R1';
                 }

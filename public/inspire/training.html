@@ -398,16 +398,16 @@
             // Build schedule HTML directly using training page's own getRounds
             const studentIds = training.studentIds || [];
             if (studentIds.length === 0) { el.innerHTML = ''; return; }
-            const orderList = Schedule.loadOrder(training.id, studentIds);
+            const orderList = Schedule.loadOrder(mock, studentIds);
             if (!this._scheduleRoundId) {
-                const saved = Schedule.loadRoundId(training.id);
+                const saved = Schedule.loadRoundId(mock);
                 this._scheduleRoundId = saved || (mock.tasks && mock.tasks.length > 0 ? mock.tasks[0].taskId + '_R1' : null);
             }
             el.innerHTML = '<div style="width:175px;flex-shrink:0;background:#f8fafc;border-radius:8px;border:1px solid var(--gray-200);padding:0.65rem;font-size:0.82rem;max-height:calc(88vh - 120px);overflow-y:auto;">' +
                 Schedule.renderTrainingPanel(mock, training, orderList, this._scheduleRoundId,
                     () => { this._scheduleShuffle(); },
                     () => { this._scheduleReset(); },
-                    (e) => { this._scheduleRoundId = e.target.value || null; Schedule.saveOrder(this._scoreEntryTrainingId, null, this._scheduleRoundId); this._refreshSchedule(); },
+                    (e) => { this._scheduleRoundId = e.target.value || null; Schedule.saveOrder(mock, null, this._scheduleRoundId); this._refreshSchedule(); },
                     (s) => this.escapeHtml(s)) + '</div>';
             this._bindScheduleEvents(training);
         },
@@ -1390,16 +1390,16 @@
         _renderScheduleContent(mock, training) {
             const studentIds = training.studentIds || [];
             if (studentIds.length === 0) return '';
-            const orderList = Schedule.loadOrder(training.id, studentIds);
+            const orderList = Schedule.loadOrder(mock, studentIds);
             if (!this._scheduleRoundId) {
-                const saved = Schedule.loadRoundId(training.id);
+                const saved = Schedule.loadRoundId(mock);
                 this._scheduleRoundId = saved || (mock && mock.tasks && mock.tasks.length > 0 ? mock.tasks[0].taskId + '_R1' : null);
             }
             return '<div style="width:175px;flex-shrink:0;background:#f8fafc;border-radius:8px;border:1px solid var(--gray-200);padding:0.65rem;font-size:0.82rem;max-height:calc(88vh - 120px);overflow-y:auto;">' +
                 Schedule.renderTrainingPanel(mock, training, orderList, this._scheduleRoundId,
                     () => { this._scheduleShuffle(); },
                     () => { this._scheduleReset(); },
-                    (e) => { this._scheduleRoundId = e.target.value || null; Schedule.saveOrder(this._scoreEntryTrainingId, null, this._scheduleRoundId); this._refreshSchedule(); },
+                    (e) => { this._scheduleRoundId = e.target.value || null; Schedule.saveOrder(mock, null, this._scheduleRoundId); this._refreshSchedule(); },
                     (s) => this.escapeHtml(s)) + '</div>';
         },
 
@@ -1407,11 +1407,12 @@
             const btnS = document.getElementById('btnSchShuffle');
             const btnR = document.getElementById('btnSchReset');
             const sel = document.getElementById('scheduleRoundSelect');
+            const mock = training ? (training.mockCompetitions.find(m => m.id === this._scoreEntryMockId) || null) : null;
             if (btnS) btnS.addEventListener('click', () => { this._scheduleShuffle(); });
             if (btnR) btnR.addEventListener('click', () => { this._scheduleReset(); });
             if (sel) sel.addEventListener('change', (e) => {
                 this._scheduleRoundId = e.target.value || null;
-                Schedule.saveOrder(this._scoreEntryTrainingId, null, this._scheduleRoundId);
+                Schedule.saveOrder(mock, null, this._scheduleRoundId);
                 this._refreshSchedule();
             });
         },
@@ -1421,9 +1422,10 @@
             if (!trainingId) return;
             const training = this.data.trainings.find(t => t.id === trainingId);
             if (!training) return;
-            let list = Schedule.loadOrder(trainingId, training.studentIds || []);
+            const mock = training.mockCompetitions.find(m => m.id === this._scoreEntryMockId) || null;
+            let list = Schedule.loadOrder(mock, training.studentIds || []);
             list = Schedule.shuffle(list);
-            Schedule.saveOrder(trainingId, list, this._scheduleRoundId);
+            Schedule.saveOrder(mock, list, this._scheduleRoundId);
             this._refreshSchedule();
         },
 
@@ -1432,7 +1434,8 @@
             if (!trainingId) return;
             const training = this.data.trainings.find(t => t.id === trainingId);
             if (!training) return;
-            Schedule.saveOrder(trainingId, [...(training.studentIds || [])], this._scheduleRoundId);
+            const mock = training.mockCompetitions.find(m => m.id === this._scoreEntryMockId) || null;
+            Schedule.saveOrder(mock, [...(training.studentIds || [])], this._scheduleRoundId);
             this._refreshSchedule();
         },
 
