@@ -268,13 +268,17 @@
         // Load any external scripts the target page needs that aren't loaded yet
         // (e.g. analysis.js / schedule.js used by training.html), so globals like
         // Analysis/Schedule exist before the page's inline app script runs.
+        // NOTE: core framework scripts (shared/shared_indexdb/header) are loaded once
+        // per full page load and must never be re-loaded here — header.js even removes
+        // its own <script> tag on injection, so it would otherwise be re-loaded.
         async function ensurePageScripts(doc) {
+            const CORE_SCRIPTS = new Set(['shared.js', 'shared_indexdb.js', 'header.js']);
             const loaded = new Set(
                 Array.from(document.querySelectorAll('script[src]')).map(s => s.getAttribute('src'))
             );
             const needed = Array.from(doc.querySelectorAll('script[src]'))
                 .map(s => s.getAttribute('src'))
-                .filter(src => src && !loaded.has(src));
+                .filter(src => src && !loaded.has(src) && !CORE_SCRIPTS.has(src));
             await Promise.all([...new Set(needed)].map(src => new Promise(resolve => {
                 const s = document.createElement('script');
                 s.src = src;
