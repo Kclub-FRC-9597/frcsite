@@ -110,6 +110,22 @@ window.loadFooter = async function () {
     return _footerHTML;
 };
 
+// ─── 主站 header 右侧“其他赛事”下拉（委托绑定，header 由各页注入） ───
+document.addEventListener('click', function (e) {
+    var toggle = document.getElementById('inspireDdToggle');
+    var menu = document.getElementById('inspireDdMenu');
+    if (!toggle || !menu) return;
+    if (toggle.contains(e.target)) {
+        e.preventDefault();
+        e.stopPropagation();
+        var open = menu.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    } else if (!menu.contains(e.target)) {
+        menu.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+});
+
 // ─── 本地数据提交到服务器 ───
 window.submitLocalPrescout = async function (id) {
     var entries = window.getLocalPrescoutData();
