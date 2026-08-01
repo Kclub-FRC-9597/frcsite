@@ -611,6 +611,16 @@
             document.getElementById('editPracticeConfirm').addEventListener('click', () => this.confirmEditPractice());
             document.getElementById('editPracticeDelete').addEventListener('click', () => this.deleteEditPractice());
             document.getElementById('editPracticeModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.stopPropagation(); });
+
+            // 工具下拉：点击菜单外关闭（全局委托，仅绑定一次，避免 render 累积）
+            document.addEventListener('click', (e) => {
+                document.querySelectorAll('.tools-dd-menu').forEach((menu) => {
+                    const dd = menu.closest('.tools-dd');
+                    if (dd && !dd.contains(e.target) && menu.style.display === 'block') {
+                        menu.style.display = 'none';
+                    }
+                });
+            });
         },
 
         // ============ Import Practice ============
@@ -1165,6 +1175,8 @@
             document.getElementById('scoreEntryModal').classList.remove('open');
             this._scoreEntryTrainingId = null;
             this._scoreEntryMockId = null;
+            // 关闭后刷新主内容，确保模拟赛成绩/排名等数据即时更新（无需手动刷新页面）
+            this.render();
         },
 
         renderScoreEntry() {
@@ -2068,13 +2080,18 @@
                                 <span style="font-size:0.85rem;color:var(--gray-500);margin-left:0.5rem;">${t.date}</span>
                                 ${D.currentTrainingId === t.id ? '<span style="font-size:0.75rem;background:var(--accent);color:#fff;padding:0.1rem 0.6rem;border-radius:10px;margin-left:0.3rem;">当前</span>' : ''}
                             </div>
-                            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
-                                <button class="btn btn-outline btn-sm" id="editTrainingBtn">⚙️ 设置</button>
+                            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
                                 ${D.currentTrainingId !== t.id ? `<button class="btn btn-outline btn-sm" id="setCurrentBtn">⭐ 设为当前</button>` : ''}
                                 <button class="btn btn-primary btn-sm" id="addMockBtn">📝 新增记录</button>
-                                <button class="btn btn-outline btn-sm" id="importPracticeBtn">📥 导入练习</button>
-                                <button class="btn btn-accent btn-sm" id="exportCSVBtn">📥 导出CSV</button>
-                                <button class="btn btn-outline btn-sm" id="exportBackupBtn">💾 备份数据</button>
+                                <div class="tools-dd" id="toolsDd">
+                                    <button class="btn btn-outline btn-sm" id="toolsMenuBtn">🛠 工具 <span class="caret">▾</span></button>
+                                    <div class="tools-dd-menu" id="toolsMenu" style="display:none;">
+                                        <button class="tools-dd-item" data-action="settings">⚙️ 设置</button>
+                                        <button class="tools-dd-item" data-action="import">📥 导入练习</button>
+                                        <button class="tools-dd-item" data-action="csv">📥 导出CSV</button>
+                                        <button class="tools-dd-item" data-action="backup">💾 备份数据</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>`;
 
@@ -2422,18 +2439,31 @@
             const addBtn = document.getElementById('addTrainingBtn');
             if (addBtn) addBtn.addEventListener('click', () => this.openTrainingModal());
             if (this.selectedTrainingId) {
-                const editBtn = document.getElementById('editTrainingBtn');
-                if (editBtn) editBtn.addEventListener('click', () => this.openTrainingModal(this.selectedTrainingId));
                 const setCurrentBtn = document.getElementById('setCurrentBtn');
                 if (setCurrentBtn) setCurrentBtn.addEventListener('click', () => this.setCurrentTraining(this.selectedTrainingId));
                 const addMockBtn = document.getElementById('addMockBtn');
                 if (addMockBtn) addMockBtn.addEventListener('click', () => this.openMockModal(this.selectedTrainingId, null));
-                const importBtn = document.getElementById('importPracticeBtn');
-                if (importBtn) importBtn.addEventListener('click', () => this.openImportPractice());
-                const backupBtn = document.getElementById('exportBackupBtn');
-                if (backupBtn) backupBtn.addEventListener('click', () => this.exportBackup());
-                const exportBtn = document.getElementById('exportCSVBtn');
-                if (exportBtn) exportBtn.addEventListener('click', () => this.exportCSV(this.selectedTrainingId));
+                // 工具下拉：设置 / 导入练习 / 导出CSV / 备份数据
+                const toolsDd = document.getElementById('toolsDd');
+                const toolsMenuBtn = document.getElementById('toolsMenuBtn');
+                const toolsMenu = document.getElementById('toolsMenu');
+                if (toolsMenuBtn && toolsMenu) {
+                    toolsMenuBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toolsMenu.style.display = toolsMenu.style.display === 'block' ? 'none' : 'block';
+                    });
+                    toolsMenu.querySelectorAll('.tools-dd-item').forEach((item) => {
+                        item.addEventListener('click', () => {
+                            toolsMenu.style.display = 'none';
+                            const action = item.dataset.action;
+                            if (action === 'settings') this.openTrainingModal(this.selectedTrainingId);
+                            else if (action === 'import') this.openImportPractice();
+                            else if (action === 'csv') this.exportCSV(this.selectedTrainingId);
+                            else if (action === 'backup') this.exportBackup();
+                        });
+                    });
+                    // 点击菜单外关闭：全局委托见 bindEvents（仅绑定一次，避免 render 累积）
+                }
             }
 
             container.querySelectorAll('.badge[data-student-id]').forEach((el) => {

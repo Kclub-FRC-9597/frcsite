@@ -98,6 +98,9 @@ window.loadHeader = async function () {
             '</nav>',
             '<a href="#account/profile" class="header-account-link">👤 账户</a></nav>'
         );
+    } else {
+        // 未登录：隐藏"赛事"入口（赛事为登录后功能，默认不显示）
+        header = _headerHTML.replace(/<a href="#tools">赛事<\/a>\s*/, '');
     }
     return header;
 };
@@ -107,7 +110,12 @@ window.loadFooter = async function () {
         var res = await fetch('/partials/footer.html');
         _footerHTML = await res.text();
     }
-    return _footerHTML;
+    var footer = _footerHTML;
+    if (!window.currentUser) {
+        // 未登录：隐藏页脚"工具"列（赛事为登录后功能，默认不显示）
+        footer = _footerHTML.replace(/<div class="footer-column">\s*<strong>工具<\/strong>[\s\S]*?<\/div>\s*/, '');
+    }
+    return footer;
 };
 
 // ─── 主站 header 右侧“开放工具”下拉（委托绑定，header 由各页注入） ───

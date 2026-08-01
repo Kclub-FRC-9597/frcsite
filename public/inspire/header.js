@@ -23,6 +23,7 @@
         case 'admin.html':     activeMenu = 'education';  break;
         case 'migration.html': activeMenu = 'migration'; break;
         case 'devtools.html':  activeMenu = 'devtools';  break;
+        case 'changelog.html': activeMenu = 'changelog'; break;
     }
 
     let category;
@@ -145,6 +146,9 @@
                 </a>
                 <a href="devtools.html" class="sidebar-item${activeMenu === 'devtools' ? ' active' : ''}">
                     <span class="icon">🛠</span>开发者工具
+                </a>
+                <a href="changelog.html" class="sidebar-item${activeMenu === 'changelog' ? ' active' : ''}">
+                    <span class="icon">📝</span>修订记录
                 </a>`;
         }
 

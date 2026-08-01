@@ -728,6 +728,41 @@ select:focus {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
+/* ========== Tools Dropdown ========== */
+.tools-dd {
+    position: relative;
+    display: inline-block;
+}
+.tools-dd-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    z-index: 50;
+    min-width: 150px;
+    padding: 0.3rem;
+}
+.tools-dd-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.tools-dd-item:hover {
+    background: var(--gray-100);
+    color: var(--primary);
+}
+
 /* ========== Migration / DB Manager ========== */
 .mig-log {
     background: #f8fafc;
@@ -753,6 +788,82 @@ select:focus {
 .mig-badge.ok { background: #dcfce7; color: #15803d; }
 .mig-badge.old { background: #fee2e2; color: #b91c1c; }
 .mig-badge.missing { background: #fee2e2; color: #b91c1c; }
+
+/* ========== Changelog ========== */
+.changelog-group {
+    margin-bottom: 0.5rem;
+}
+.changelog-group:last-child {
+    margin-bottom: 0;
+}
+.changelog-date-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.7rem;
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--gray-700);
+    transition: var(--transition);
+}
+.changelog-date-header:hover {
+    background: var(--gray-100);
+}
+.changelog-arrow {
+    font-size: 0.7rem;
+    color: var(--gray-400);
+    width: 0.9rem;
+    text-align: center;
+}
+.changelog-date-count {
+    font-size: 0.78rem;
+    color: var(--gray-400);
+    font-weight: 400;
+    margin-left: auto;
+}
+.changelog-group-body {
+    padding-left: 1rem;
+}
+.changelog-group-body.collapsed {
+    display: none;
+}
+.changelog-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+.changelog-item:last-child {
+    border-bottom: none;
+}
+.changelog-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.12rem 0.5rem;
+    border-radius: 10px;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+}
+.changelog-body {
+    flex: 1;
+    min-width: 0;
+}
+.changelog-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+.changelog-desc {
+    font-size: 0.82rem;
+    color: var(--gray-500);
+    margin-top: 0.15rem;
+    line-height: 1.5;
+}
 
 /* ========== Training List ========== */
 .training-list {

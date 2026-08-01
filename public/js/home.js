@@ -47,6 +47,19 @@ window.renderHome = async function () {
             '</div>';
     }).join('');
 
+    // 赛事（Scouting 工具）为登录后功能，未登录默认不显示入口
+    var isLoggedIn = !!window.currentUser;
+    var toolsHeroBtn = isLoggedIn ? '<a href="#tools/prescouting" class="hero-btn-secondary">🔧 进入 Scouting 工具</a>' : '';
+    var toolsSection = isLoggedIn
+        ? '<h2 class="home-section-title anim-fade-in-up">Scouting 工具</h2>' +
+          '<p style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.95em;" class="anim-fade-in-up anim-delay-1">为了更好地进行赛事数据分析和战略规划，我们开发了专业的 Scouting 系统：</p>' +
+          '<div class="home-tools-grid anim-fade-in-up anim-delay-2">' +
+          '<div class="home-tool-card"><span class="tool-icon">📋</span><h4>PreScouting</h4><p>赛前数据收集与团队评估</p><a href="#tools/prescouting" class="tool-link">开始使用</a></div>' +
+          '<div class="home-tool-card"><span class="tool-icon">📊</span><h4>Scouting</h4><p>现场实时数据记录与分析</p><a href="#tools/scouting" class="tool-link">开始使用</a></div>' +
+          '<div class="home-tool-card"><span class="tool-icon">📈</span><h4>Analysis</h4><p>数据可视化与战略决策支持</p><a href="#tools/analysis" class="tool-link">查看数据</a></div>' +
+          '</div>'
+        : '';
+
     app.innerHTML =
         header +
         '<div class="content home-content">' +
@@ -54,7 +67,7 @@ window.renderHome = async function () {
         '<h1 class="anim-fade-in-up"><strong>Luban Robotics</strong> #FRC9597</h1>' +
         '<div class="hero-actions anim-fade-in-up anim-delay-2">' +
         '<a href="#seasons/2026" class="hero-btn-primary">🏆 查看赛季</a>' +
-        '<a href="#tools/prescouting" class="hero-btn-secondary">🔧 进入 Scouting 工具</a>' +
+        toolsHeroBtn +
         '</div></div>' +
         '<div class="home-about-grid anim-fade-in-up anim-delay-1"><div>' +
         '<p class="home-about-text home-about-text-gap">' + content.aboutUs.p1 + '</p>' +
@@ -68,13 +81,8 @@ window.renderHome = async function () {
         '</div></div>' +
         '<h2 class="home-section-title anim-fade-in-up">核心理念</h2>' +
         '<div class="home-features-grid anim-fade-in-up anim-delay-1">' + featuresHtml + '</div>' +
-        '<h2 class="home-section-title anim-fade-in-up">Scouting 工具</h2>' +
-        '<p style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.95em;" class="anim-fade-in-up anim-delay-1">为了更好地进行赛事数据分析和战略规划，我们开发了专业的 Scouting 系统：</p>' +
-        '<div class="home-tools-grid anim-fade-in-up anim-delay-2">' +
-        '<div class="home-tool-card"><span class="tool-icon">📋</span><h4>PreScouting</h4><p>赛前数据收集与团队评估</p><a href="#tools/prescouting" class="tool-link">开始使用</a></div>' +
-        '<div class="home-tool-card"><span class="tool-icon">📊</span><h4>Scouting</h4><p>现场实时数据记录与分析</p><a href="#tools/scouting" class="tool-link">开始使用</a></div>' +
-        '<div class="home-tool-card"><span class="tool-icon">📈</span><h4>Analysis</h4><p>数据可视化与战略决策支持</p><a href="#tools/analysis" class="tool-link">查看数据</a></div>' +
-        '</div></div>' +
+        toolsSection +
+        '</div>' +
         footer;
 
     var cards = app.querySelectorAll('.home-feature-card');
