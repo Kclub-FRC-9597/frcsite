@@ -60,19 +60,14 @@ input {
     transition: var(--transition);
 }
 
-/* ========== Dev Notice ========== */
-.dev-notice {
-    background: #fef3c7;
-    color: #92400e;
+/* ========== Site Notice ========== */
+.site-notice {
+    background: #e0f2fe;
+    color: #0c4a6e;
     text-align: center;
     padding: 6px 1rem;
     font-size: 0.85rem;
-    border-bottom: 1px solid #fcd34d;
-}
-.dev-notice a {
-    color: #2563eb;
-    font-weight: 600;
-    text-decoration: underline;
+    border-bottom: 1px solid #bae6fd;
 }
 /* ========== Header ========== */
 header {
@@ -640,6 +635,124 @@ select:focus {
 .student-list {
     margin-top: 0.5rem;
 }
+
+/* ========== Student Group (collapsible by class) ========== */
+.student-group {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.6rem;
+    overflow: hidden;
+}
+.student-group:last-child {
+    margin-bottom: 0;
+}
+.student-group-header {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.7rem;
+    background: var(--gray-50);
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    transition: var(--transition);
+}
+.student-group-header:hover {
+    background: var(--gray-100);
+}
+.student-group-arrow {
+    font-size: 0.7rem;
+    color: var(--gray-400);
+    width: 0.9rem;
+    text-align: center;
+}
+.student-group-name {
+    flex: 1;
+}
+.student-group-badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+.student-group-badge.unassigned {
+    background: #fef3c7;
+    color: #92400e;
+}
+.student-group-count {
+    font-size: 0.78rem;
+    color: var(--gray-400);
+    font-weight: 400;
+}
+.student-group-body {
+    border-top: 1px solid var(--gray-100);
+}
+.student-group-body.collapsed {
+    display: none;
+}
+.student-group-empty {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.82rem;
+    color: var(--gray-400);
+    text-align: center;
+}
+
+/* ========== Student View Toggle ========== */
+.view-toggle {
+    display: inline-flex;
+    gap: 0.25rem;
+    background: var(--gray-100);
+    border-radius: 8px;
+    padding: 0.2rem;
+}
+.view-toggle .view-btn {
+    border: none;
+    background: transparent;
+    padding: 0.28rem 0.65rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--gray-500);
+    transition: var(--transition);
+    white-space: nowrap;
+}
+.view-toggle .view-btn:hover {
+    color: var(--primary);
+}
+.view-toggle .view-btn.active {
+    background: #fff;
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ========== Migration / DB Manager ========== */
+.mig-log {
+    background: #f8fafc;
+    border: 1px solid var(--gray-100);
+    padding: 0.6rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    margin-top: 0.75rem;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: Menlo, Consolas, monospace;
+    color: var(--gray-700);
+}
+.mig-badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+.mig-badge.ok { background: #dcfce7; color: #15803d; }
+.mig-badge.old { background: #fee2e2; color: #b91c1c; }
+.mig-badge.missing { background: #fee2e2; color: #b91c1c; }
 
 /* ========== Training List ========== */
 .training-list {

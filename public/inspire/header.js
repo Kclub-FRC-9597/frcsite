@@ -10,7 +10,6 @@
     // switch below matches even when the .html suffix is stripped.
     if (!path.endsWith('.html')) path += '.html';
     const searchParams = new URLSearchParams(window.location.search);
-    const tabParam = searchParams.get('tab');
     const trainingIdParam = searchParams.get('id');
 
     // Skip header/sidebar injection on display page (has its own UI)
@@ -21,9 +20,9 @@
         case 'stats.html':    activeMenu = 'stats';    break;
         case 'training.html': activeMenu = 'training'; break;
         case 'tasks.html':    activeMenu = 'tasks';    break;
-        case 'admin.html':
-            activeMenu = tabParam === 'students' ? 'students' : 'classes';
-            break;
+        case 'admin.html':     activeMenu = 'education';  break;
+        case 'migration.html': activeMenu = 'migration'; break;
+        case 'devtools.html':  activeMenu = 'devtools';  break;
     }
 
     let category;
@@ -35,7 +34,7 @@
 
     const categoryTabs = [
         { key: 'competition', label: '🏆 赛事', href: 'stats.html' },
-        { key: 'education',   label: '📚 教务', href: 'admin.html' },
+        { key: 'education',   label: '📚 后台', href: 'admin.html' },
     ];
 
     const sectionTitles = {
@@ -45,6 +44,9 @@
 
     // ---- Build header HTML ----
     const headerHtml = `
+<div class="site-notice">
+    所有数据本地存储，教务模块提供 <b>数据导入导出</b>功能便于数据迁移/备份
+</div>
 <header>
     <div class="header-inner">
         <button class="sidebar-toggle" id="sidebarToggle" aria-label="切换菜单">☰</button>
@@ -135,17 +137,15 @@
 
         function buildEducationMenu() {
             return `
-                <a href="admin.html" class="sidebar-item${activeMenu === 'classes' ? ' active' : ''}">
-                    <span class="icon">🏫</span>班级管理
+                <a href="admin.html" class="sidebar-item${activeMenu === 'education' ? ' active' : ''}">
+                    <span class="icon">🏫</span>教务管理
                 </a>
-                <a href="admin.html?tab=students" class="sidebar-item${activeMenu === 'students' ? ' active' : ''}">
-                    <span class="icon">👤</span>学员管理
+                <a href="migration.html" class="sidebar-item${activeMenu === 'migration' ? ' active' : ''}">
+                    <span class="icon">🔄</span>数据迁移
                 </a>
-                <div style="margin-top:1.5rem;padding-top:0.75rem;border-top:1px solid var(--gray-100);">
-                    <a href="tools/db-manager.html" class="sidebar-item" style="opacity:0.55;font-size:0.82rem;">
-                        <span class="icon">🛠</span>DB Manager
-                    </a>
-                </div>`;
+                <a href="devtools.html" class="sidebar-item${activeMenu === 'devtools' ? ' active' : ''}">
+                    <span class="icon">🛠</span>开发者工具
+                </a>`;
         }
 
         // ---- Inject sidebar + layout ----

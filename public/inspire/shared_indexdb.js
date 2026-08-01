@@ -130,7 +130,7 @@
         const missing = requiredTables.filter(t => !db.objectStoreNames.contains(t));
         if (missing.length > 0) {
             steps.push(`❌ 缺失表: ${missing.join(', ')}`);
-            steps.push('💡 请用 DB Manager 工具重建（tools/db-manager.html）');
+            steps.push('💡 请到「数据迁移」页面重建（migration.html）');
             return { pass: false, steps };
         }
 

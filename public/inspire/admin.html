@@ -12,74 +12,39 @@
     <script src="header.js"></script>
 
     <div class="container">
-        <!-- ====== 存储引擎选择 ====== -->
-        <div class="card" id="storageEngineCard" style="margin-bottom:1rem;">
-            <div class="card-header" style="margin-bottom:0;">
-                <span class="card-title">💾 数据存储</span>
-                <span id="engineStatus" style="font-size:0.82rem;font-weight:400;color:var(--gray-500);">🔍 检测中...</span>
+        <!-- ====== 新增班级 ====== -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🏫 新增班级</span>
             </div>
-            <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;padding-top:0.25rem;">
-                <label style="display:inline-flex;align-items:center;gap:0.3rem;cursor:pointer;font-size:0.88rem;">
-                    <input type="radio" name="storageEngine" value="ls" checked style="accent-color:var(--primary);">
-                    📦 localStorage
-                </label>
-                <label style="display:inline-flex;align-items:center;gap:0.3rem;cursor:pointer;font-size:0.88rem;">
-                    <input type="radio" name="storageEngine" value="idb" disabled style="accent-color:var(--primary);">
-                    🗄️ IndexedDB (STS_DB)
-                </label>
-                <button class="btn btn-outline btn-sm" id="verifyIDBBtn">🔬 验证并写入 STS_DB</button>
-                <button class="btn btn-outline btn-sm" id="switchToLSBtn" style="display:none;">🔙 切回 localStorage</button>
-            </div>
-            <div id="idbVerifyLog" style="margin-top:0.5rem;font-size:0.82rem;background:#f8fafc;padding:0.5rem 0.75rem;border-radius:6px;font-family:monospace;white-space:pre-wrap;display:none;line-height:1.6;"></div>
-        </div>
-
-        <!-- ====== 数据备份 / 跨设备同步 ====== -->
-        <div class="card" id="backupCard" style="margin-bottom:1rem;">
-            <div class="card-header" style="margin-bottom:0;">
-                <span class="card-title">📦 数据备份 / 跨设备同步</span>
-                <span style="font-size:0.82rem;font-weight:400;color:var(--gray-500);">导出全部 localStorage 数据，导入后可跨设备恢复</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;padding-top:0.25rem;">
-                <button class="btn btn-primary btn-sm" id="exportDataBtn">⬇️ 导出全部数据</button>
-                <button class="btn btn-outline btn-sm" id="importDataBtn">⬆️ 导入数据</button>
-                <input type="file" id="importFileInput" accept=".json,application/json" style="display:none;" />
+            <div class="form-row">
+                <input type="text" id="groupNameInput" class="input-full" placeholder="输入班级名称" maxlength="20" autocomplete="off" />
+                <button class="btn btn-primary" id="addGroupBtn">➕ 添加班级</button>
             </div>
         </div>
 
-        <!-- ====== 班级管理 ====== -->
-        <div id="section-classes">
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">🏫 新增班级</span>
-                </div>
-                <div class="form-row">
-                    <input type="text" id="groupNameInput" class="input-full" placeholder="输入班级名称" maxlength="20" autocomplete="off" />
-                    <button class="btn btn-primary" id="addGroupBtn">➕ 添加班级</button>
-                </div>
-                <div id="groupList" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.4rem;">
-                    <!-- Rendered by JS -->
-                </div>
+        <!-- ====== 新增学员 ====== -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">👤 新增学员</span>
+            </div>
+            <div class="form-row">
+                <input type="text" id="studentNameInput" class="input-full" placeholder="输入学员姓名" maxlength="20" autocomplete="off" />
+                <button class="btn btn-primary" id="addStudentBtn">➕ 添加学员</button>
             </div>
         </div>
 
-        <!-- ====== 学员管理 ====== -->
-        <div id="section-students" style="display:none;">
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">👤 新增学员</span>
-                </div>
-                <div class="form-row">
-                    <input type="text" id="studentNameInput" class="input-full" placeholder="输入学员姓名" maxlength="20" autocomplete="off" />
-                    <button class="btn btn-primary" id="addStudentBtn">➕ 添加</button>
+        <!-- ====== 学员与班级（按班级分组折叠，班级可删除） ====== -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">📋 学员与班级 (<span id="studentCount">0</span>)</span>
+                <div class="view-toggle" id="studentViewToggle">
+                    <button type="button" class="view-btn active" data-view="class">👥 按班级</button>
+                    <button type="button" class="view-btn" data-view="student">📋 按学员</button>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">📋 全部学员 (<span id="studentCount">0</span>)</span>
-                </div>
-                <div id="studentList" class="student-list">
-                    <!-- Rendered by JS -->
-                </div>
+            <div id="studentList" class="student-list">
+                <!-- Rendered by JS -->
             </div>
         </div>
     </div>
@@ -105,62 +70,26 @@
         </div>
     </div>
 
-    <!-- ========== Modal: 导入数据 ========== -->
-    <div class="modal-overlay" id="importModal">
-        <div class="modal-box" style="max-width:480px;">
-            <h3>⬆️ 导入数据</h3>
-            <div id="importPreviewInfo" style="font-size:0.85rem;color:var(--gray-600);margin-bottom:0.5rem;white-space:pre-wrap;line-height:1.6;"></div>
-            <div id="importKeyList" style="max-height:160px;overflow-y:auto;font-size:0.8rem;background:#f8fafc;padding:0.5rem 0.75rem;border-radius:6px;font-family:monospace;white-space:pre-wrap;line-height:1.6;margin-bottom:0.75rem;"></div>
-            <div class="form-group">
-                <label>导入方式</label>
-                <label style="display:inline-flex;align-items:center;gap:0.3rem;cursor:pointer;font-size:0.88rem;margin-right:1rem;">
-                    <input type="radio" name="importMode" value="overwrite" checked style="accent-color:var(--primary);">
-                    整体覆盖（先清空再写入）
-                </label>
-                <label style="display:inline-flex;align-items:center;gap:0.3rem;cursor:pointer;font-size:0.88rem;">
-                    <input type="radio" name="importMode" value="merge" style="accent-color:var(--primary);">
-                    合并写入（保留其他数据）
-                </label>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-outline" id="importModalCancel">取消</button>
-                <button class="btn btn-primary" id="importModalConfirm">确认导入</button>
-            </div>
-        </div>
-    </div>
-
     <!-- ========== Toast Container ========== -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
     if (!window.AdminApp) {
     // =================================================================
-    //  Admin App — 教务管理 (班级管理 + 学员管理)
-    //  通过左侧栏菜单切换（班级管理→admin.html, 学员管理→admin.html?tab=students）
+    //  Admin App — 教务管理 (班级 + 学员，按班级分组折叠)
     // =================================================================
     const AdminApp = {
         _editStudentId: null,
-        _pendingImport: null,
 
         init() {
             Shared.loadData();
-            this.showSection();
             this.bindEvents();
             this.render();
-            this._checkIDBStatus();
         },
 
         generateId() { return Shared.generateId(); },
         toast(msg, type) { Shared.toast(msg, type); },
         escapeHtml(str) { return Shared.escapeHtml(str); },
-
-        // 根据 URL 参数显示对应区域
-        showSection() {
-            const params = new URLSearchParams(window.location.search);
-            const tab = params.get('tab');
-            document.getElementById('section-classes').style.display = tab === 'students' ? 'none' : 'block';
-            document.getElementById('section-students').style.display = tab === 'students' ? 'block' : 'none';
-        },
 
         // ============ Group Operations ============
         addGroup(name) {
@@ -279,120 +208,6 @@
             this.toast(`已移除学员"${student.name}"`);
         },
 
-        // ============ 数据备份 / 跨设备同步 ============
-        // 导出 localStorage 全部键为 JSON 文件
-        exportAllData() {
-            try {
-                const keys = {};
-                let totalBytes = 0;
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    const value = localStorage.getItem(key);
-                    keys[key] = value;
-                    totalBytes += (key.length + (value ? value.length : 0)) * 2; // UTF-16 近似字节
-                }
-                const payload = {
-                    app: 'insTools',
-                    type: 'localstorage-backup',
-                    formatVersion: 1,
-                    exportedAt: new Date().toISOString(),
-                    keyCount: Object.keys(keys).length,
-                    keys,
-                };
-                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `insTools_backup_${new Date().toISOString().slice(0, 10)}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                this.toast(`✅ 已导出 ${payload.keyCount} 个键，约 ${(totalBytes / 1024).toFixed(1)} KB`);
-            } catch (e) {
-                console.warn('exportAllData error:', e);
-                this.toast('导出失败', 'warning');
-            }
-        },
-
-        // 解析并预览导入文件
-        async handleImportFile(file) {
-            if (!file) return;
-            try {
-                const text = await file.text();
-                const payload = JSON.parse(text);
-                if (!payload || typeof payload !== 'object' || !payload.keys || typeof payload.keys !== 'object') {
-                    this.toast('文件格式不正确：缺少 keys 字段', 'warning');
-                    return;
-                }
-                this._pendingImport = payload;
-                const keyNames = Object.keys(payload.keys);
-                const totalBytes = keyNames.reduce((s, k) => s + (k.length + (payload.keys[k] ? payload.keys[k].length : 0)) * 2, 0);
-                const timeStr = payload.exportedAt ? new Date(payload.exportedAt).toLocaleString() : '未知';
-                let info = `📄 ${file.name}\n导出时间：${timeStr}\n键数量：${keyNames.length}　数据量：${(totalBytes / 1024).toFixed(1)} KB`;
-                if (payload.keys.sts_storage_mode === 'idb') {
-                    info += '\n⚠️ 源设备处于 IndexedDB 模式，本次备份不含 STS_DB 数据；建议在源设备切回 localStorage 后重新导出';
-                }
-                document.getElementById('importPreviewInfo').textContent = info;
-                document.getElementById('importKeyList').textContent = keyNames.join('\n');
-                document.getElementById('importModal').classList.add('open');
-            } catch (e) {
-                console.warn('handleImportFile error:', e);
-                this.toast('导入文件解析失败：不是有效的 JSON', 'warning');
-            }
-        },
-
-        closeImportModal() {
-            document.getElementById('importModal').classList.remove('open');
-            this._pendingImport = null;
-        },
-
-        confirmImport() {
-            const payload = this._pendingImport;
-            if (!payload) return;
-            const mode = document.querySelector('input[name="importMode"]:checked').value;
-            try {
-                if (mode === 'overwrite') localStorage.clear();
-                Object.keys(payload.keys).forEach((k) => localStorage.setItem(k, payload.keys[k]));
-                Shared.loadData();
-                this.render();
-                const modeLabel = mode === 'overwrite' ? '整体覆盖' : '合并写入';
-                this.toast(`✅ 已导入 ${Object.keys(payload.keys).length} 个键（${modeLabel}）`);
-                this.closeImportModal();
-            } catch (e) {
-                console.warn('confirmImport error:', e);
-                this.toast('导入写入失败', 'warning');
-            }
-        },
-
-        // ============ IDB / 存储引擎 ============
-        async _checkIDBStatus() {
-            const status = document.getElementById('engineStatus');
-            const dbOk = await Shared._initIDB();
-            const engine = Shared._getEngine();
-            const idbRadio = document.querySelector('input[value="idb"]');
-            const lsRadio = document.querySelector('input[value="ls"]');
-
-            if (dbOk) {
-                status.textContent = '✅ STS_DB 就绪';
-                idbRadio.disabled = false;
-            } else {
-                status.textContent = '❌ IndexedDB 不可用，仅 localStorage';
-                return;
-            }
-
-            // 恢复上次选择的引擎
-            if (engine === 'idb') {
-                idbRadio.checked = true;
-                document.getElementById('switchToLSBtn').style.display = '';
-                await Shared._overrideFromIDB();
-                this.render();
-                this.toast('🗄️ 数据源: IndexedDB (STS_DB)');
-            } else {
-                lsRadio.checked = true;
-            }
-        },
-
         // ============ Events Binding ============
         bindEvents() {
             document.getElementById('addGroupBtn').addEventListener('click', () => {
@@ -413,6 +228,7 @@
             document.getElementById('studentNameInput').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') document.getElementById('addStudentBtn').click();
             });
+            // === 学员/班级操作 ===
             document.getElementById('editStudentModalCancel').addEventListener('click', () => this.closeEditStudentModal());
             document.getElementById('editStudentModalConfirm').addEventListener('click', () => this.confirmEditStudent());
             document.getElementById('editStudentNameInput').addEventListener('keydown', (e) => {
@@ -422,86 +238,18 @@
                 if (e.target === e.currentTarget) this.closeEditStudentModal();
             });
 
-            // === IDB 存储引擎事件 ===
-            document.getElementById('verifyIDBBtn').addEventListener('click', async () => {
-                const log = document.getElementById('idbVerifyLog');
-                log.style.display = 'block';
-                log.textContent = '⏳ 验证中...\n';
-
-                const result = await Shared._verifyIDB();
-                log.textContent = result.steps.join('\n');
-
-                if (result.pass) {
-                    log.textContent += '\n\n══════ ✅ 全部通过 — 可切换到 IndexedDB ══════';
-                    const idbRadio = document.querySelector('input[value="idb"]');
-                    idbRadio.disabled = false;
-                    Shared.toast('✅ 验证通过，可切换到 STS_DB');
-                } else {
-                    log.textContent += '\n\n══════ ❌ 数据不一致 — 请勿切换 ══════';
-                }
-            });
-
-            document.querySelectorAll('input[name="storageEngine"]').forEach(radio => {
-                radio.addEventListener('change', async function () {
-                    if (this.value === 'idb') {
-                        Shared._setEngine('idb');
-                        Shared.loadData();
-                        await Shared._overrideFromIDB();
-                        document.getElementById('switchToLSBtn').style.display = '';
-                        AdminApp.render();
-                        Shared.toast('🗄️ 已切换到 IndexedDB (STS_DB)');
-                    } else {
-                        Shared._setEngine('ls');
-                        Shared.loadData();
-                        document.getElementById('switchToLSBtn').style.display = 'none';
-                        AdminApp.render();
-                        Shared.toast('📦 已切换到 localStorage');
-                    }
+            // === 学员视图切换（按班级 / 按学员） ===
+            document.querySelectorAll('#studentViewToggle .view-btn').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    this.setStudentsView(btn.dataset.view);
+                    this.render();
                 });
-            });
-
-            document.getElementById('switchToLSBtn').addEventListener('click', () => {
-                document.querySelector('input[value="ls"]').click();
-            });
-
-            // === 数据备份 / 导入导出 ===
-            document.getElementById('exportDataBtn').addEventListener('click', () => this.exportAllData());
-            document.getElementById('importDataBtn').addEventListener('click', () => {
-                document.getElementById('importFileInput').click();
-            });
-            document.getElementById('importFileInput').addEventListener('change', (e) => {
-                this.handleImportFile(e.target.files[0]);
-                e.target.value = '';
-            });
-            document.getElementById('importModalCancel').addEventListener('click', () => this.closeImportModal());
-            document.getElementById('importModalConfirm').addEventListener('click', () => this.confirmImport());
-            document.getElementById('importModal').addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) this.closeImportModal();
             });
         },
 
         // ============ Render ============
         render() {
-            try { this.renderGroups(); } catch (e) { console.warn('renderGroups error:', e); }
             try { this.renderStudents(); } catch (e) { console.warn('renderStudents error:', e); }
-        },
-
-        renderGroups() {
-            const container = document.getElementById('groupList');
-            const allClasses = Shared.data.classes;
-            if (allClasses.length === 0) {
-                container.innerHTML = '<span style="font-size:0.85rem;color:var(--gray-400);">暂无班级，请添加</span>';
-                return;
-            }
-            container.innerHTML = allClasses.map((c) =>
-                `<span style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.25rem 0.7rem;background:var(--primary-bg);color:var(--primary);border-radius:16px;font-size:0.85rem;">
-                    🏫 ${this.escapeHtml(c.name)}
-                    <span class="del-group" data-group-id="${c.id}" style="cursor:pointer;color:var(--gray-400);font-size:0.8rem;" title="删除班级">✕</span>
-                </span>`
-            ).join('');
-            container.querySelectorAll('.del-group').forEach((el) => {
-                el.addEventListener('click', () => this.removeGroup(el.dataset.groupId));
-            });
         },
 
         renderStudents() {
@@ -511,27 +259,55 @@
                 container.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>暂无学员，请在上方添加</p></div>';
                 return;
             }
-            // Sort: grouped students first, then ungrouped
-            const sorted = [...Shared.data.students].sort((a, b) => {
-                const ga = Shared.getCurrentClassName(a.id);
-                const gb = Shared.getCurrentClassName(b.id);
-                if (ga && !gb) return -1;
-                if (!ga && gb) return 1;
-                if (ga !== gb) return ga.localeCompare(gb, 'zh');
-                return a.name.localeCompare(b.name, 'zh');
+
+            // 同步视图切换按钮高亮
+            document.querySelectorAll('#studentViewToggle .view-btn').forEach((b) => {
+                b.classList.toggle('active', b.dataset.view === this.getStudentsView());
             });
-            let html = `<div style="overflow-x:auto;"><table class="score-table" style="font-size:0.85rem;">
-                <thead><tr>
-                    <th style="width:40px;text-align:center;">#</th>
-                    <th style="text-align:left;">姓名</th>
-                    <th style="text-align:left;">班级</th>
-                    <th style="width:80px;text-align:center;">操作</th>
-                </tr></thead><tbody>`;
-            sorted.forEach((s, i) => {
+
+            if (this.getStudentsView() === 'student') {
+                this.renderStudentsFlat(container);
+            } else {
+                this.renderStudentsByClass(container);
+            }
+            this.bindStudentActions(container);
+        },
+
+        // ---- 学员视图模式：'class' 按班级分组（默认） | 'student' 按学员平铺 ----
+        getStudentsView() {
+            return localStorage.getItem('admin_students_view') === 'student' ? 'student' : 'class';
+        },
+        setStudentsView(view) {
+            localStorage.setItem('admin_students_view', view);
+        },
+        bindStudentActions(container) {
+            // 操作按钮（两种视图共用）
+            container.querySelectorAll('.del').forEach((el) => {
+                el.addEventListener('click', () => this.removeStudent(el.dataset.studentId));
+            });
+            container.querySelectorAll('.edit-student').forEach((el) => {
+                el.addEventListener('click', () => this.editStudent(el.dataset.studentId));
+            });
+            container.querySelectorAll('.edit-student-group').forEach((el) => {
+                el.addEventListener('click', () => this.editStudent(el.dataset.studentId));
+            });
+        },
+
+        // ============ 视图：按学员平铺（学员 | 所属班级） ============
+        renderStudentsFlat(container) {
+            const students = [...Shared.data.students].sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+            let html = '<div style="overflow-x:auto;"><table class="score-table">'
+                + '<thead><tr>'
+                + '<th style="width:40px;text-align:center;">#</th>'
+                + '<th style="text-align:left;">学员</th>'
+                + '<th style="text-align:left;">所属班级</th>'
+                + '<th style="width:80px;text-align:center;">操作</th>'
+                + '</tr></thead><tbody>';
+            students.forEach((s, i) => {
                 const gn = Shared.getCurrentClassName(s.id);
                 const groupDisplay = gn
                     ? `<span class="edit-student-group" data-student-id="${s.id}" title="点击修改班级" style="cursor:pointer;color:var(--gray-600);border-bottom:1px dashed var(--gray-300);">🏫 ${this.escapeHtml(gn)}</span>`
-                    : `<span class="edit-student-group" data-student-id="${s.id}" title="点击设置班级" style="cursor:pointer;color:var(--gray-400);border-bottom:1px dashed var(--gray-300);">—</span>`;
+                    : `<span class="edit-student-group" data-student-id="${s.id}" title="点击设置班级" style="cursor:pointer;color:var(--gray-400);border-bottom:1px dashed var(--gray-300);">📂 待分班</span>`;
                 html += `<tr>
                     <td style="text-align:center;color:var(--gray-400);">${i + 1}</td>
                     <td><strong>${this.escapeHtml(s.name)}</strong></td>
@@ -544,15 +320,122 @@
             });
             html += '</tbody></table></div>';
             container.innerHTML = html;
-            container.querySelectorAll('.del').forEach((el) => {
-                el.addEventListener('click', () => this.removeStudent(el.dataset.studentId));
+        },
+
+        // ============ 视图：按班级分组（可折叠） ============
+        renderStudentsByClass(container) {
+            // ---- 按当前班级分组（未分班学员归入“待分班”） ----
+            const byClass = new Map(); // classId -> students[]
+            const unassigned = [];
+            Shared.data.students.forEach((s) => {
+                const classId = Shared.getCurrentClassId(s.id);
+                if (classId && Shared.getGroupName(classId)) {
+                    if (!byClass.has(classId)) byClass.set(classId, []);
+                    byClass.get(classId).push(s);
+                } else {
+                    unassigned.push(s);
+                }
             });
-            container.querySelectorAll('.edit-student').forEach((el) => {
-                el.addEventListener('click', () => this.editStudent(el.dataset.studentId));
+
+            // 展示所有班级（含空班，便于在此管理/删除班级）；末尾追加虚拟“待分班”分组（非空才显示）
+            const collapsedSet = this.getCollapsedStudentGroups();
+            const groups = Shared.data.classes.map((c) => ({
+                key: c.id,
+                name: c.name,
+                students: (byClass.get(c.id) || []).sort((a, b) => a.name.localeCompare(b.name, 'zh')),
+                virtual: false,
+            }));
+            groups.push({
+                key: '__unassigned__',
+                name: '待分班',
+                students: [...unassigned].sort((a, b) => a.name.localeCompare(b.name, 'zh')),
+                virtual: true,
             });
-            container.querySelectorAll('.edit-student-group').forEach((el) => {
-                el.addEventListener('click', () => this.editStudent(el.dataset.studentId));
+            const last = groups[groups.length - 1];
+            if (last.virtual && last.students.length === 0) groups.pop();
+
+            let html = '';
+            groups.forEach((g) => {
+                const collapsed = collapsedSet.has(g.key);
+                const arrow = collapsed ? '▶' : '▼';
+                const badge = g.virtual
+                    ? '<span class="student-group-badge unassigned">未分班</span>'
+                    : '';
+                const delBtn = g.virtual
+                    ? ''
+                    : `<button class="del-group" data-group-id="${g.key}" title="删除班级" style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:0.85rem;padding:0 0.3rem;line-height:1;">✕</button>`;
+                const bodyContent = g.students.length === 0
+                    ? '<div class="student-group-empty">暂无学员</div>'
+                    : `<table class="score-table">
+                            <thead><tr>
+                                <th style="width:40px;text-align:center;">#</th>
+                                <th style="text-align:left;">姓名</th>
+                                <th style="width:80px;text-align:center;">操作</th>
+                            </tr></thead>
+                            <tbody>
+                            ${g.students.map((s, i) => `
+                                <tr>
+                                    <td style="text-align:center;color:var(--gray-400);">${i + 1}</td>
+                                    <td><strong>${this.escapeHtml(s.name)}</strong></td>
+                                    <td style="text-align:center;white-space:nowrap;">
+                                        <button class="edit-student" data-student-id="${s.id}" title="编辑" style="background:none;border:none;cursor:pointer;color:var(--primary);font-size:0.8rem;padding:0.15rem 0.4rem;">✏️</button>
+                                        <button class="del" data-student-id="${s.id}" title="移除" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:0.8rem;padding:0.15rem 0.4rem;">🗑️</button>
+                                    </td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>`;
+                html += `
+                <div class="student-group${collapsed ? ' collapsed' : ''}" data-group-key="${g.key}">
+                    <div class="student-group-header" title="点击折叠/展开">
+                        <span class="student-group-arrow">${arrow}</span>
+                        <span class="student-group-name">${g.virtual ? '📂' : '🏫'} ${this.escapeHtml(g.name)}</span>
+                        ${badge}
+                        <span class="student-group-count">${g.students.length} 人</span>
+                        ${delBtn}
+                    </div>
+                    <div class="student-group-body${collapsed ? ' collapsed' : ''}">
+                        ${bodyContent}
+                    </div>
+                </div>`;
             });
+            container.innerHTML = html;
+
+            // 班级头点击折叠/展开（删除按钮不触发）
+            container.querySelectorAll('.student-group-header').forEach((h) => {
+                h.addEventListener('click', (e) => {
+                    if (e.target.closest('.del-group')) return;
+                    this.toggleStudentGroup(h.closest('.student-group'));
+                });
+            });
+            // 删除班级
+            container.querySelectorAll('.del-group').forEach((el) => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.removeGroup(el.dataset.groupId);
+                });
+            });
+        },
+
+        // ---- 学员分组折叠状态（localStorage 持久化） ----
+        getCollapsedStudentGroups() {
+            try {
+                const raw = localStorage.getItem('admin_student_groups_collapsed');
+                return new Set(raw ? JSON.parse(raw) : []);
+            } catch (e) { return new Set(); }
+        },
+        saveCollapsedStudentGroups(set) {
+            localStorage.setItem('admin_student_groups_collapsed', JSON.stringify([...set]));
+        },
+        toggleStudentGroup(groupEl) {
+            const key = groupEl.dataset.groupKey;
+            const body = groupEl.querySelector('.student-group-body');
+            const arrow = groupEl.querySelector('.student-group-arrow');
+            const collapsed = groupEl.classList.toggle('collapsed');
+            if (body) body.classList.toggle('collapsed', collapsed);
+            if (arrow) arrow.textContent = collapsed ? '▶' : '▼';
+            const set = this.getCollapsedStudentGroups();
+            if (collapsed) set.add(key); else set.delete(key);
+            this.saveCollapsedStudentGroups(set);
         },
     };
 
