@@ -110,7 +110,7 @@ window.loadFooter = async function () {
     return _footerHTML;
 };
 
-// ─── 主站 header 右侧“其他赛事”下拉（委托绑定，header 由各页注入） ───
+// ─── 主站 header 右侧“开放工具”下拉（委托绑定，header 由各页注入） ───
 document.addEventListener('click', function (e) {
     var toggle = document.getElementById('inspireDdToggle');
     var menu = document.getElementById('inspireDdMenu');
