@@ -245,8 +245,6 @@
             container.querySelectorAll('.edit-task-btn').forEach((btn) => {
                 btn.addEventListener('click', () => this.openEditModal(btn.dataset.taskId));
             });
-
-            if (window.updateHeaderStats) window.updateHeaderStats();
         },
     };
 

@@ -2017,7 +2017,6 @@
         // ============ Render ============
         render() {
             try { this.renderTrainingList(); } catch (e) { console.warn('render error:', e); }
-            if (window.updateHeaderStats) window.updateHeaderStats();
         },
 
         renderStats() {

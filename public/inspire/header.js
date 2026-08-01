@@ -45,9 +45,6 @@
 
     // ---- Build header HTML ----
     const headerHtml = `
-<div class="dev-notice">
-    ⚠️ 开发版本 — 正式版请访问 <a href="https://inspire.frc9597.com">inspire.frc9597.com</a>
-</div>
 <header>
     <div class="header-inner">
         <button class="sidebar-toggle" id="sidebarToggle" aria-label="切换菜单">☰</button>
@@ -59,11 +56,6 @@
             ).join('')}
         </div>
         <div class="header-spacer"></div>
-        <div class="header-stats">
-            <span>👥 学员 <strong id="hdrStudents">0</strong></span>
-            <span>📋 集训 <strong id="hdrTrainings">0</strong></span>
-            <span>📝 记录 <strong id="hdrMocks">0</strong></span>
-        </div>
     </div>
 </header>`;
 
@@ -343,7 +335,6 @@
                         script.textContent = oldScript.textContent;
                         document.body.appendChild(script);
                     });
-                    if (window.updateHeaderStats) setTimeout(window.updateHeaderStats, 100);
                     // Pre-fetch adjacent pages after navigation
                     setTimeout(() => {
                         appPages.filter(p => p !== href.split('?')[0] && !pageCache[p]).forEach(p => {
@@ -390,22 +381,6 @@
                 sidebarEl.classList.remove('open');
                 overlayEl.classList.remove('open');
             });
-        }
-
-        // ---- Update header stats ----
-        if (window.Shared && Shared.data) {
-            const updateStats = () => {
-                const el1 = document.getElementById('hdrStudents');
-                const el2 = document.getElementById('hdrTrainings');
-                const el3 = document.getElementById('hdrMocks');
-                if (el1) el1.textContent = Shared.data.students.length;
-                if (el2) el2.textContent = Shared.data.trainings.length;
-                let mc = 0;
-                Shared.data.trainings.forEach((t) => (mc += t.mockCompetitions.length));
-                if (el3) el3.textContent = mc;
-            };
-            setTimeout(updateStats, 50);
-            window.updateHeaderStats = updateStats;
         }
     }
 

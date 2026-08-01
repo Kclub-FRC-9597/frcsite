@@ -484,7 +484,6 @@
         render() {
             try { this.renderGroups(); } catch (e) { console.warn('renderGroups error:', e); }
             try { this.renderStudents(); } catch (e) { console.warn('renderStudents error:', e); }
-            if (window.updateHeaderStats) window.updateHeaderStats();
         },
 
         renderGroups() {

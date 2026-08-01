@@ -135,7 +135,6 @@
         // ============ Render ============
         render() {
             try { this.renderStats(); } catch (e) { console.warn('renderStats error:', e); }
-            if (window.updateHeaderStats) window.updateHeaderStats();
         },
 
         renderChallengeFilter() {
