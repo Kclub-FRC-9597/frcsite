@@ -1,0 +1,47 @@
+# R1.plan.yaml
+title: Inspire 数据库 schema（9 表 + JSONB）
+prd_ref: prd-2-001.R1
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: 阅读迁移脚本
+    instructions:
+      - 打开 migrations/002_inspire.sql，对照 R1.md 的表清单逐张看
+      - 找出 JSONB 列、主键、索引、外键
+    verify: 能说出每张表的作用
+    expected: 理解"实体规范化 + JSONB 存嵌套数据"
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: 执行迁移
+    instructions:
+      - 执行 `docker compose exec api npm run migrate`
+    verify: 迁移成功，无报错
+    expected: 9 张表建成
+    history: []
+
+  - id: M-3
+    executor: human
+    learn: 验证表结构与幂等
+    instructions:
+      - psql 执行 `\dt inspire.*`（应 9 张表）
+      - 执行 `\d inspire.mocks`（确认 jsonb 列）
+      - 再次 `npm run migrate`（应幂等无报错）
+    verify: 9 张表齐全；mocks 含 4 个 jsonb 列；重复迁移无报错
+    expected: 建库可重复，覆盖现状数据模型
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE B：B-2 \dt、B-3 幂等、B-4 jsonb
+not_doing:
+  - 不落库 rankings（派生数据）
+  - 不做数据导入（那是 R5）
+  - 不做分页/增量（后续）
+boundary:
+  constraints: 迁移幂等；只存文本/数字
+  depends_on: prd-1.R3（schema 命名空间已就绪）

@@ -1,0 +1,54 @@
+# R4.plan.yaml
+title: 只读接口 GET /api/snapshot
+prd_ref: prd-2-002.R4
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: 写第一个 GET handler
+    instructions:
+      - 在 modules/inspire/routes.ts 实现 snapshot：查询各表并组装成契约结构
+      - 用参数化 SQL（$1 占位），不拼接字符串
+    verify: 代码能编译（npm run build）
+    expected: 理解"请求→查询→JSON 返回"链路
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: 空库验证
+    instructions:
+      - 确保无数据时执行 `curl -s localhost:8080/api/snapshot`
+    verify: 200，返回空结构（students:[] 等）
+    expected: 空库不报错
+    history: []
+
+  - id: M-3
+    executor: human
+    learn: 有数据验证
+    instructions:
+      - 先执行一次 import（R5 或预置数据）后，再 curl snapshot
+      - 与导入 JSON 逐项比对
+    verify: 返回与数据库一致
+    expected: 数据链路通
+    history: []
+
+  - id: M-4
+    executor: human
+    learn: 公网只读验证（需另一设备）
+    instructions:
+      - 用手机流量 `curl -s https://api.inspire.frc9597.com/api/snapshot`
+    verify: 200 且数据一致
+    expected: 学员/家长视角只读可用
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE C：C-3 公开 200、C-4 空库、C-7 数据一致；GATE D：M-D1/M-D2
+not_doing:
+  - 不做分页/增量（全量快照）
+  - 不做字段过滤权限（全公开只读）
+boundary:
+  constraints: 只读、公开、数据量小用全量
+  depends_on: prd-2-001.R1（schema）、prd-2-001.R2（契约）

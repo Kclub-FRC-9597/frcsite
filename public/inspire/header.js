@@ -21,6 +21,8 @@
         case 'training.html': activeMenu = 'training'; break;
         case 'tasks.html':    activeMenu = 'tasks';    break;
         case 'admin.html':     activeMenu = 'education';  break;
+        case 'student.html':   activeMenu = 'student';    break;
+        case 'stu_tool.html':  activeMenu = 'stu_tool';   break;
         case 'migration.html': activeMenu = 'migration'; break;
         case 'devtools.html':  activeMenu = 'devtools';  break;
         case 'changelog.html': activeMenu = 'changelog'; break;
@@ -46,7 +48,7 @@
     // ---- Build header HTML ----
     const headerHtml = `
 <div class="site-notice">
-    所有数据本地存储，教务模块提供 <b>数据导入导出</b>功能便于数据迁移/备份
+    所有数据本地存储，后台-教务模块提供 <b>数据导入导出</b>功能便于数据迁移/备份
 </div>
 <header>
     <div class="header-inner">
@@ -59,6 +61,9 @@
             ).join('')}
         </div>
         <div class="header-spacer"></div>
+        <a href="stu_tool.html" class="header-student-entry${activeMenu === 'stu_tool' ? ' active' : ''}" title="成绩录入：录入与查看自己的成绩">
+            <span class="icon">👤</span>成绩录入
+        </a>
     </div>
 </header>`;
 
@@ -140,6 +145,9 @@
             return `
                 <a href="admin.html" class="sidebar-item${activeMenu === 'education' ? ' active' : ''}">
                     <span class="icon">🏫</span>教务管理
+                </a>
+                <a href="student.html" class="sidebar-item${activeMenu === 'student' ? ' active' : ''}">
+                    <span class="icon">👤</span>个人成绩卡
                 </a>
                 <a href="migration.html" class="sidebar-item${activeMenu === 'migration' ? ' active' : ''}">
                     <span class="icon">🔄</span>数据迁移

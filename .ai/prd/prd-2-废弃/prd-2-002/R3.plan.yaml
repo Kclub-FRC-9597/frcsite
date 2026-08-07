@@ -1,0 +1,37 @@
+# R3.plan.yaml
+title: 鉴权中间件（Bearer token）
+prd_ref: prd-2-002.R3
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: 理解中间件与 HTTP 头
+    instructions:
+      - 阅读 src/middleware/auth.ts，理解它在路由前拦截请求、比对 Authorization 头与 ADMIN_TOKEN
+      - 在 .env 设置 ADMIN_TOKEN
+    verify: 能说出"中间件 = 请求关卡"的含义
+    expected: 理解鉴权原理
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: 手动验证三种情况
+    instructions:
+      - `curl -s -X POST localhost:8080/api/import -d '{}'`（无 token）
+      - `curl -s -X POST localhost:8080/api/import -H "Authorization: Bearer wrong" -d '{}'`
+      - `curl -s localhost:8080/api/snapshot`（无 token）
+    verify: 前两个 401；snapshot 200
+    expected: 读写分离生效
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE C：C-1 无 token 401、C-2 错误 token 401、C-3 只读公开 200
+not_doing:
+  - 不做用户体系/多角色（token 单角色足够，预留可扩展）
+  - 不落库 token（环境变量）
+boundary:
+  constraints: token 走环境变量；写路径才鉴权
+  depends_on: prd-2-001.R2（契约鉴权约定）

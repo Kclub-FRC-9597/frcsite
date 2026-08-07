@@ -146,6 +146,36 @@ header .logo {
     flex: 1;
 }
 
+/* ========== Header: 学员入口（我的成绩） ========== */
+.header-student-entry {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    transition: 0.2s ease;
+    white-space: nowrap;
+}
+.header-student-entry .icon {
+    font-size: 1rem;
+}
+.header-student-entry:hover {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+.header-student-entry.active {
+    background: #fff;
+    color: var(--primary);
+    border-color: #fff;
+    font-weight: 700;
+}
+
 /* ========== Layout: Sidebar + Main ========== */
 .layout {
     display: flex;
@@ -1142,6 +1172,201 @@ select:focus {
     );
     transition: width 0.4s ease;
 }
+
+/* ========== Student Card（个人成绩卡） ========== */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+.stat-cell {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1rem;
+    text-align: center;
+}
+.stat-cell .stat-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+.stat-cell .stat-label {
+    margin-top: 0.25rem;
+}
+.student-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0 0.25rem;
+    flex-wrap: wrap;
+}
+.student-card-avatar {
+    font-size: 2.2rem;
+    line-height: 1;
+}
+.student-card-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--gray-800);
+}
+.student-card-sub {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+.task-bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.task-bar-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) 2fr 90px;
+    align-items: center;
+    gap: 0.75rem;
+}
+.task-bar-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+.task-bar-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--gray-700);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.task-bar-count {
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    margin-left: auto;
+}
+.task-bar-value {
+    text-align: right;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--gray-700);
+    white-space: nowrap;
+}
+.task-type-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.08rem 0.4rem;
+    border-radius: 8px;
+    background: var(--primary-bg);
+    color: var(--primary);
+    white-space: nowrap;
+}
+.task-type-badge.challenge {
+    background: #fef3c7;
+    color: #b45309;
+}
+@media (max-width: 640px) {
+    .task-bar-row {
+        grid-template-columns: 1fr 1.5fr;
+    }
+    .task-bar-value {
+        grid-column: 1 / -1;
+        text-align: left;
+    }
+}
+
+/* ========== 自主训练录入 ========== */
+.form-note {
+    font-size: 0.78rem;
+    color: var(--gray-400);
+    margin-top: 0.5rem;
+}
+
+/* ========== Toast ========== */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.toast {
+    background: #111827;
+    color: #fff;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-md);
+    animation: fadeIn 0.2s ease;
+    max-width: 320px;
+}
+.toast-warning {
+    background: #92400e;
+}
+
+/* ========== 失误点标签（stu_tool） ========== */
+.mistake-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.28rem 0.7rem;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: 1px solid var(--gray-200);
+    cursor: pointer;
+    transition: 0.15s ease;
+    user-select: none;
+}
+.mistake-tag:hover {
+    border-color: var(--primary-light);
+    color: var(--primary);
+    background: var(--primary-bg);
+}
+.mistake-tag.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    font-weight: 600;
+}
+.mistake-tag-x {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    cursor: pointer;
+}
+.mistake-tag.active .mistake-tag-x {
+    opacity: 0.85;
+}
+
+/* ========== 录入成绩卡片（页面重点，高亮） ========== */
+.card-entry {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border: 2px solid #fb923c;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.18);
+}
+.card-entry .card-title {
+    color: #c2410c;
+}
+.card-entry .form-note {
+    color: #9a3412;
+}
+.card-entry input,
+.card-entry select {
+    border-color: #fdba74;
+    background: #fff;
+}
+.card-entry input:focus,
+.card-entry select:focus {
+    border-color: #fb923c;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+}
+
+
 
 /* ========== Modal ========== */
 .modal-overlay {

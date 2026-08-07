@@ -1,0 +1,59 @@
+# R6.plan.yaml
+title: Inspire 前端接入
+prd_ref: prd-2-003.R6
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: fetch 基础 / CORS
+    instructions:
+      - 在 public/inspire/ 新建 api-client.js：封装 getSnapshot() 与 importData()
+      - 后端 api 地址用常量或配置项（默认 https://api.inspire.frc9597.com）
+      - 确认后端 CORS 允许 inspire.frc9597.com 来源
+    verify: 浏览器控制台无 CORS 报错
+    expected: 理解 fetch 与跨域
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: 管理端导入入口
+    instructions:
+      - 在 migration.html 增加"导入到服务器"按钮，输入 token，调 importData()
+      - 展示导入结果（成功/失败/计数）
+    verify: 导入成功后服务器 snapshot 能查到
+    expected: 教练写路径可用
+    history: []
+
+  - id: M-3
+    executor: human
+    learn: 只读页加载服务器数据
+    instructions:
+      - 在 stats.html / display.html 启动时调 getSnapshot()，用返回数据渲染（复用现有渲染逻辑）
+    verify: 页面显示服务器数据，而非本地空数据
+    expected: 学员/家长只读路径可用
+    history: []
+
+  - id: M-4
+    executor: human
+    learn: 跨设备端到端联调
+    instructions:
+      - 教练在开发机导入新数据
+      - 用手机流量刷新 stats/display，确认看到新数据
+      - 两台设备同时刷新多次
+      - 学员视角尝试无 token 写 → 被拒
+    verify: 见 TESTPLAN GATE D M-D1~M-D5
+    expected: 端到端多设备访问可用
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE D：M-D1~M-D5（全手工、需公网设备）
+not_doing:
+  - 不改静态站部署方式（仍在 inspire.frc9597.com 发布）
+  - 不做登录界面（token 输入即可）
+  - 不做离线缓存改造
+boundary:
+  constraints: 前端改动仅在 frcsite public/inspire/；靠契约与后端解耦；公网验证需另一设备
+  depends_on: prd-2-002.R4/R5（后端已就绪）、prd-2-001.R2（契约）

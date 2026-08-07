@@ -1,0 +1,68 @@
+# R1.plan.yaml
+title: 本地部署栈（Docker Compose + 项目骨架）
+prd_ref: prd-1.R1
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: Node 项目结构 / package.json
+    instructions:
+      - 打开 frc9597-backend/，对照 README 看 package.json、tsconfig.json、src/index.ts
+      - 提问自己：package.json 里的 dependencies 和 scripts 分别是什么？
+    verify: 能说出每个文件的作用
+    expected: 理解"Node 项目 = 文件夹 + package.json + 源码"
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: Docker Compose 基础
+    instructions:
+      - 在 Debian 13 执行 `docker --version` 和 `docker compose version`
+      - 阅读 compose.yml，确认两个服务：db(postgres:16)、api(node)
+    verify: 两个命令都有版本号输出
+    expected: Docker 环境就绪，理解 compose 编排两个容器
+    history: []
+
+  - id: M-3
+    executor: human
+    learn: docker compose up / ps / logs
+    instructions:
+      - 执行 `docker compose up -d`
+      - 执行 `docker compose ps`
+      - 执行 `docker compose logs api --tail=20`
+    verify: ps 显示 postgres/api 均为 Up（或 healthy）；日志无 ERROR
+    expected: 两个容器后台运行
+    history: []
+
+  - id: M-4
+    executor: human
+    learn: curl 访问 API
+    instructions:
+      - 执行 `curl -s localhost:8080/api/health`
+    verify: 返回 {"status":"ok","db":"up"}
+    expected: 服务 + 数据库都活着
+    history: []
+
+  - id: M-5
+    executor: human
+    learn: 开发循环（改代码 → 重跑 → 看变化）
+    instructions:
+      - 在 src/index.ts 把 health 返回加一个字段 version:"1"，保存
+      - 若配了 --watch 则自动重载；否则 `docker compose restart api`
+      - 再次 curl health
+    verify: 看到新字段
+    expected: 理解后端开发的"改-跑-看"循环
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE A：A-1 compose ps、A-2 本机 health、A-3 psql select 1
+not_doing:
+  - 不配置公网穿透（那是 R2）
+  - 不建业务表（那是 prd-2）
+  - 不写前端
+boundary:
+  constraints: 所有步骤手动执行；Debian 13 需已装 Docker + compose
+  depends_on: 无

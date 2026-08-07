@@ -1,0 +1,58 @@
+# R3.plan.yaml
+title: PostgreSQL 基础设施（连接 + 迁移 + schema 命名空间）
+prd_ref: prd-1.R3
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: 连接字符串 / 环境变量
+    instructions:
+      - 复制 .env.example 为 .env，填 DATABASE_URL
+      - 阅读 src/db.ts，理解 Pool 如何读环境变量
+    verify: 能说出连接字符串各段含义
+    expected: 理解 user:pass@host:port/db
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: psql 手动连库
+    instructions:
+      - 执行 `docker compose exec db psql -U inspire -d inspire`
+      - 执行 `\conninfo` 看连接信息，`\q` 退出
+    verify: 连接成功
+    expected: 用命令行亲手摸到数据库
+    history: []
+
+  - id: M-3
+    executor: human
+    learn: 迁移机制
+    instructions:
+      - 阅读 migrations/001_init.sql
+      - 执行 `docker compose exec api npm run migrate`
+      - 再次执行，观察是否幂等（重复无报错）
+    verify: 第一次建表成功；第二次跳过/无报错
+    expected: 理解"迁移 = 版本化、可重复、记录版本"
+    history: []
+
+  - id: M-4
+    executor: human
+    learn: schema 命名空间
+    instructions:
+      - psql 执行 `\dn` 查看 schema 列表，确认 inspire 存在
+      - 执行 `\dt inspire.*` 查看 inspire 下对象
+    verify: inspire schema 在列
+    expected: 理解按域分 schema 的意义
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE B：B-1 migrate、B-2 \dt、B-3 幂等、B-4 jsonb 检查、M-B1 down -v 重建
+not_doing:
+  - 不建 inspire 业务表（那是 prd-2 R1）
+  - 不做数据导入/导出
+  - 不配置高可用/备份（后续再说）
+boundary:
+  constraints: 全手动；迁移脚本须幂等
+  depends_on: R1（DB 容器已运行）

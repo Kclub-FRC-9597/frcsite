@@ -1,0 +1,36 @@
+# R2.plan.yaml
+title: API 契约（snapshot / import）
+prd_ref: prd-2-001.R2
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: 理解 REST / HTTP 状态码
+    instructions:
+      - 阅读 .ai/prd/prd-2/docs/api-contract.md 的请求/响应/错误码三部分
+      - 结合 curl 手动请求一次（见下）
+    verify: 能说出 GET/POST 区别、401/400/500 含义
+    expected: 掌握 HTTP 基础
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: 对照契约核对实现
+    instructions:
+      - 逐条核对 api-contract.md 与代码：字段、类型、错误码
+      - 用 curl 验证一个成功 + 一个失败场景
+    verify: 契约与实现完全一致
+    expected: 契约评审通过
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE C：契约核对条目
+not_doing:
+  - 不定义登录/注册接口（token 鉴权即可）
+  - 不做分页参数（全量快照，后续演进）
+boundary:
+  constraints: 契约先评审再实现；前后端只靠契约耦合
+  depends_on: prd-2-001.R1（字段以 schema 为准）

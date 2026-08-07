@@ -1,0 +1,66 @@
+# R2.plan.yaml
+title: Cloudflare Tunnel 公网穿透
+prd_ref: prd-1.R2
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: 安装 cloudflared / 登录
+    instructions:
+      - 在 Debian 安装 cloudflared（官方二进制或 apt）
+      - 执行 `cloudflared tunnel login`，浏览器授权
+    verify: 提示成功，生成了 ~/.cloudflared/cert.pem
+    expected: cloudflared 就绪
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: 创建命名隧道
+    instructions:
+      - 执行 `cloudflared tunnel create inspire-backend`
+    verify: 输出隧道 UUID，credentials json 生成
+    expected: 命名隧道已建（记住 UUID/名称）
+    history: []
+
+  - id: M-3
+    executor: human
+    learn: 配置公开主机名路由
+    instructions:
+      - 在 Cloudflare 面板 Zero Trust → Networks → Tunnels 选择该隧道
+      - 添加 Public Hostname：api.inspire.frc9597.com → service http://localhost:8080
+    verify: 面板显示路由已建
+    expected: api.inspire.frc9597.com 指向本地 api
+    history: []
+
+  - id: M-4
+    executor: human
+    learn: 启动隧道（compose 内 cloudflared 服务）
+    instructions:
+      - 在 compose.yml 配置 cloudflared 服务（token 式），`docker compose up -d`
+      - 或主机运行 `cloudflared tunnel run inspire-backend`
+    verify: `cloudflared tunnel list` 显示该隧道 ACTIVE
+    expected: 隧道在线
+    history: []
+
+  - id: M-5
+    executor: human
+    learn: 公网验证 + 重连验证
+    instructions:
+      - 用手机流量（关 WiFi）执行 `curl -s https://api.inspire.frc9597.com/api/health`
+      - `docker compose restart cloudflared` 后等 30s 再测
+    verify: 返回 {"status":"ok","db":"up"}；重启后自动恢复
+    expected: 公网可达 + 自动重连
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE A：A-4 tunnel list、A-5 公网 health、M-A1 浏览器、M-A2 重连、M-A3 停机预期
+not_doing:
+  - 不启用 Cloudflare Access 登录门禁（免费 50 用户限制与此无关，本项目用应用层 token）
+  - 不用 Quick Tunnel（200 并发限制）
+  - 不映射数据库 5432 端口到公网
+boundary:
+  constraints: 公网验证需另一网络设备；本机离线则公网不可达（预期）
+  depends_on: R1（本地服务须已可访问）

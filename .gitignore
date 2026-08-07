@@ -171,3 +171,6 @@ worker-configuration.d.ts
 .env*
 !.env.example
 .wrangler/
+
+# Windows 整站备份副本（public 的重复，不入库）
+public copy/

@@ -1,0 +1,67 @@
+# R5.plan.yaml
+title: 写接口 POST /api/import
+prd_ref: prd-2-002.R5
+created: 2026-08-05
+mode: manual-teaching
+
+steps:
+  - id: M-1
+    executor: human
+    learn: 解析请求体 / 校验 token
+    instructions:
+      - 在 import handler 中：先走 R3 中间件，再解析 body
+      - 校验 body 结构（mode 默认 merge）
+    verify: 无 token 被拦 401
+    expected: 鉴权 + 入参校验
+    history: []
+
+  - id: M-2
+    executor: human
+    learn: 事务 + upsert 实现
+    instructions:
+      - 用 BEGIN/COMMIT/ROLLBACK（或 pg 事务 API）包裹全部写入
+      - 各实体表用 ON CONFLICT(id) DO UPDATE
+      - replace 模式先清空 inspire 域数据再导入
+    verify: 代码编译通过
+    expected: 理解事务与 upsert
+    history: []
+
+  - id: M-3
+    executor: human
+    learn: merge 幂等验证
+    instructions:
+      - 带 token 导入 testdata/small.json（merge）
+      - 再导入一次
+      - `curl snapshot` 比对
+    verify: 两次导入后计数不翻倍，无脏数据
+    expected: 幂等生效
+    history: []
+
+  - id: M-4
+    executor: human
+    learn: replace 验证
+    instructions:
+      - 带 token、mode=replace 导入 testdata/big.json
+      - snapshot 比对
+    verify: 学员=20，无 small.json 残留
+    expected: replace 模式正确
+    history: []
+
+  - id: M-5
+    executor: human
+    learn: 公网写验证（需另一设备）
+    instructions:
+      - 用手机流量，带 token POST https://api.inspire.frc9597.com/api/import
+    verify: 200 成功
+    expected: 公网写路径可用
+    history: []
+
+test_strategy:
+  manual:
+    - TESTPLAN.md GATE C：C-1~C-2 401、C-5 merge、C-6 幂等、C-7 一致、C-8 replace、C-9 公网写
+not_doing:
+  - 不做增量同步/冲突合并（本阶段全量导入）
+  - 不做细粒度 CRUD（教练录入走导入 + 后续演进）
+boundary:
+  constraints: 写操作全走 token 鉴权；事务保证一致性；upsert 幂等
+  depends_on: prd-2-002.R3（鉴权）、prd-2-001.R1（schema）
