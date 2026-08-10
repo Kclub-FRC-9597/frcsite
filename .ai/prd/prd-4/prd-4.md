@@ -53,7 +53,7 @@ structure:
 | A 移除「目标设定」 | R1 | 定点删除记录类型（入口 + 内部实现） |
 | B 任务满分用时目标 | R2 | 数据模型 `task.goalTimeRange` + 判定函数 `Shared.evaluateTimeGoal` |
 | | R3 | 任务管理页用时区间配置 UI（`tasks.html`） |
-| | R4 | 集训统计展示（`training.html` 概览首行显示当前目标 + 达标徽章/达标率/学员覆盖） |
+| | R4 | 集训统计展示（`training.html` 每个学员最佳成绩下显示下一目标 + 达标徽章/学员覆盖） |
 | | R5 | 学员详情与统计页展示（`student.js`/`stats.html`） |
 | C 收尾 | R6 | changelog + 全量语法校验 + 浏览器回归 + 提交 |
 
@@ -83,7 +83,7 @@ training.studentGoals = [ { id, studentId, taskId, goalTimeRange: {/* 学员专�
 | P0② | R1 | 定点删除后下拉只剩 模拟赛/正赛、轮次编号回归、语法校验 |
 | P1 | R2 | 判定函数单测（满分非满分/区间边界/无配置） |
 | P2 | R3 | 用时区间配置持久化、刷新保留 |
-| P3 | R4 | 目标首行/达标徽章/达标率/学员覆盖 |
+| P3 | R4 | 最佳下方显示下一目标/达标徽章/学员覆盖 |
 | P4 | R5 | 学员详情达标+差秒数、统计页达标率 |
 | P5 | R6 | changelog + 全量校验 + 浏览器回归 + 提交 |
 

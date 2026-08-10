@@ -7,7 +7,7 @@ steps:
   - id: A-1
     executor: agent
     file: public/inspire/training.html
-    action: 概览表格顶部新增「🎯 目标」行（置于最佳成绩之前，作为表格首行）：任务列显示目标用时区间；每个学员列用 Shared.getGoalRange 显示当前有效目标（覆盖优先，未配置显示 —）；多任务时每任务一行
+    action: 在每个学员最佳成绩单元格内、最佳值下方显示「下一目标」：用 Shared.getGoalRange 取当前有效目标（覆盖优先，未配置显示 —），格式如「满分≤12s」
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
@@ -23,14 +23,6 @@ steps:
   - id: A-3
     executor: agent
     file: public/inspire/training.html
-    action: 概览区增加达标人数 + 达标率汇总行
-    verify: node 内联脚本校验
-    expect: ALL INLINE SCRIPTS OK
-    history: []
-
-  - id: A-4
-    executor: agent
-    file: public/inspire/training.html
     action: 新增学员「调整目标」弹窗：选择学员+任务，编辑用时区间；保存写入 training.studentGoals；未设置 = 走任务默认
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
@@ -39,11 +31,11 @@ steps:
 test_strategy:
   auto:
     - training.html 内联脚本校验
-    - 注入测试数据验证徽章/达标率/覆盖计算
+    - 注入测试数据验证下一目标/达标徽章/覆盖计算
   manual:
-    - 有区间任务：最佳成绩旁显示达标徽章，概览汇总正确
+    - 有区间任务：最佳值下方显示「下一目标」，最佳成绩旁有达标徽章
     - 学员覆盖后仅该学员按专属区间判定
-    - 无区间任务不显示徽章
+    - 无区间任务不显示徽章/目标
 
 not_doing:
   - 不动成绩录入/赛程/CSV 导出
