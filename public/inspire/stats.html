@@ -79,7 +79,6 @@
                 ? D.challengeTaskFilter : null;
             D.trainings.forEach((t) => {
                 t.mockCompetitions.forEach((m) => {
-                    if (Shared.getMockType(m) === 'goal') return; // 目标设定不计入成绩统计
                     const types = this.getMockTypes(m);
                     if (!types.has(type)) return;
                     Object.entries(m.scores).forEach(([sid, studentScores]) => {

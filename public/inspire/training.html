@@ -104,7 +104,6 @@
                 <select id="competitionTypeSelect" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;background:#fff;color:var(--gray-800);">
                     <option value="mock">🏅 模拟赛</option>
                     <option value="official">🏆 正赛</option>
-                    <option value="goal">🎯 目标设定</option>
                 </select>
             </div>
             <div class="form-group">
@@ -215,6 +214,30 @@
                 <button class="btn btn-outline" id="editPracticeCancel">取消</button>
                 <button class="btn btn-danger btn-sm" id="editPracticeDelete" style="margin-right:auto;">🗑️ 删除</button>
                 <button class="btn btn-primary" id="editPracticeConfirm">💾 保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Modal: 学员目标调整 ========== -->
+    <div class="modal-overlay" id="studentGoalModal">
+        <div class="modal-box" style="max-width:480px;">
+            <h3>🎯 调整学员目标</h3>
+            <input type="hidden" id="studentGoalStudentId" />
+            <div class="form-group">
+                <label>学员</label>
+                <div id="studentGoalStudentName" style="padding:0.4rem 0;font-weight:600;"></div>
+            </div>
+            <div class="form-group">
+                <label>任务</label>
+                <select id="studentGoalTaskSelect" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;"></select>
+            </div>
+            <div class="form-group">
+                <label>目标档位（秒，逗号分隔；留空 = 用任务默认）</label>
+                <input type="text" id="studentGoalTimesInput" placeholder="如 100,80,70" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;" />
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="studentGoalCancel">取消</button>
+                <button class="btn btn-primary" id="studentGoalConfirm">保存</button>
             </div>
         </div>
     </div>
@@ -335,8 +358,7 @@
             const training = this.data.trainings.find((t) => t.id === trainingId);
             if (!training) return null;
             const typeLabel = Shared.getMockTypeText({ competitionType: competitionType || 'mock' });
-            // 目标设定不占用自动编号，模拟赛轮次只统计非目标设定记录
-            const compCount = training.mockCompetitions.filter(m => Shared.isStatCounted(m)).length;
+            const compCount = training.mockCompetitions.length;
             const mock = {
                 id: this.generateId(),
                 name: name.trim() || `${typeLabel} ${compCount + 1}`,
@@ -457,6 +479,86 @@
             }
             this.saveData();
             this.toast('评语已保存');
+        },
+
+        // ============ 学员目标（满分前提用时档位） ============
+        _getGoalInfo(studentId, tid, training) {
+            const taskDef = this.data.tasks.find(d => d.id === tid);
+            const goalTimes = Shared.getGoalTimes(taskDef, training, studentId);
+            let bestFullScoreTime = null;
+            (training.mockCompetitions || []).forEach(m => {
+                const entry = m.scores && m.scores[studentId] && m.scores[studentId][tid] ? m.scores[studentId][tid] : null;
+                if (!entry) return;
+                this.getRounds(entry).forEach(r => {
+                    if (r.withdrawn) return;
+                    if (r.score === undefined || r.score === null) return;
+                    if (taskDef && taskDef.maxScore && r.score === taskDef.maxScore && r.time != null) {
+                        if (bestFullScoreTime === null || r.time < bestFullScoreTime) bestFullScoreTime = r.time;
+                    }
+                });
+            });
+            const current = Shared.currentGoal(bestFullScoreTime, goalTimes);
+            return { goalTimes, bestFullScoreTime, current };
+        },
+
+        _goalCellHtml(studentId, tid, training) {
+            const gi = this._getGoalInfo(studentId, tid, training);
+            if (!gi.goalTimes) return '';
+            if (!gi.current) {
+                return '<div style="font-size:0.68rem;color:#10b981;margin-top:0.15rem;">🎯 目标全达成 ✅</div>';
+            }
+            const achieved = gi.goalTimes.filter(t => Shared.isGoalAchieved(gi.bestFullScoreTime, t));
+            const achievedMax = achieved.length ? Math.max(...achieved) : null;
+            const badge = achievedMax != null
+                ? `<span style="color:#10b981;">✅ 达成${achievedMax}s</span>`
+                : `<span style="color:#ef4444;">✗ 未达成</span>`;
+            return `<div style="font-size:0.68rem;color:var(--gray-400);margin-top:0.15rem;">🎯 当前目标 ${gi.current}s · ${badge}</div>`;
+        },
+
+        openStudentGoalModal(studentId) {
+            const training = this.data.trainings.find(t => t.id === this.selectedTrainingId);
+            if (!training) return;
+            const student = this.data.students.find(s => s.id === studentId);
+            if (!student) return;
+            document.getElementById('studentGoalStudentId').value = studentId;
+            document.getElementById('studentGoalStudentName').textContent = student.name;
+            const taskSel = document.getElementById('studentGoalTaskSelect');
+            const tasks = (training.tasks || []).map(x => x.taskId).map(id => this.data.tasks.find(t => t.id === id)).filter(Boolean);
+            taskSel.innerHTML = '<option value="">— 选择任务 —</option>' + tasks.map(t =>
+                `<option value="${t.id}">${this.escapeHtml(t.name)}</option>`
+            ).join('');
+            document.getElementById('studentGoalTimesInput').value = '';
+            taskSel.onchange = () => {
+                const sg = (training.studentGoals || []).find(g => g.studentId === studentId && g.taskId === taskSel.value);
+                document.getElementById('studentGoalTimesInput').value = sg ? (sg.goalTimes || []).join(',') : '';
+            };
+            document.getElementById('studentGoalModal').classList.add('open');
+        },
+
+        closeStudentGoalModal() {
+            document.getElementById('studentGoalModal').classList.remove('open');
+        },
+
+        confirmStudentGoalModal() {
+            const studentId = document.getElementById('studentGoalStudentId').value;
+            const taskId = document.getElementById('studentGoalTaskSelect').value;
+            const training = this.data.trainings.find(t => t.id === this.selectedTrainingId);
+            if (!training || !studentId || !taskId) { this.toast('请选择任务', 'warning'); return; }
+            if (!training.studentGoals) training.studentGoals = [];
+            const raw = document.getElementById('studentGoalTimesInput').value;
+            const nums = String(raw).split(/[,，\s]+/).map(s => parseFloat(s)).filter(n => !isNaN(n) && n > 0);
+            const goalTimes = nums.length ? nums : null;
+            let sg = training.studentGoals.find(g => g.studentId === studentId && g.taskId === taskId);
+            if (goalTimes) {
+                if (sg) sg.goalTimes = goalTimes;
+                else training.studentGoals.push({ id: this.generateId(), studentId, taskId, goalTimes });
+            } else {
+                if (sg) training.studentGoals = training.studentGoals.filter(g => g !== sg);
+            }
+            this.saveData();
+            this.render();
+            this.closeStudentGoalModal();
+            this.toast('学员目标已更新');
         },
 
         removeMockCompetition(trainingId, mockId) {
@@ -614,6 +716,9 @@
             document.getElementById('editPracticeConfirm').addEventListener('click', () => this.confirmEditPractice());
             document.getElementById('editPracticeDelete').addEventListener('click', () => this.deleteEditPractice());
             document.getElementById('editPracticeModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.stopPropagation(); });
+            document.getElementById('studentGoalCancel').addEventListener('click', () => this.closeStudentGoalModal());
+            document.getElementById('studentGoalConfirm').addEventListener('click', () => this.confirmStudentGoalModal());
+            document.getElementById('studentGoalModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) this.closeStudentGoalModal(); });
 
             // 工具下拉：点击菜单外关闭（全局委托，仅绑定一次，避免 render 累积）
             document.addEventListener('click', (e) => {
@@ -1125,11 +1230,7 @@
             }
             let name = document.getElementById('mockNameInput').value.trim();
             if (!name) {
-                // 模拟赛轮次编号只统计非目标设定记录，目标设定不占用轮次
-                const compCount = training.mockCompetitions.filter(m => Shared.isStatCounted(m)).length;
-                name = competitionType === 'official' ? '正赛'
-                    : competitionType === 'goal' ? '目标设定'
-                    : '第' + (compCount + 1) + '轮';
+                name = competitionType === 'official' ? '正赛' : '第' + (training.mockCompetitions.length + 1) + '轮';
             }
             const date = document.getElementById('mockDateInput').value || new Date().toISOString().slice(0, 10);
             const group = document.getElementById('mockGroupSelect').value;
@@ -1495,8 +1596,7 @@
             const taskIds = Object.keys(taskMap);
 
             const records = [...training.mockCompetitions].reverse();
-            // 目标设定(goal)记录不计入成绩统计（趋势图不纳入）
-            const chartRecords = training.mockCompetitions.filter(m => Shared.isStatCounted(m));
+            const chartRecords = training.mockCompetitions;
             if (records.length === 0) {
                 let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
                     <h3 style="font-size:1.15rem;margin:0;">📊 ${this.escapeHtml(student.name)} 成绩详情</h3>
@@ -1513,7 +1613,6 @@
                 let bestScore = null, bestTime = null;
                 training.mockCompetitions.forEach((mock) => {
                     if (mock.withdrawn && mock.withdrawn[studentId]) return;
-                    if (!Shared.isStatCounted(mock)) return; // 目标设定不计入成绩统计
                     const entry = mock.scores[studentId] && mock.scores[studentId][tid] ? mock.scores[studentId][tid] : null;
                     if (!entry) return;
                     const rounds = this.getRounds(entry);
@@ -1573,7 +1672,6 @@
                     let bestScore = null, bestTime = null;
                     training.mockCompetitions.forEach((mock) => {
                         if (mock.withdrawn && mock.withdrawn[studentId]) return;
-                        if (!Shared.isStatCounted(mock)) return; // 目标设定不计入成绩统计
                         const entry = mock.scores[studentId] && mock.scores[studentId][tid] ? mock.scores[studentId][tid] : null;
                         if (!entry) return;
                         const rounds = this.getRounds(entry);
@@ -2136,8 +2234,7 @@
                     }
 
                     // === Best Score Overview (across all mocks) ===
-                    // 目标设定(goal)记录不计入成绩统计
-                    const statMocks = t.mockCompetitions.filter(m => Shared.isStatCounted(m));
+                    const statMocks = t.mockCompetitions;
                     if (t.mockCompetitions.length > 0 && students.length > 0) {
                         const allTaskIds = new Set();
                         statMocks.forEach(m => {
@@ -2216,7 +2313,7 @@
                             if (hasTasks) html += '<th style="min-width:70px;">任务</th>';
                             html += '<th style="width:44px;">轮次</th>';
                             students.forEach(s => {
-                                html += `<th style="text-align:center;min-width:80px;">${this.escapeHtml(s.name)}</th>`;
+                                html += `<th style="text-align:center;min-width:80px;">${this.escapeHtml(s.name)}<br><button class="student-goal-btn" data-student-id="${s.id}" title="调整目标档位" style="font-size:0.65rem;padding:0.05rem 0.4rem;margin-top:0.15rem;background:var(--primary-bg);color:var(--primary);border:none;border-radius:8px;cursor:pointer;">🎯目标</button></th>`;
                             });
                             html += '</tr></thead><tbody>';
 
@@ -2234,9 +2331,10 @@
                                     html += `<td style="text-align:center;padding:0.2rem 0.4rem;">
                                         <span style="font-weight:600;color:var(--primary);">${best.score}</span>
                                         <span style="font-size:0.7rem;color:var(--gray-400);"> ${timeStr}</span>
+                                        ${this._goalCellHtml(s.id, taskIdList[0], t)}
                                     </td>`;
                                 } else {
-                                    html += `<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-</td>`;
+                                    html += `<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-${this._goalCellHtml(s.id, taskIdList[0], t)}</td>`;
                                 }
                             });
                             html += '</tr>';
@@ -2252,9 +2350,10 @@
                                         html += `<td style="text-align:center;padding:0.2rem 0.4rem;">
                                             <span style="font-weight:600;color:var(--primary);">${best.score}</span>
                                             <span style="font-size:0.7rem;color:var(--gray-400);"> ${timeStr}</span>
+                                            ${this._goalCellHtml(s.id, tid, t)}
                                         </td>`;
                                     } else {
-                                        html += `<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-</td>`;
+                                        html += `<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-${this._goalCellHtml(s.id, tid, t)}</td>`;
                                     }
                                 });
                                 html += '</tr>';
@@ -2282,30 +2381,6 @@
                             html += '</tr>';
                             // Separator
                             html += '<tr><td colspan="' + (3 + students.length) + '" style="border-bottom:3px solid var(--gray-300);padding:0;"></td></tr>';
-                        } else {
-                            // 只有目标设定等不计分记录：统计区仍显示，数值用 - 占位
-                            html += '<tr style="background:#f8fafc;">';
-                            html += '<td style="vertical-align:middle;text-align:center;font-weight:700;color:var(--primary);font-size:0.85rem;">🏆 最佳成绩</td>';
-                            html += '<td style="font-size:0.82rem;color:var(--gray-400);">暂无</td>';
-                            students.forEach(() => {
-                                html += '<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-</td>';
-                            });
-                            html += '</tr>';
-                            html += '<tr style="background:var(--primary-bg);font-weight:600;">';
-                            html += '<td style="font-size:0.82rem;color:var(--primary);">综合最佳</td>';
-                            html += '<td></td>';
-                            students.forEach(() => {
-                                html += '<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-</td>';
-                            });
-                            html += '</tr>';
-                            html += '<tr style="background:var(--primary-bg);">';
-                            html += '<td style="font-size:0.82rem;font-weight:600;color:var(--accent);">综合排名</td>';
-                            html += '<td></td>';
-                            students.forEach(() => {
-                                html += '<td style="text-align:center;color:var(--gray-300);font-size:0.9rem;font-weight:700;">-</td>';
-                            });
-                            html += '</tr>';
-                            html += '<tr><td colspan="' + (2 + students.length) + '" style="border-bottom:3px solid var(--gray-300);padding:0;"></td></tr>';
                         }
 
                         sortedMocks.forEach((m) => {
@@ -2513,6 +2588,12 @@
                 el.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.openScoreEntry(el.dataset.trainingId, el.dataset.mockId);
+                });
+            });
+            container.querySelectorAll('.student-goal-btn').forEach((el) => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openStudentGoalModal(el.dataset.studentId);
                 });
             });
 

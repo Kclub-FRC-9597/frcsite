@@ -289,27 +289,48 @@ const Shared = {
     },
 
     // ============ Mock 类型工具 ============
-    // competitionType: 'mock'(模拟赛) | 'official'(正赛) | 'goal'(目标设定)
+    // competitionType: 'mock'(模拟赛) | 'official'(正赛)
     getMockType(mock) {
         return (mock && mock.competitionType) || 'mock';
     },
     // 纯文本（无 emoji）：用于名称生成 / CSV 导出
     getMockTypeText(mock) {
         const t = this.getMockType(mock);
-        return t === 'official' ? '正赛' : t === 'goal' ? '目标设定' : '模拟赛';
+        return t === 'official' ? '正赛' : '模拟赛';
     },
     // 带 emoji 的标签：用于界面徽章
     getMockTypeLabel(mock) {
         const t = this.getMockType(mock);
-        return t === 'official' ? '🏆 正赛' : t === 'goal' ? '🎯 目标设定' : '🏅 模拟赛';
+        return t === 'official' ? '🏆 正赛' : '🏅 模拟赛';
     },
     getMockTypeBg(mock) {
         const t = this.getMockType(mock);
-        return t === 'official' ? '#fef3c7;color:#92400e' : t === 'goal' ? '#dcfce7;color:#15803d' : '#dbeafe;color:#1d4ed8';
+        return t === 'official' ? '#fef3c7;color:#92400e' : '#dbeafe;color:#1d4ed8';
     },
-    // 目标设定记录不计入成绩统计
-    isStatCounted(mock) {
-        return this.getMockType(mock) !== 'goal';
+
+    // ============ 目标档位工具（满分前提用时目标） ============
+    // task.goalTimes: 目标时间档位列表（从松到紧，越低越难；达成需满分 + 用时≤档位）
+    // training.studentGoals: 学员覆盖档位（可选，缺省走任务默认）
+    // 解析学员的有效目标档位：覆盖优先，否则任务默认；无配置返回 null
+    getGoalTimes(task, training, studentId) {
+        if (!task) return null;
+        if (training && training.studentGoals && studentId) {
+            const sg = training.studentGoals.find(g => g.studentId === studentId && g.taskId === task.id);
+            if (sg && sg.goalTimes && sg.goalTimes.length > 0) return sg.goalTimes;
+        }
+        return (task.goalTimes && task.goalTimes.length > 0) ? task.goalTimes : null;
+    },
+    // 某档目标是否达成：bestFullScoreTime（满分成绩中最短用时）<= goalTime
+    isGoalAchieved(bestFullScoreTime, goalTime) {
+        return bestFullScoreTime !== null && bestFullScoreTime !== undefined && bestFullScoreTime <= goalTime;
+    },
+    // 当前目标 = 下一档更快目标：max{ t ∈ goalTimes | t < best }；
+    //   无满分成绩 → 最松档（max goalTimes）；全部达成 → null
+    currentGoal(bestFullScoreTime, goalTimes) {
+        if (!goalTimes || goalTimes.length === 0) return null;
+        if (bestFullScoreTime === null || bestFullScoreTime === undefined) return Math.max(...goalTimes);
+        const next = Math.max(...goalTimes.filter(t => t < bestFullScoreTime));
+        return isFinite(next) ? next : null;
     },
 };
 

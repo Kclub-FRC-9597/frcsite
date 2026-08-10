@@ -104,22 +104,25 @@
             let totalScores = [];
             let totalTimes = [];
             const addEntry = (tid, score, time) => {
-                if (!perTask[tid]) perTask[tid] = { scores: [], times: [], count: 0 };
+                if (!perTask[tid]) perTask[tid] = { scores: [], times: [], fullTimes: [], count: 0 };
                 const p = perTask[tid];
+                const task = taskMap[tid];
                 if (score !== null && score !== undefined) { p.scores.push(score); totalScores.push(score); }
                 if (time !== null && time !== undefined) { p.times.push(time); totalTimes.push(time); }
+                if (task && task.maxScore && score === task.maxScore && time != null) p.fullTimes.push(time);
                 p.count += 1;
             };
 
-            const wantMock = source === 'all' || source === 'mock' || source === 'official';
+            const wantMock = source === 'all' || source === 'competition';
             const wantPractice = source === 'all' || source === 'practice';
 
             (D.trainings || []).forEach((training) => {
                 if (wantMock) {
                     (training.mockCompetitions || []).forEach((mock) => {
                         const mockSource = mock.competitionType || 'mock';
-                        if (mockSource === 'goal') return; // 目标设定不计入成绩统计
-                        if (source !== 'all' && mockSource !== source) return;
+                        if (source === 'competition') {
+                            if (mockSource !== 'mock' && mockSource !== 'official') return;
+                        }
                         const scores = mock.scores || {};
                         const studentScores = scores[studentId];
                         if (!studentScores) return;
@@ -178,19 +181,20 @@
                         maxScore: task ? (task.maxScore || null) : null,
                         best: p.scores.length ? Math.max(...p.scores) : null,
                         bestTime: p.times.length ? Math.min(...p.times) : null,
+                        bestFullScoreTime: p.fullTimes.length ? Math.min(...p.fullTimes) : null,
                         count: p.count,
                     };
                 })
                 .sort((a, b) => (b.best || 0) - (a.best || 0));
 
-            return { student, stats, taskBars };
+            return { student, stats, taskBars, taskMap };
         },
 
         // ============ 渲染 ============
         renderCard(studentId, source) {
             const container = document.getElementById('studentCardContent');
             const src = source || this.source || 'all';
-            const { student, stats, taskBars } = this.buildStats(studentId, src);
+            const { student, stats, taskBars, taskMap } = this.buildStats(studentId, src);
 
             if (!student) {
                 container.innerHTML = '<div class="empty-state"><div class="icon">❓</div><p>学员不存在</p></div>';
@@ -235,12 +239,29 @@
                     const value = b.best !== null
                         ? (b.maxScore ? `${b.best} / ${b.maxScore}` : `${b.best}`)
                         : '-';
+                    const taskDef = taskMap[b.taskId] || null;
+                    const goalTimes = Shared.getGoalTimes(taskDef, null, null);
+                    let goalHtml = '';
+                    if (goalTimes) {
+                        const current = Shared.currentGoal(b.bestFullScoreTime, goalTimes);
+                        if (!current) {
+                            goalHtml = '<div style="font-size:0.7rem;color:#10b981;">🎯 目标全达成 ✅</div>';
+                        } else {
+                            const achieved = goalTimes.filter(t => Shared.isGoalAchieved(b.bestFullScoreTime, t));
+                            const achievedMax = achieved.length ? Math.max(...achieved) : null;
+                            const badge = achievedMax != null
+                                ? `<span style="color:#10b981;">✅ ${achievedMax}s</span>`
+                                : `<span style="color:#ef4444;">✗ 未达成</span>`;
+                            goalHtml = `<div style="font-size:0.7rem;color:var(--gray-400);">🎯 当前目标 ${current}s · ${badge}</div>`;
+                        }
+                    }
                     return `
                         <div class="task-bar-row">
                             <div class="task-bar-label">
                                 <span class="task-bar-name">${Shared.escapeHtml(b.name)}</span>
                                 ${typeBadge}
                                 <span class="task-bar-count">${b.count}次</span>
+                                ${goalHtml}
                             </div>
                             <div class="score-bar"><div class="score-bar-fill" style="width:${pct}%;"></div></div>
                             <div class="task-bar-value">${value}</div>
