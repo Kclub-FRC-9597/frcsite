@@ -4,7 +4,9 @@ prd_ref: prd-4.R3
 created: 2026-08-10
 
 steps:
+  # ── agent 自动执行阶段 ──────────────────────────────────
   - id: A-1
+    phase: auto
     executor: agent
     file: public/inspire/tasks.html
     action: 任务表单增加「满分用时目标」区：渲染 task.goalTimeRange 已有值（上限必填、下限可留空）
@@ -13,11 +15,53 @@ steps:
     history: []
 
   - id: A-2
+    phase: auto
     executor: agent
     file: public/inspire/tasks.html
     action: 保存任务时收集用时区间写入 task.goalTimeRange（未配置 = 不写入该字段）；编辑任务时回填
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
+    history: []
+
+  # ── 手动测试阶段（GATE 3） ──────────────────────────────
+  - id: M-1
+    phase: manual
+    executor: human
+    instructions:
+      - 任务管理新建任务，设置用时区间（上限 12s，下限留空）→ 保存
+      - 刷新页面，确认区间保留
+      - 编辑任务修改区间 → 保存
+    pass_criteria: 用时区间保存后刷新保留；编辑即时生效；不配区间的任务不写入 goalTimeRange
+    signal: 反馈「GATE 3 通过」
+    history: []
+
+  # ── 收尾阶段（冻结） ────────────────────────────────────
+  - id: W-1
+    phase: auto
+    executor: agent
+    action: 整理本次实现的 API 文档（task.goalTimeRange 结构、任务表单字段）
+    expect: API 文档已更新到对应位置
+    history: []
+
+  - id: W-2
+    phase: auto
+    executor: agent
+    action: 更新 R3.md front matter 中 status.implement = done
+    expect: R3.md status.implement 已变为 done
+    history: []
+
+  - id: W-3
+    phase: auto
+    executor: agent
+    action: 将 R3.plan.yaml 重命名为 R3.plan_done.yaml
+    expect: R3.plan_done.yaml 文件存在
+    history: []
+
+  - id: W-4
+    phase: auto
+    executor: agent
+    action: 将 R3.md 重命名为 R3_done.md
+    expect: R3_done.md 文件存在
     history: []
 
 test_strategy:

@@ -4,7 +4,9 @@ prd_ref: prd-4.R1
 created: 2026-08-10
 
 steps:
+  # ── agent 自动执行阶段 ──────────────────────────────────
   - id: A-1
+    phase: auto
     executor: agent
     file: public/inspire/training.html
     action: 删除下拉 `<option value="goal">🎯 目标设定</option>`；confirmMockModal 还原为 `name = competitionType === 'official' ? '正赛' : '第' + (training.mockCompetitions.length + 1) + '轮'`；addMockCompetition `compCount` 改回 `training.mockCompetitions.length` 并删注释；renderTrainingList `statMocks` 改回 `t.mockCompetitions`（删过滤/注释/占位 else）；renderStudentDetail `chartRecords` 改回 `training.mockCompetitions`、删两处 `isStatCounted` 跳过
@@ -13,6 +15,7 @@ steps:
     history: []
 
   - id: A-2
+    phase: auto
     executor: agent
     file: public/inspire/shared.js
     action: getMockTypeText/Label/Bg 去掉 goal 分支；删除 isStatCounted 方法
@@ -21,6 +24,7 @@ steps:
     history: []
 
   - id: A-3
+    phase: auto
     executor: agent
     file: public/inspire/student.js
     action: 删除 `if (mockSource === 'goal') return; // 目标设定不计入成绩统计`
@@ -29,6 +33,7 @@ steps:
     history: []
 
   - id: A-4
+    phase: auto
     executor: agent
     file: public/inspire/stats.html
     action: 删除 `if (Shared.getMockType(m) === 'goal') return; // 目标设定不计入成绩统计`
@@ -37,11 +42,53 @@ steps:
     history: []
 
   - id: A-5
+    phase: auto
     executor: agent
     file: public/inspire/changelog.js
     action: 删除 2026-08-10「记录类型新增目标设定」条目
     verify: node --check public/inspire/changelog.js
     expect: 无输出（通过）
+    history: []
+
+  # ── 手动测试阶段（GATE 1） ──────────────────────────────
+  - id: M-1
+    phase: manual
+    executor: human
+    instructions:
+      - 刷新 training.html，新增记录展开「记录类型」下拉
+      - 名称留空新增一条模拟赛
+      - 打开含「无任务但有成绩」记录的集训、学员详情、统计页、导出 CSV
+    pass_criteria: 下拉只剩 模拟赛/正赛；默认名「第N轮」且编号不被目标设定占用；__default__ 兜底生效；无 goal 残留
+    signal: 反馈「GATE 1 通过」
+    history: []
+
+  # ── 收尾阶段（冻结） ────────────────────────────────────
+  - id: W-1
+    phase: auto
+    executor: agent
+    action: 整理本次实现的 API 文档（Shared.getMockType* 签名、移除项说明）
+    expect: API 文档已更新到对应位置
+    history: []
+
+  - id: W-2
+    phase: auto
+    executor: agent
+    action: 更新 R1.md front matter 中 status.implement = done
+    expect: R1.md status.implement 已变为 done
+    history: []
+
+  - id: W-3
+    phase: auto
+    executor: agent
+    action: 将 R1.plan.yaml 重命名为 R1.plan_done.yaml
+    expect: R1.plan_done.yaml 文件存在
+    history: []
+
+  - id: W-4
+    phase: auto
+    executor: agent
+    action: 将 R1.md 重命名为 R1_done.md
+    expect: R1_done.md 文件存在
     history: []
 
 test_strategy:

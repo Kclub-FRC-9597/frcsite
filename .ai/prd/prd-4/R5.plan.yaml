@@ -4,7 +4,9 @@ prd_ref: prd-4.R5
 created: 2026-08-10
 
 steps:
+  # ── agent 自动执行阶段 ──────────────────────────────────
   - id: A-1
+    phase: auto
     executor: agent
     file: public/inspire/student.js
     action: 个人成绩卡来源切换：提供「自主练习 / 模拟练习（模拟赛+正赛）」分开与整合的预览（复用现有来源过滤，补充「整合」视图）
@@ -13,11 +15,53 @@ steps:
     history: []
 
   - id: A-2
+    phase: auto
     executor: agent
     file: public/inspire/student.js
     action: 每任务最佳成绩下方显示「下一目标」（Shared.getGoalRange，覆盖优先）；达标徽章（Shared.evaluateTimeGoal 遍历全部轮次任一命中）；未达标显示差几秒/未满分提示；无区间显示「未设目标」
     verify: node --check public/inspire/student.js
     expect: 无输出（通过）
+    history: []
+
+  # ── 手动测试阶段（GATE 4 · R5 部分） ────────────────────
+  - id: M-1
+    phase: manual
+    executor: human
+    instructions:
+      - 打开个人成绩卡，确认展示全部数据（模拟赛+正赛+自主练习）
+      - 切换「自主练习 / 模拟练习」分开与整合视图
+      - 每任务确认「下一目标」、达标徽章与差距显示
+    pass_criteria: 个人成绩卡全部数据可切换；自主/模拟分开-整合正常；每任务达标/下一目标正确（含覆盖）；无区间显示「未设目标」
+    signal: 反馈「GATE 4（R5）通过」
+    history: []
+
+  # ── 收尾阶段（冻结） ────────────────────────────────────
+  - id: W-1
+    phase: auto
+    executor: agent
+    action: 整理本次实现的 API 文档（来源切换接口、达标/下一目标渲染说明）
+    expect: API 文档已更新到对应位置
+    history: []
+
+  - id: W-2
+    phase: auto
+    executor: agent
+    action: 更新 R5.md front matter 中 status.implement = done
+    expect: R5.md status.implement 已变为 done
+    history: []
+
+  - id: W-3
+    phase: auto
+    executor: agent
+    action: 将 R5.plan.yaml 重命名为 R5.plan_done.yaml
+    expect: R5.plan_done.yaml 文件存在
+    history: []
+
+  - id: W-4
+    phase: auto
+    executor: agent
+    action: 将 R5.md 重命名为 R5_done.md
+    expect: R5_done.md 文件存在
     history: []
 
 test_strategy:

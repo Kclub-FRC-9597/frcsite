@@ -4,7 +4,9 @@ prd_ref: prd-4.R2
 created: 2026-08-10
 
 steps:
+  # ── agent 自动执行阶段 ──────────────────────────────────
   - id: A-1
+    phase: auto
     executor: agent
     file: public/inspire/shared.js
     action: 新增 `getGoalRange(task, training, studentId)`：优先返回 training.studentGoals 中该学员覆盖的用时区间，否则返回 task.goalTimeRange；无配置返回 null
@@ -13,6 +15,7 @@ steps:
     history: []
 
   - id: A-2
+    phase: auto
     executor: agent
     file: public/inspire/shared.js
     action: 新增 `evaluateTimeGoal(score, time, task, training, studentId)`：得分=task.maxScore 且 用时在 [minTime ?? 0, maxTime] 内返回 true，否则 false；无配置返回 null
@@ -21,11 +24,51 @@ steps:
     history: []
 
   - id: A-3
+    phase: auto
     executor: agent
     file: node -e（临时单测）
     action: 用注入数据跑 evaluateTimeGoal：满分且在区间内达标 / 满分但超时未达标 / 非满分不算 / 无配置不参与
     verify: node -e "..."（断言输出）
     expect: 与预期一致
+    history: []
+
+  # ── 手动测试阶段（GATE 2 补充） ─────────────────────────
+  - id: M-1
+    phase: manual
+    executor: human
+    instructions:
+      - 打开训练管理页，确认旧任务（无 goalTimeRange）时各统计/展示无变化
+    pass_criteria: 无 goalTimeRange 的任务不参与达标判定，页面无异常
+    signal: 反馈「GATE 2 通过」
+    history: []
+
+  # ── 收尾阶段（冻结） ────────────────────────────────────
+  - id: W-1
+    phase: auto
+    executor: agent
+    action: 整理本次实现的 API 文档（Shared.getGoalRange / Shared.evaluateTimeGoal 参数与返回）
+    expect: API 文档已更新到对应位置
+    history: []
+
+  - id: W-2
+    phase: auto
+    executor: agent
+    action: 更新 R2.md front matter 中 status.implement = done
+    expect: R2.md status.implement 已变为 done
+    history: []
+
+  - id: W-3
+    phase: auto
+    executor: agent
+    action: 将 R2.plan.yaml 重命名为 R2.plan_done.yaml
+    expect: R2.plan_done.yaml 文件存在
+    history: []
+
+  - id: W-4
+    phase: auto
+    executor: agent
+    action: 将 R2.md 重命名为 R2_done.md
+    expect: R2_done.md 文件存在
     history: []
 
 test_strategy:

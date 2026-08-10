@@ -4,7 +4,9 @@ prd_ref: prd-4.R6
 created: 2026-08-10
 
 steps:
+  # ── agent 自动执行阶段 ──────────────────────────────────
   - id: A-1
+    phase: auto
     executor: agent
     file: public/inspire/changelog.js
     action: 新增 2026-08-10 条目：移除「目标设定」记录类型（定点删除）+ 新增任务满分用时目标（task.goalTimeRange / evaluateTimeGoal / 达标展示与学员覆盖）
@@ -13,6 +15,7 @@ steps:
     history: []
 
   - id: A-2
+    phase: auto
     executor: agent
     file: R1~R5 涉及文件
     action: 全量语法校验（shared.js/student.js/changelog.js + training.html/tasks.html/stats.html 内联脚本）
@@ -20,21 +23,52 @@ steps:
     expect: 全部通过
     history: []
 
+  # ── 手动测试阶段（GATE 5） ──────────────────────────────
   - id: M-1
+    phase: manual
     executor: human
     instructions:
-      - 浏览器全站回归：集训详情、学员详情、统计页、任务管理、成绩录入
-    expected: 无异常
+      - 浏览器全站回归：集训详情、个人成绩卡、统计页、任务管理、成绩录入
     pass_criteria: 各页正常，达标徽章/下一目标/学员覆盖符合预期；个人成绩卡自主/模拟切换正常
-    signal: 反馈回归结果
+    signal: 反馈「GATE 5 通过」
     history: []
 
   - id: A-3
+    phase: auto
     executor: agent
     file: git
     action: 提交 prd-4 文档与代码改动
     verify: git log --oneline -3
     expect: 新的提交出现
+    history: []
+
+  # ── 收尾阶段（冻结） ────────────────────────────────────
+  - id: W-1
+    phase: auto
+    executor: agent
+    action: 整理本次实现的 API 文档（changelog 条目、全量接口说明汇总）
+    expect: API 文档已更新到对应位置
+    history: []
+
+  - id: W-2
+    phase: auto
+    executor: agent
+    action: 更新 R6.md front matter 中 status.implement = done
+    expect: R6.md status.implement 已变为 done
+    history: []
+
+  - id: W-3
+    phase: auto
+    executor: agent
+    action: 将 R6.plan.yaml 重命名为 R6.plan_done.yaml
+    expect: R6.plan_done.yaml 文件存在
+    history: []
+
+  - id: W-4
+    phase: auto
+    executor: agent
+    action: 将 R6.md 重命名为 R6_done.md
+    expect: R6_done.md 文件存在
     history: []
 
 test_strategy:
@@ -50,3 +84,14 @@ not_doing:
 boundary:
   constraints: 以 GATE 5 为最终通过条件
   depends_on: R1~R5 全部通过
+
+# ── PRD 收尾清单 ────────────────────────────────────────────
+# 当 prd-4 下所有 R 的 status 均为 done/pass 时，conductor 执行此清单。
+wrap_up:
+  summary: prd-4 完成：移除「目标设定」记录类型；新增任务满分用时目标（task.goalTimeRange + evaluateTimeGoal + 学员覆盖）；集训概览每个学员最佳下显示下一目标+达标徽章；个人成绩卡展示全部数据并支持自主/模拟（模拟赛+正赛）分开/整合切换
+  check_fixer: true
+  update_total: true
+  ask_user:
+    - 是否合并开发分支
+    - 是否标记发布版本
+    - 是否有后续 PRD 要启动
