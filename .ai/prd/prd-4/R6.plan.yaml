@@ -7,7 +7,7 @@ steps:
   - id: A-1
     executor: agent
     file: public/inspire/changelog.js
-    action: 新增 2026-08-10 条目：移除「目标设定」记录类型（定点删除）+ 新增任务级目标梯度（task.goalLevels / evaluateGoal / 展示与覆盖）
+    action: 新增 2026-08-10 条目：移除「目标设定」记录类型（定点删除）+ 新增任务满分用时目标（task.goalTimeRange / evaluateTimeGoal / 达标展示与学员覆盖）
     verify: node --check public/inspire/changelog.js
     expect: 无输出（通过）
     history: []
@@ -25,7 +25,7 @@ steps:
     instructions:
       - 浏览器全站回归：集训详情、学员详情、统计页、任务管理、成绩录入
     expected: 无异常
-    pass_criteria: 各页正常，等级徽章/达标率/覆盖符合预期
+    pass_criteria: 各页正常，达标徽章/达标率/学员覆盖符合预期
     signal: 反馈回归结果
     history: []
 

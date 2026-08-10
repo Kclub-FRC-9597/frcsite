@@ -1,5 +1,5 @@
 # R5.plan.yaml
-title: 学员统计展示
+title: 学员达标展示
 prd_ref: prd-4.R5
 created: 2026-08-10
 
@@ -7,7 +7,7 @@ steps:
   - id: A-1
     executor: agent
     file: public/inspire/student.js
-    action: 学员详情每任务最佳成绩旁显示等级徽章；计算距下一档差距（minScore - 得分 或 maxTime - 用时），已达最高档显示「已达最高」
+    action: 学员详情每任务最佳成绩旁显示达标徽章；未达标显示差距（还差几秒或未满分提示）
     verify: node --check public/inspire/student.js
     expect: 无输出（通过）
     history: []
@@ -15,7 +15,7 @@ steps:
   - id: A-2
     executor: agent
     file: public/inspire/stats.html
-    action: 统计页按任务汇总各等级人数 + 达标率
+    action: 统计页按任务汇总达标人数 + 达标率
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
@@ -25,9 +25,9 @@ test_strategy:
     - node --check student.js
     - stats.html 内联脚本校验
   manual:
-    - 学员详情显示等级与差距（差几分/几秒）
+    - 学员详情显示达标与差距（差几秒）
     - 统计页达标率正确
-    - 无梯度任务显示「未设梯度」
+    - 无区间任务显示「未设目标」
 
 not_doing:
   - 不动学员成绩录入（stu_tool）

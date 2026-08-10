@@ -56,7 +56,7 @@ test_strategy:
 
 not_doing:
   - 不清理已建的 goal 历史记录（保留在 localStorage）
-  - 不做任务级梯度（那是 R2~R5）
+  - 不做任务满分用时目标（那是 R2~R5）
 
 boundary:
   constraints: 只删 goal 相关行；保留 __default__ 兜底与 getMockType* 重构
