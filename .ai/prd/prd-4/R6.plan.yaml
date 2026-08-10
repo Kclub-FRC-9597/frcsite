@@ -9,7 +9,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/changelog.js
-    action: 新增 2026-08-10 条目：移除「目标设定」记录类型（定点删除）+ 新增任务满分用时目标（task.goalTimeRange / evaluateTimeGoal / 达标展示与学员覆盖）
+    action: 新增 2026-08-10 条目：移除「目标设定」记录类型（定点删除）+ 新增任务满分用时目标（task.goalTimes / currentGoal / 达标展示与学员覆盖）
     verify: node --check public/inspire/changelog.js
     expect: 无输出（通过）
     history: []
@@ -29,7 +29,7 @@ steps:
     executor: human
     instructions:
       - 浏览器全站回归：集训详情、个人成绩卡、统计页、任务管理、成绩录入
-    pass_criteria: 各页正常，达标徽章/下一目标/学员覆盖符合预期；个人成绩卡自主/模拟切换正常
+    pass_criteria: 各页正常，达标徽章/当前目标/学员覆盖符合预期；个人成绩卡自主/模拟切换正常
     signal: 反馈「GATE 5 通过」
     history: []
 
@@ -88,7 +88,7 @@ boundary:
 # ── PRD 收尾清单 ────────────────────────────────────────────
 # 当 prd-4 下所有 R 的 status 均为 done/pass 时，conductor 执行此清单。
 wrap_up:
-  summary: prd-4 完成：移除「目标设定」记录类型；新增任务满分用时目标（task.goalTimeRange + evaluateTimeGoal + 学员覆盖）；集训概览每个学员最佳下显示下一目标+达标徽章；个人成绩卡展示全部数据并支持自主/模拟（模拟赛+正赛）分开/整合切换
+  summary: prd-4 完成：移除「目标设定」记录类型；新增任务满分用时目标（task.goalTimes + currentGoal/isGoalAchieved + 学员覆盖）；集训概览每个学员最佳下显示当前目标+达标徽章；个人成绩卡展示全部数据并支持自主/模拟（模拟赛+正赛）分开/整合切换
   check_fixer: true
   update_total: true
   ask_user:

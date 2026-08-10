@@ -18,7 +18,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/student.js
-    action: 每任务最佳成绩下方显示「下一目标」（Shared.getGoalRange，覆盖优先）；达标徽章（Shared.evaluateTimeGoal 遍历全部轮次任一命中）；未达标显示差几秒/未满分提示；无区间显示「未设目标」
+    action: 每任务最佳成绩下方显示「当前目标」（Shared.getGoalTimes + Shared.currentGoal，覆盖优先）；达标徽章（Shared.isGoalAchieved）；未达标显示差几秒/未满分提示；无档位显示「未设目标」
     verify: node --check public/inspire/student.js
     expect: 无输出（通过）
     history: []
@@ -30,8 +30,8 @@ steps:
     instructions:
       - 打开个人成绩卡，确认展示全部数据（模拟赛+正赛+自主练习）
       - 切换「自主练习 / 模拟练习」分开与整合视图
-      - 每任务确认「下一目标」、达标徽章与差距显示
-    pass_criteria: 个人成绩卡全部数据可切换；自主/模拟分开-整合正常；每任务达标/下一目标正确（含覆盖）；无区间显示「未设目标」
+      - 每任务确认「当前目标」、达标徽章与差距显示
+    pass_criteria: 个人成绩卡全部数据可切换；自主/模拟分开-整合正常；每任务达标/当前目标正确（含覆盖）；无档位显示「未设目标」
     signal: 反馈「GATE 4（R5）通过」
     history: []
 
@@ -39,7 +39,7 @@ steps:
   - id: W-1
     phase: auto
     executor: agent
-    action: 整理本次实现的 API 文档（来源切换接口、达标/下一目标渲染说明）
+    action: 整理本次实现的 API 文档（来源切换接口、达标/当前目标渲染说明）
     expect: API 文档已更新到对应位置
     history: []
 
@@ -69,7 +69,7 @@ test_strategy:
     - node --check student.js
   manual:
     - 个人成绩卡展示全部数据，自主练习/模拟练习 分开与整合切换正常
-    - 每任务达标与「下一目标」正确（含覆盖）
+    - 每任务达标与「当前目标」正确（含覆盖）
     - 无区间任务显示「未设目标」
 
 not_doing:

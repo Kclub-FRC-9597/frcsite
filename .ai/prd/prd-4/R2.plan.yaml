@@ -9,7 +9,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/shared.js
-    action: 新增 `getGoalRange(task, training, studentId)`：优先返回 training.studentGoals 中该学员覆盖的用时区间，否则返回 task.goalTimeRange；无配置返回 null
+    action: 新增 `getGoalTimes(task, training, studentId)`：优先返回 training.studentGoals 中该学员覆盖的档位列表，否则返回 task.goalTimes；无配置返回 null
     verify: node --check public/inspire/shared.js
     expect: 无输出（通过）
     history: []
@@ -18,7 +18,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/shared.js
-    action: 新增 `evaluateTimeGoal(score, time, task, training, studentId)`：得分=task.maxScore 且 用时在 [minTime ?? 0, maxTime] 内返回 true，否则 false；无配置返回 null
+    action: 新增 `isGoalAchieved(bestFullScoreTime, goalTime)`（bestFullScoreTime<=goalTime 即达成）与 `currentGoal(bestFullScoreTime, goalTimes)`（无满分→max(goalTimes)；否则 max{t | t<best}；全达成→null）
     verify: node --check public/inspire/shared.js
     expect: 无输出（通过）
     history: []
@@ -27,7 +27,7 @@ steps:
     phase: auto
     executor: agent
     file: node -e（临时单测）
-    action: 用注入数据跑 evaluateTimeGoal：满分且在区间内达标 / 满分但超时未达标 / 非满分不算 / 无配置不参与
+    action: 用注入数据跑 currentGoal/isGoalAchieved：best 75→目标70 / best 120→目标100 / 无满分→最松档 / 全达成→null / 非满分不算
     verify: node -e "..."（断言输出）
     expect: 与预期一致
     history: []
@@ -37,8 +37,8 @@ steps:
     phase: manual
     executor: human
     instructions:
-      - 打开训练管理页，确认旧任务（无 goalTimeRange）时各统计/展示无变化
-    pass_criteria: 无 goalTimeRange 的任务不参与达标判定，页面无异常
+      - 打开训练管理页，确认旧任务（无 goalTimes）时各统计/展示无变化
+    pass_criteria: 无 goalTimes 的任务不参与目标判定，页面无异常
     signal: 反馈「GATE 2 通过」
     history: []
 
@@ -46,7 +46,7 @@ steps:
   - id: W-1
     phase: auto
     executor: agent
-    action: 整理本次实现的 API 文档（Shared.getGoalRange / Shared.evaluateTimeGoal 参数与返回）
+    action: 整理本次实现的 API 文档（Shared.getGoalTimes / Shared.currentGoal / Shared.isGoalAchieved 参数与返回）
     expect: API 文档已更新到对应位置
     history: []
 
@@ -74,9 +74,9 @@ steps:
 test_strategy:
   auto:
     - node --check shared.js
-    - 注入数据单测 evaluateTimeGoal 四类场景
+    - 注入数据单测 currentGoal/isGoalAchieved 场景
   manual:
-    - 旧任务无 goalTimeRange 时各统计页无变化
+    - 旧任务无 goalTimes 时各统计页无变化
 
 not_doing:
   - 不画 UI（那是 R3/R4/R5）

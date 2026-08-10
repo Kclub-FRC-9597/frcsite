@@ -9,7 +9,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/training.html
-    action: 在每个学员最佳成绩单元格内、最佳值下方显示「下一目标」：用 Shared.getGoalRange 取当前有效目标（覆盖优先，未配置显示 —），格式如「满分≤12s」
+    action: 在每个学员最佳成绩单元格内、最佳值下方显示「当前目标」：用 Shared.getGoalTimes 取有效档位（覆盖优先），用 Shared.currentGoal(bestFullScoreTime, goalTimes) 计算下一档并渲染（无满分→最松档，全达成→「已达全部目标」，未配置→—）
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
@@ -18,7 +18,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/training.html
-    action: 为每个学员×任务遍历其全部轮次调用 Shared.evaluateTimeGoal，任一命中「满分且用时在区间」即达标；best-of 单元格旁渲染 ✅/✗ 徽章；未配置区间不显示
+    action: 达标徽章：取该学员该任务满分成绩中最短用时 bestFullScoreTime，用 Shared.isGoalAchieved(bestFullScoreTime, 当前目标档) 判定并渲染 ✅/✗；未配置档位不显示
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
@@ -27,7 +27,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/training.html
-    action: 新增学员「调整目标」弹窗：选择学员+任务，编辑用时区间；保存写入 training.studentGoals；未设置 = 走任务默认
+    action: 新增学员「调整目标」弹窗：选择学员+任务，编辑目标档位列表；保存写入 training.studentGoals；未设置 = 走任务默认
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
@@ -37,10 +37,10 @@ steps:
     phase: manual
     executor: human
     instructions:
-      - 集训详情概览：确认每个学员最佳值下方显示「下一目标」
+      - 集训详情概览：确认每个学员最佳值下方显示「当前目标」（如 best 75s → 70s）
       - 确认最佳成绩旁有达标徽章 ✅/✗
-      - 对某学员点「调整目标」设置覆盖区间，刷新确认
-    pass_criteria: 下一目标（覆盖优先）正确；达标徽章正确；学员覆盖仅影响该学员且刷新保留；无区间任务不显示徽章/目标
+      - 对某学员点「调整目标」设置覆盖档位，刷新确认
+    pass_criteria: 当前目标（下一档，覆盖优先）正确；达标徽章正确；学员覆盖仅影响该学员且刷新保留；无档位任务不显示徽章/目标
     signal: 反馈「GATE 4（R4）通过」
     history: []
 
@@ -76,11 +76,11 @@ steps:
 test_strategy:
   auto:
     - training.html 内联脚本校验
-    - 注入测试数据验证下一目标/达标徽章/覆盖计算
+    - 注入测试数据验证当前目标/达标徽章/覆盖计算
   manual:
-    - 有区间任务：最佳值下方显示「下一目标」，最佳成绩旁有达标徽章
-    - 学员覆盖后仅该学员按专属区间判定
-    - 无区间任务不显示徽章/目标
+    - 有档位任务：最佳值下方显示「当前目标」，最佳成绩旁有达标徽章
+    - 学员覆盖后仅该学员按专属档位判定
+    - 无档位任务不显示徽章/目标
 
 not_doing:
   - 不动成绩录入/赛程/CSV 导出

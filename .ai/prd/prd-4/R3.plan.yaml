@@ -9,7 +9,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/tasks.html
-    action: 任务表单增加「满分用时目标」区：渲染 task.goalTimeRange 已有值（上限必填、下限可留空）
+    action: 任务表单增加「目标档位」区：渲染 task.goalTimes 已有值（时间档位列表，支持增删）
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
@@ -18,7 +18,7 @@ steps:
     phase: auto
     executor: agent
     file: public/inspire/tasks.html
-    action: 保存任务时收集用时区间写入 task.goalTimeRange（未配置 = 不写入该字段）；编辑任务时回填
+    action: 保存任务时收集档位列表写入 task.goalTimes（未配置 = 不写入该字段）；编辑任务时回填
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
@@ -28,10 +28,10 @@ steps:
     phase: manual
     executor: human
     instructions:
-      - 任务管理新建任务，设置用时区间（上限 12s，下限留空）→ 保存
-      - 刷新页面，确认区间保留
-      - 编辑任务修改区间 → 保存
-    pass_criteria: 用时区间保存后刷新保留；编辑即时生效；不配区间的任务不写入 goalTimeRange
+      - 任务管理新建任务，添加目标档位 100/80/70（秒）→ 保存
+      - 刷新页面，确认档位列表保留
+      - 编辑任务增删/改档位 → 保存
+    pass_criteria: 目标档位列表保存后刷新保留；编辑即时生效；不配档位的任务不写入 goalTimes
     signal: 反馈「GATE 3 通过」
     history: []
 
@@ -39,7 +39,7 @@ steps:
   - id: W-1
     phase: auto
     executor: agent
-    action: 整理本次实现的 API 文档（task.goalTimeRange 结构、任务表单字段）
+    action: 整理本次实现的 API 文档（task.goalTimes 档位列表结构、任务表单字段）
     expect: API 文档已更新到对应位置
     history: []
 
@@ -68,9 +68,9 @@ test_strategy:
   auto:
     - tasks.html 内联脚本校验
   manual:
-    - 新建任务设用时区间（如 上限 12s）→ 保存 → 刷新保留
-    - 编辑任务改区间 → 保存生效
-    - 不配区间的任务不写入 goalTimeRange，不影响其它
+    - 新建任务设目标档位（如 100/80/70s）→ 保存 → 刷新保留
+    - 编辑任务增删/改档位 → 保存生效
+    - 不配档位的任务不写入 goalTimes，不影响其它
 
 not_doing:
   - 不在本页做达标判定/徽章（那是 R4/R5）
