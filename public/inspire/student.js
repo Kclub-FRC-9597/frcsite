@@ -118,6 +118,7 @@
                 if (wantMock) {
                     (training.mockCompetitions || []).forEach((mock) => {
                         const mockSource = mock.competitionType || 'mock';
+                        if (mockSource === 'goal') return; // 目标设定不计入成绩统计
                         if (source !== 'all' && mockSource !== source) return;
                         const scores = mock.scores || {};
                         const studentScores = scores[studentId];

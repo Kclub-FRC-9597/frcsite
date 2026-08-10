@@ -287,6 +287,30 @@ const Shared = {
         if (entry.round1 === undefined) return entry.score ?? null;
         return this.getBestScore(entry);
     },
+
+    // ============ Mock 类型工具 ============
+    // competitionType: 'mock'(模拟赛) | 'official'(正赛) | 'goal'(目标设定)
+    getMockType(mock) {
+        return (mock && mock.competitionType) || 'mock';
+    },
+    // 纯文本（无 emoji）：用于名称生成 / CSV 导出
+    getMockTypeText(mock) {
+        const t = this.getMockType(mock);
+        return t === 'official' ? '正赛' : t === 'goal' ? '目标设定' : '模拟赛';
+    },
+    // 带 emoji 的标签：用于界面徽章
+    getMockTypeLabel(mock) {
+        const t = this.getMockType(mock);
+        return t === 'official' ? '🏆 正赛' : t === 'goal' ? '🎯 目标设定' : '🏅 模拟赛';
+    },
+    getMockTypeBg(mock) {
+        const t = this.getMockType(mock);
+        return t === 'official' ? '#fef3c7;color:#92400e' : t === 'goal' ? '#dcfce7;color:#15803d' : '#dbeafe;color:#1d4ed8';
+    },
+    // 目标设定记录不计入成绩统计
+    isStatCounted(mock) {
+        return this.getMockType(mock) !== 'goal';
+    },
 };
 
 window.Shared = Shared;

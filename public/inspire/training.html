@@ -104,6 +104,7 @@
                 <select id="competitionTypeSelect" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;background:#fff;color:var(--gray-800);">
                     <option value="mock">🏅 模拟赛</option>
                     <option value="official">🏆 正赛</option>
+                    <option value="goal">🎯 目标设定</option>
                 </select>
             </div>
             <div class="form-group">
@@ -333,10 +334,12 @@
         addMockCompetition(trainingId, name, date, competitionType, roundType, scores, tasks, group, participantCount) {
             const training = this.data.trainings.find((t) => t.id === trainingId);
             if (!training) return null;
-            const typeLabel = competitionType === 'official' ? '正赛' : '模拟赛';
+            const typeLabel = Shared.getMockTypeText({ competitionType: competitionType || 'mock' });
+            // 目标设定不占用自动编号，模拟赛轮次只统计非目标设定记录
+            const compCount = training.mockCompetitions.filter(m => Shared.isStatCounted(m)).length;
             const mock = {
                 id: this.generateId(),
-                name: name.trim() || `${typeLabel} ${training.mockCompetitions.length + 1}`,
+                name: name.trim() || `${typeLabel} ${compCount + 1}`,
                 date: date || new Date().toISOString().slice(0, 10),
                 competitionType: competitionType || 'mock',
                 type: roundType || 'single',
@@ -461,7 +464,7 @@
             if (!training) return;
             const mock = training.mockCompetitions.find((m) => m.id === mockId);
             if (!mock) return;
-            if (!confirm(`确定要删除模拟赛"${mock.name}"吗？`)) return;
+            if (!confirm(`确定要删除${Shared.getMockTypeText(mock)}"${mock.name}"吗？`)) return;
             training.mockCompetitions = training.mockCompetitions.filter((m) => m.id !== mockId);
             this.saveData();
             this.render();
@@ -498,7 +501,7 @@
             rows.push(header.map(escape).join(','));
 
             training.mockCompetitions.forEach((mock) => {
-                const typeLabel = (mock.competitionType || 'mock') === 'official' ? '正赛' : '模拟赛';
+                const typeLabel = Shared.getMockTypeText(mock);
                 students.forEach((s) => {
                     const rank = mock.rankings && mock.rankings[s.id] ? mock.rankings[s.id] : '';
                     taskIds.forEach((tid) => {
@@ -1122,7 +1125,11 @@
             }
             let name = document.getElementById('mockNameInput').value.trim();
             if (!name) {
-                name = competitionType === 'official' ? '正赛' : '第' + (training.mockCompetitions.length + 1) + '轮';
+                // 模拟赛轮次编号只统计非目标设定记录，目标设定不占用轮次
+                const compCount = training.mockCompetitions.filter(m => Shared.isStatCounted(m)).length;
+                name = competitionType === 'official' ? '正赛'
+                    : competitionType === 'goal' ? '目标设定'
+                    : '第' + (compCount + 1) + '轮';
             }
             const date = document.getElementById('mockDateInput').value || new Date().toISOString().slice(0, 10);
             const group = document.getElementById('mockGroupSelect').value;
@@ -1195,7 +1202,7 @@
                 <div>
                     <h3 style="font-size:1.15rem;margin:0;">${this.escapeHtml(mock.name)}</h3>
                     <div style="font-size:0.85rem;color:var(--gray-500);">${mock.date} · ${training.name}
-                        <span style="font-size:0.7rem;background:${(mock.competitionType || 'mock') === 'official' ? '#fef3c7;color:#92400e' : '#dbeafe;color:#1d4ed8'};padding:0.1rem 0.5rem;border-radius:10px;margin-left:0.3rem;">${(mock.competitionType || 'mock') === 'official' ? '🏆 正赛' : '🏅 模拟赛'}</span>
+                        <span style="font-size:0.7rem;background:${Shared.getMockTypeBg(mock)};padding:0.1rem 0.5rem;border-radius:10px;margin-left:0.3rem;">${Shared.getMockTypeLabel(mock)}</span>
                         <span style="font-size:0.7rem;background:${(mock.group || 'senior') === 'senior' ? '#e0e7ff;color:#4338ca' : '#fce7f3;color:#9d174d'};padding:0.1rem 0.5rem;border-radius:10px;margin-left:0.3rem;">${(mock.group || 'senior') === 'senior' ? '小高组' : '小低组'}</span>
                         ${mock.participantCount ? `<span style="font-size:0.7rem;background:#f3e8ff;color:#6b21a8;padding:0.1rem 0.5rem;border-radius:10px;margin-left:0.3rem;">👥 ${mock.participantCount}人</span>` : ''}
                         ${this.getTaskLabels(mock)}
@@ -1488,7 +1495,8 @@
             const taskIds = Object.keys(taskMap);
 
             const records = [...training.mockCompetitions].reverse();
-            const chartRecords = training.mockCompetitions;
+            // 目标设定(goal)记录不计入成绩统计（趋势图不纳入）
+            const chartRecords = training.mockCompetitions.filter(m => Shared.isStatCounted(m));
             if (records.length === 0) {
                 let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
                     <h3 style="font-size:1.15rem;margin:0;">📊 ${this.escapeHtml(student.name)} 成绩详情</h3>
@@ -1505,6 +1513,7 @@
                 let bestScore = null, bestTime = null;
                 training.mockCompetitions.forEach((mock) => {
                     if (mock.withdrawn && mock.withdrawn[studentId]) return;
+                    if (!Shared.isStatCounted(mock)) return; // 目标设定不计入成绩统计
                     const entry = mock.scores[studentId] && mock.scores[studentId][tid] ? mock.scores[studentId][tid] : null;
                     if (!entry) return;
                     const rounds = this.getRounds(entry);
@@ -1564,6 +1573,7 @@
                     let bestScore = null, bestTime = null;
                     training.mockCompetitions.forEach((mock) => {
                         if (mock.withdrawn && mock.withdrawn[studentId]) return;
+                        if (!Shared.isStatCounted(mock)) return; // 目标设定不计入成绩统计
                         const entry = mock.scores[studentId] && mock.scores[studentId][tid] ? mock.scores[studentId][tid] : null;
                         if (!entry) return;
                         const rounds = this.getRounds(entry);
@@ -2126,9 +2136,15 @@
                     }
 
                     // === Best Score Overview (across all mocks) ===
+                    // 目标设定(goal)记录不计入成绩统计
+                    const statMocks = t.mockCompetitions.filter(m => Shared.isStatCounted(m));
                     if (t.mockCompetitions.length > 0 && students.length > 0) {
                         const allTaskIds = new Set();
-                        t.mockCompetitions.forEach(m => (m.tasks || []).forEach(ti => allTaskIds.add(ti.taskId)));
+                        statMocks.forEach(m => {
+                            // 兼容无任务记录（成绩存于默认任务 __default__），与单条记录渲染逻辑一致
+                            const mTasks = (m.tasks && m.tasks.length > 0) ? m.tasks : [{ taskId: null, rounds: 1 }];
+                            mTasks.forEach(ti => allTaskIds.add(ti.taskId || '__default__'));
+                        });
                         const taskIdList = Array.from(allTaskIds);
 
                         // Compute best per-task per-student across all mocks
@@ -2137,7 +2153,7 @@
                         taskIdList.forEach(tid => {
                             students.forEach(s => {
                                 let bestSc = null, bestTm = null;
-                                t.mockCompetitions.forEach(m => {
+                                statMocks.forEach(m => {
                                     const entry = m.scores[s.id] && m.scores[s.id][tid] ? m.scores[s.id][tid] : null;
                                     if (!entry) return;
                                     this.getRounds(entry).forEach(r => {
@@ -2266,11 +2282,35 @@
                             html += '</tr>';
                             // Separator
                             html += '<tr><td colspan="' + (3 + students.length) + '" style="border-bottom:3px solid var(--gray-300);padding:0;"></td></tr>';
+                        } else {
+                            // 只有目标设定等不计分记录：统计区仍显示，数值用 - 占位
+                            html += '<tr style="background:#f8fafc;">';
+                            html += '<td style="vertical-align:middle;text-align:center;font-weight:700;color:var(--primary);font-size:0.85rem;">🏆 最佳成绩</td>';
+                            html += '<td style="font-size:0.82rem;color:var(--gray-400);">暂无</td>';
+                            students.forEach(() => {
+                                html += '<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-</td>';
+                            });
+                            html += '</tr>';
+                            html += '<tr style="background:var(--primary-bg);font-weight:600;">';
+                            html += '<td style="font-size:0.82rem;color:var(--primary);">综合最佳</td>';
+                            html += '<td></td>';
+                            students.forEach(() => {
+                                html += '<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-</td>';
+                            });
+                            html += '</tr>';
+                            html += '<tr style="background:var(--primary-bg);">';
+                            html += '<td style="font-size:0.82rem;font-weight:600;color:var(--accent);">综合排名</td>';
+                            html += '<td></td>';
+                            students.forEach(() => {
+                                html += '<td style="text-align:center;color:var(--gray-300);font-size:0.9rem;font-weight:700;">-</td>';
+                            });
+                            html += '</tr>';
+                            html += '<tr><td colspan="' + (2 + students.length) + '" style="border-bottom:3px solid var(--gray-300);padding:0;"></td></tr>';
                         }
 
                         sortedMocks.forEach((m) => {
-                            const typeLabel = (m.competitionType || 'mock') === 'official' ? '🏆 正赛' : '🏅 模拟赛';
-                            const typeBg = (m.competitionType || 'mock') === 'official' ? '#fef3c7;color:#92400e' : '#dbeafe;color:#1d4ed8';
+                            const typeLabel = Shared.getMockTypeLabel(m);
+                            const typeBg = Shared.getMockTypeBg(m);
 
                             // Tasks this mock covers
                             const mockTasks = (m.tasks && m.tasks.length > 0) ? m.tasks : [{ taskId: null, rounds: 1 }];
