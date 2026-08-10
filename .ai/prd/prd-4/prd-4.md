@@ -25,7 +25,7 @@ structure:
     file: R4.md
   - type: r
     id: R5
-    title: 学员达标展示
+    title: 个人数据展示
     file: R5.md
   - type: r
     id: R6
@@ -54,7 +54,7 @@ structure:
 | B 任务满分用时目标 | R2 | 数据模型 `task.goalTimeRange` + 判定函数 `Shared.evaluateTimeGoal` |
 | | R3 | 任务管理页用时区间配置 UI（`tasks.html`） |
 | | R4 | 集训统计展示（`training.html` 每个学员最佳成绩下显示下一目标 + 达标徽章/学员覆盖） |
-| | R5 | 学员详情与统计页展示（`student.js`/`stats.html`） |
+| | R5 | 个人成绩卡展示（`student.js` 全部数据 + 自主/模拟分开-整合切换 + 达标/下一目标） |
 | C 收尾 | R6 | changelog + 全量语法校验 + 浏览器回归 + 提交 |
 
 ## 数据模型（核心）
@@ -76,6 +76,11 @@ training.studentGoals = [ { id, studentId, taskId, goalTimeRange: {/* 学员专�
 - ✅ 判定依据 = **满分前提下的用时区间**（得分必须满分 + 用时落在老师设置的区间内）；单一区间、无需命名、无多档。
 - ✅ 学员覆盖 = **保留**（`training.studentGoals`）：**首次训练绘制个人基准线时需按学员单独设目标**，故纳入范围；未设置覆盖的学员走任务默认区间。
 
+## 数据边界（展示来源）
+
+- **集训页**（`training.html`）：只展示/统计 **模拟赛/正赛**（`mockCompetitions`）；自主练习（`practiceRecords`）**不进入**集训统计与排名。目标/达标判定仅基于模拟赛/正赛成绩。
+- **个人成绩卡**（`student.js`）：展示**全部数据**（模拟赛 + 正赛 + 自主练习）；提供「自主练习 / 模拟练习」的**分开 / 整合**切换预览；模拟练习 = 模拟赛 + 正赛。
+
 ## 推进阶段（GATE）
 
 | 阶段 | R | 验证 |
@@ -84,7 +89,7 @@ training.studentGoals = [ { id, studentId, taskId, goalTimeRange: {/* 学员专�
 | P1 | R2 | 判定函数单测（满分非满分/区间边界/无配置） |
 | P2 | R3 | 用时区间配置持久化、刷新保留 |
 | P3 | R4 | 最佳下方显示下一目标/达标徽章/学员覆盖 |
-| P4 | R5 | 学员详情达标+差秒数、统计页达标率 |
+| P4 | R5 | 个人成绩卡全部数据+自主/模拟切换、达标/下一目标 |
 | P5 | R6 | changelog + 全量校验 + 浏览器回归 + 提交 |
 
 测试见 `TESTPLAN.md`（GATE 1~5）。P0①（git 安全点提交）已完成：`46389d3`。

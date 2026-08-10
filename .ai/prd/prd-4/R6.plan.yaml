@@ -25,7 +25,7 @@ steps:
     instructions:
       - 浏览器全站回归：集训详情、学员详情、统计页、任务管理、成绩录入
     expected: 无异常
-    pass_criteria: 各页正常，达标徽章/达标率/学员覆盖符合预期
+    pass_criteria: 各页正常，达标徽章/下一目标/学员覆盖符合预期；个人成绩卡自主/模拟切换正常
     signal: 反馈回归结果
     history: []
 

@@ -1,5 +1,5 @@
 # R5.plan.yaml
-title: 学员达标展示
+title: 个人数据展示
 prd_ref: prd-4.R5
 created: 2026-08-10
 
@@ -7,31 +7,32 @@ steps:
   - id: A-1
     executor: agent
     file: public/inspire/student.js
-    action: 学员详情每任务最佳成绩旁显示达标徽章；未达标显示差距（还差几秒或未满分提示）
+    action: 个人成绩卡来源切换：提供「自主练习 / 模拟练习（模拟赛+正赛）」分开与整合的预览（复用现有来源过滤，补充「整合」视图）
     verify: node --check public/inspire/student.js
     expect: 无输出（通过）
     history: []
 
   - id: A-2
     executor: agent
-    file: public/inspire/stats.html
-    action: 统计页按任务汇总达标人数 + 达标率
-    verify: node 内联脚本校验
-    expect: ALL INLINE SCRIPTS OK
+    file: public/inspire/student.js
+    action: 每任务最佳成绩下方显示「下一目标」（Shared.getGoalRange，覆盖优先）；达标徽章（Shared.evaluateTimeGoal 遍历全部轮次任一命中）；未达标显示差几秒/未满分提示；无区间显示「未设目标」
+    verify: node --check public/inspire/student.js
+    expect: 无输出（通过）
     history: []
 
 test_strategy:
   auto:
     - node --check student.js
-    - stats.html 内联脚本校验
   manual:
-    - 学员详情显示达标与差距（差几秒）
-    - 统计页达标率正确
+    - 个人成绩卡展示全部数据，自主练习/模拟练习 分开与整合切换正常
+    - 每任务达标与「下一目标」正确（含覆盖）
     - 无区间任务显示「未设目标」
 
 not_doing:
+  - 统计页（stats.html）暂不做目标/达标展示
+  - 自主练习不进入集训统计/排名（见总纲「数据边界」）
   - 不动学员成绩录入（stu_tool）
 
 boundary:
-  constraints: 复用 R2 判定函数，只做展示
+  constraints: 复用 R2 判定函数；个人成绩卡只读展示
   depends_on: R2（判定）、R4（覆盖数据）
