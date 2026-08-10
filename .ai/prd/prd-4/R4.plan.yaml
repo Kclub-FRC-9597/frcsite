@@ -7,7 +7,7 @@ steps:
   - id: A-1
     executor: agent
     file: public/inspire/training.html
-    action: 在 renderTrainingList 最佳成绩概览中，为每个学员×任务用 Shared.evaluateTimeGoal 判定达标，best-of 单元格旁渲染 ✅/✗ 徽章；未配置区间不显示
+    action: 概览表格顶部新增「🎯 目标」行（置于最佳成绩之前，作为表格首行）：任务列显示目标用时区间；每个学员列用 Shared.getGoalRange 显示当前有效目标（覆盖优先，未配置显示 —）；多任务时每任务一行
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
@@ -15,12 +15,20 @@ steps:
   - id: A-2
     executor: agent
     file: public/inspire/training.html
-    action: 概览区增加达标人数 + 达标率汇总行
+    action: 为每个学员×任务遍历其全部轮次调用 Shared.evaluateTimeGoal，任一命中「满分且用时在区间」即达标；best-of 单元格旁渲染 ✅/✗ 徽章；未配置区间不显示
     verify: node 内联脚本校验
     expect: ALL INLINE SCRIPTS OK
     history: []
 
   - id: A-3
+    executor: agent
+    file: public/inspire/training.html
+    action: 概览区增加达标人数 + 达标率汇总行
+    verify: node 内联脚本校验
+    expect: ALL INLINE SCRIPTS OK
+    history: []
+
+  - id: A-4
     executor: agent
     file: public/inspire/training.html
     action: 新增学员「调整目标」弹窗：选择学员+任务，编辑用时区间；保存写入 training.studentGoals；未设置 = 走任务默认
