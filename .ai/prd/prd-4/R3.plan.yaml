@@ -1,0 +1,36 @@
+# R3.plan.yaml
+title: 任务梯度配置
+prd_ref: prd-4.R3
+created: 2026-08-10
+
+steps:
+  - id: A-1
+    executor: agent
+    file: public/inspire/tasks.html
+    action: 任务表单增加「目标梯度」编辑区：渲染 task.goalLevels 已有档位；支持添加/删除档位、编辑 名称/最低得分/最迟用时
+    verify: node 内联脚本校验
+    expect: ALL INLINE SCRIPTS OK
+    history: []
+
+  - id: A-2
+    executor: agent
+    file: public/inspire/tasks.html
+    action: 保存任务时收集档位写入 task.goalLevels（无档位 = []）；编辑任务时回填
+    verify: node 内联脚本校验
+    expect: ALL INLINE SCRIPTS OK
+    history: []
+
+test_strategy:
+  auto:
+    - tasks.html 内联脚本校验
+  manual:
+    - 新建任务添加 3 档梯度 → 保存 → 刷新保留
+    - 编辑任务增删档/改阈值 → 保存生效
+    - 不配梯度的任务保存为空数组，不影响其它
+
+not_doing:
+  - 不在本页做等级判定/徽章（那是 R4/R5）
+
+boundary:
+  constraints: 复用现有任务 CRUD 与 localStorage 保存路径
+  depends_on: R2（字段结构）

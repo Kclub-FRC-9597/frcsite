@@ -1,0 +1,63 @@
+# R1.plan.yaml
+title: 移除目标设定
+prd_ref: prd-4.R1
+created: 2026-08-10
+
+steps:
+  - id: A-1
+    executor: agent
+    file: public/inspire/training.html
+    action: 删除下拉 `<option value="goal">🎯 目标设定</option>`；confirmMockModal 还原为 `name = competitionType === 'official' ? '正赛' : '第' + (training.mockCompetitions.length + 1) + '轮'`；addMockCompetition `compCount` 改回 `training.mockCompetitions.length` 并删注释；renderTrainingList `statMocks` 改回 `t.mockCompetitions`（删过滤/注释/占位 else）；renderStudentDetail `chartRecords` 改回 `training.mockCompetitions`、删两处 `isStatCounted` 跳过
+    verify: node 内联脚本校验（<script> 无 src 块逐个 new Function）
+    expect: ALL INLINE SCRIPTS OK
+    history: []
+
+  - id: A-2
+    executor: agent
+    file: public/inspire/shared.js
+    action: getMockTypeText/Label/Bg 去掉 goal 分支；删除 isStatCounted 方法
+    verify: node --check public/inspire/shared.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-3
+    executor: agent
+    file: public/inspire/student.js
+    action: 删除 `if (mockSource === 'goal') return; // 目标设定不计入成绩统计`
+    verify: node --check public/inspire/student.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-4
+    executor: agent
+    file: public/inspire/stats.html
+    action: 删除 `if (Shared.getMockType(m) === 'goal') return; // 目标设定不计入成绩统计`
+    verify: node 内联脚本校验
+    expect: ALL INLINE SCRIPTS OK
+    history: []
+
+  - id: A-5
+    executor: agent
+    file: public/inspire/changelog.js
+    action: 删除 2026-08-10「记录类型新增目标设定」条目
+    verify: node --check public/inspire/changelog.js
+    expect: 无输出（通过）
+    history: []
+
+test_strategy:
+  auto:
+    - node --check shared.js / student.js / changelog.js
+    - training.html / stats.html 内联脚本块校验
+  manual:
+    - 新增记录下拉只剩 模拟赛/正赛
+    - 清空名称新增模拟赛 → 默认「第N轮」，编号不被目标设定占用
+    - 无任务记录（默认任务 __default__）仍进最佳成绩概览
+    - 学员详情 / 统计页 / CSV 导出回归正常
+
+not_doing:
+  - 不清理已建的 goal 历史记录（保留在 localStorage）
+  - 不做任务级梯度（那是 R2~R5）
+
+boundary:
+  constraints: 只删 goal 相关行；保留 __default__ 兜底与 getMockType* 重构
+  depends_on: P0① git 安全点提交（已完成 46389d3）

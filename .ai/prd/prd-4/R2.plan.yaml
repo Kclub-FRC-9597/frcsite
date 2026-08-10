@@ -1,0 +1,44 @@
+# R2.plan.yaml
+title: 梯度模型判定
+prd_ref: prd-4.R2
+created: 2026-08-10
+
+steps:
+  - id: A-1
+    executor: agent
+    file: public/inspire/shared.js
+    action: 新增 `getGoalLevels(task, training, studentId)`：优先返回 training.studentGoals 中该学员覆盖梯度，否则返回 task.goalLevels；无配置返回 null
+    verify: node --check public/inspire/shared.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-2
+    executor: agent
+    file: public/inspire/shared.js
+    action: 新增 `evaluateGoal(bestScore, bestTime, levels)`，按「得分≥minScore 且 用时≤maxTime」返回最高达标档，单边留空只看另一边
+    verify: node --check public/inspire/shared.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-3
+    executor: agent
+    file: node -e（临时单测）
+    action: 用注入数据跑 evaluateGoal：达标最高档 / 单边留空 / 无成绩或未达最低档 / 并列档位
+    verify: node -e "..."（断言输出）
+    expect: 与预期一致
+    history: []
+
+test_strategy:
+  auto:
+    - node --check shared.js
+    - 注入数据单测 evaluateGoal 四类场景
+  manual:
+    - 旧任务无 goalLevels 时各统计页无变化
+
+not_doing:
+  - 不画 UI（那是 R3/R4/R5）
+  - 不动成绩录入/赛程逻辑
+
+boundary:
+  constraints: 判定函数集中 shared.js，供各页复用；不改数据写入路径
+  depends_on: R1（移除 goal 后，避免两套逻辑并存）
