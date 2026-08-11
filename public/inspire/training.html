@@ -27,6 +27,11 @@
         /* 参与学员：超链接样式 */
         .student-link { color: var(--primary); }
         .student-link:hover { text-decoration: underline; }
+        /* 目标设定弹窗 tab */
+        .goal-tab { padding:0.32rem 0.95rem; border:1px solid var(--gray-300); border-radius:8px; background:#fff; color:var(--gray-600); cursor:pointer; font-size:0.85rem; }
+        .goal-tab.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+        /* 个体目标列表 */
+        .goal-table input:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
     </style>
 </head>
 <body>
@@ -221,22 +226,23 @@
         </div>
     </div>
 
-    <!-- ========== Modal: 学员目标调整 ========== -->
+    <!-- ========== Modal: 目标设定（全局 / 个体） ========== -->
     <div class="modal-overlay" id="studentGoalModal">
-        <div class="modal-box" style="max-width:480px;">
-            <h3>🎯 调整学员目标</h3>
-            <input type="hidden" id="studentGoalStudentId" />
-            <div class="form-group">
-                <label>学员</label>
-                <select id="studentGoalStudentSelect" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;"></select>
+        <div class="modal-box" style="max-width:760px;">
+            <h3>🎯 目标设定</h3>
+            <div style="display:flex;gap:0.4rem;margin-bottom:0.75rem;">
+                <button class="goal-tab active" data-tab="global">🌐 全局</button>
+                <button class="goal-tab" data-tab="individual">👤 个体</button>
             </div>
-            <div class="form-group">
-                <label>任务</label>
-                <select id="studentGoalTaskSelect" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;"></select>
+            <!-- 全局：任务默认档位 -->
+            <div id="goalGlobalPane">
+                <div id="goalGlobalTaskList"></div>
+                <div style="font-size:0.75rem;color:var(--gray-400);margin-top:0.3rem;">全局档位即任务默认目标；个体未单独设置时默认使用全局档位</div>
             </div>
-            <div class="form-group">
-                <label>目标档位（秒，逗号分隔；留空 = 用任务默认）</label>
-                <input type="text" id="studentGoalTimesInput" placeholder="如 100,80,70" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;" />
+            <!-- 个体：全部学员展开 -->
+            <div id="goalIndividualPane" style="display:none;">
+                <div id="goalIndividualList" style="overflow-x:auto;"></div>
+                <div style="font-size:0.75rem;color:var(--gray-400);margin-top:0.4rem;">每个学员每任务一格；留空 = 用全局默认，输入与全局一致也视为用全局默认；高亮框 = 已单独设置</div>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-outline" id="studentGoalCancel">取消</button>
@@ -518,33 +524,55 @@
             return `<div style="font-size:0.68rem;color:var(--gray-400);margin-top:0.15rem;">🎯 当前目标 ${gi.current}s · ${badge}</div>`;
         },
 
-        openStudentGoalModal(studentId) {
+        openStudentGoalModal() {
             const training = this.data.trainings.find(t => t.id === this.selectedTrainingId);
             if (!training) return;
+            const taskDefs = (training.tasks || []).map(x => x.taskId).map(id => this.data.tasks.find(t => t.id === id)).filter(Boolean);
+            // 全局 pane：每个任务一个档位输入
+            const globalList = document.getElementById('goalGlobalTaskList');
+            globalList.innerHTML = taskDefs.length ? taskDefs.map(td => {
+                const cur = (td.goalTimes || []).join(',');
+                return `<div class="form-group">
+                    <label>${this.escapeHtml(td.name)}</label>
+                    <input type="text" id="goalGlobalInput_${td.id}" placeholder="如 100,80,70（留空 = 无全局档位）" value="${this.escapeHtml(cur)}" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;box-sizing:border-box;" />
+                </div>`;
+            }).join('') : '<div style="font-size:0.85rem;color:var(--gray-400);">该集训暂无任务</div>';
+            // 个体 pane：全部学员 × 全部任务展开
             const students = this.data.students.filter(s => training.studentIds.includes(s.id));
-            if (!students.length) { this.toast('暂无参与学员', 'warning'); return; }
-            if (!studentId || !students.some(s => s.id === studentId)) studentId = students[0].id;
-            const stuSel = document.getElementById('studentGoalStudentSelect');
-            stuSel.innerHTML = students.map(s => `<option value="${s.id}">${this.escapeHtml(s.name)}</option>`).join('');
-            stuSel.value = studentId;
-            document.getElementById('studentGoalStudentId').value = studentId;
-            const taskSel = document.getElementById('studentGoalTaskSelect');
-            const tasks = (training.tasks || []).map(x => x.taskId).map(id => this.data.tasks.find(t => t.id === id)).filter(Boolean);
-            taskSel.innerHTML = '<option value="">— 选择任务 —</option>' + tasks.map(t =>
-                `<option value="${t.id}">${this.escapeHtml(t.name)}</option>`
-            ).join('');
-            const loadOverride = () => {
-                const sid = stuSel.value;
-                const sg = (training.studentGoals || []).find(g => g.studentId === sid && g.taskId === taskSel.value);
-                document.getElementById('studentGoalTimesInput').value = sg ? (sg.goalTimes || []).join(',') : '';
-            };
-            stuSel.onchange = () => {
-                document.getElementById('studentGoalStudentId').value = stuSel.value;
-                loadOverride();
-            };
-            taskSel.onchange = loadOverride;
-            loadOverride();
+            const indList = document.getElementById('goalIndividualList');
+            if (taskDefs.length && students.length) {
+                let table = '<table class="goal-table" style="width:100%;font-size:0.8rem;border-collapse:collapse;">';
+                table += '<thead><tr><th style="text-align:left;padding:0.35rem 0.5rem;border-bottom:1px solid var(--gray-200);white-space:nowrap;">学员</th>';
+                taskDefs.forEach(td => { table += `<th style="padding:0.35rem 0.5rem;border-bottom:1px solid var(--gray-200);white-space:nowrap;">${this.escapeHtml(td.name)}</th>`; });
+                table += '</tr></thead><tbody>';
+                students.forEach(s => {
+                    table += `<tr><td style="padding:0.35rem 0.5rem;border-bottom:1px solid var(--gray-100);white-space:nowrap;font-weight:600;">${this.escapeHtml(s.name)}</td>`;
+                    taskDefs.forEach(td => {
+                        const sg = (training.studentGoals || []).find(g => g.studentId === s.id && g.taskId === td.id);
+                        const val = sg ? (sg.goalTimes || []).join(',') : '';
+                        const ph = sg ? '' : ((td.goalTimes && td.goalTimes.length) ? `默认 ${td.goalTimes.join('/')}s` : '无全局');
+                        table += `<td style="padding:0.25rem 0.4rem;border-bottom:1px solid var(--gray-100);">
+                            <input type="text" id="goalIndInput_${s.id}_${td.id}" value="${this.escapeHtml(val)}" placeholder="${this.escapeHtml(ph)}" title="留空=全局默认" style="width:100%;min-width:96px;padding:0.35rem 0.5rem;border:1px solid ${sg ? 'var(--primary)' : 'var(--gray-300)'};border-radius:var(--radius-sm);font-size:0.8rem;box-sizing:border-box;" />
+                        </td>`;
+                    });
+                    table += '</tr>';
+                });
+                table += '</tbody></table>';
+                indList.innerHTML = table;
+            } else {
+                indList.innerHTML = '<div style="font-size:0.85rem;color:var(--gray-400);">暂无学员或任务</div>';
+            }
+            this._switchGoalTab('global');
             document.getElementById('studentGoalModal').classList.add('open');
+        },
+
+        _switchGoalTab(tab) {
+            const isGlobal = tab === 'global';
+            document.getElementById('goalGlobalPane').style.display = isGlobal ? '' : 'none';
+            document.getElementById('goalIndividualPane').style.display = isGlobal ? 'none' : '';
+            document.querySelectorAll('.goal-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
         },
 
         closeStudentGoalModal() {
@@ -552,21 +580,44 @@
         },
 
         confirmStudentGoalModal() {
-            const studentId = document.getElementById('studentGoalStudentId').value;
-            const taskId = document.getElementById('studentGoalTaskSelect').value;
             const training = this.data.trainings.find(t => t.id === this.selectedTrainingId);
-            if (!training || !studentId || !taskId) { this.toast('请选择任务', 'warning'); return; }
-            if (!training.studentGoals) training.studentGoals = [];
-            const raw = document.getElementById('studentGoalTimesInput').value;
-            const nums = String(raw).split(/[,，\s]+/).map(s => parseFloat(s)).filter(n => !isNaN(n) && n > 0);
-            const goalTimes = nums.length ? nums : null;
-            let sg = training.studentGoals.find(g => g.studentId === studentId && g.taskId === taskId);
-            if (goalTimes) {
-                if (sg) sg.goalTimes = goalTimes;
-                else training.studentGoals.push({ id: this.generateId(), studentId, taskId, goalTimes });
-            } else {
-                if (sg) training.studentGoals = training.studentGoals.filter(g => g !== sg);
+            if (!training) return;
+            // 全局 tab：保存任务默认档位
+            if (document.getElementById('goalGlobalPane').style.display !== 'none') {
+                (training.tasks || []).map(x => x.taskId).map(id => this.data.tasks.find(t => t.id === id)).filter(Boolean).forEach(td => {
+                    const raw = document.getElementById('goalGlobalInput_' + td.id).value;
+                    const nums = String(raw).split(/[,，\s]+/).map(s => parseFloat(s)).filter(n => !isNaN(n) && n > 0);
+                    if (nums.length) td.goalTimes = nums; else delete td.goalTimes;
+                });
+                this.saveData();
+                this.render();
+                this.closeStudentGoalModal();
+                this.toast('全局目标已更新');
+                return;
             }
+            // 个体 tab：全部学员 × 全部任务展开保存
+            const students = this.data.students.filter(s => training.studentIds.includes(s.id));
+            const taskDefs = (training.tasks || []).map(x => x.taskId).map(id => this.data.tasks.find(t => t.id === id)).filter(Boolean);
+            if (!training.studentGoals) training.studentGoals = [];
+            const parseNums = (raw) => String(raw).split(/[,，\s]+/).map(s => parseFloat(s)).filter(n => !isNaN(n) && n > 0);
+            students.forEach(s => {
+                taskDefs.forEach(td => {
+                    const input = document.getElementById(`goalIndInput_${s.id}_${td.id}`);
+                    if (!input) return;
+                    const nums = parseNums(input.value);
+                    const globalTimes = td.goalTimes || [];
+                    // 与全局一致 = 视为未单独设置（用全局默认）
+                    const equalsGlobal = nums.length === globalTimes.length && globalTimes.every((g, i) => g === nums[i]);
+                    const goalTimes = (nums.length && !equalsGlobal) ? nums : null;
+                    const idx = training.studentGoals.findIndex(g => g.studentId === s.id && g.taskId === td.id);
+                    if (goalTimes) {
+                        if (idx >= 0) training.studentGoals[idx].goalTimes = goalTimes;
+                        else training.studentGoals.push({ id: this.generateId(), studentId: s.id, taskId: td.id, goalTimes });
+                    } else if (idx >= 0) {
+                        training.studentGoals.splice(idx, 1);
+                    }
+                });
+            });
             this.saveData();
             this.render();
             this.closeStudentGoalModal();
@@ -731,6 +782,9 @@
             document.getElementById('studentGoalCancel').addEventListener('click', () => this.closeStudentGoalModal());
             document.getElementById('studentGoalConfirm').addEventListener('click', () => this.confirmStudentGoalModal());
             document.getElementById('studentGoalModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) this.closeStudentGoalModal(); });
+            document.querySelectorAll('.goal-tab').forEach(btn => {
+                btn.addEventListener('click', () => this._switchGoalTab(btn.dataset.tab));
+            });
 
             // 工具下拉：点击菜单外关闭（全局委托，仅绑定一次，避免 render 累积）
             document.addEventListener('click', (e) => {
@@ -2203,6 +2257,7 @@
                             <div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
                                 ${D.currentTrainingId !== t.id ? `<button class="btn btn-outline btn-sm" id="setCurrentBtn">⭐ 设为当前</button>` : ''}
                                 <button class="btn btn-primary btn-sm" id="addMockBtn">📝 新增记录</button>
+                                <button class="btn btn-outline btn-sm" id="studentGoalBtn" title="设置任务全局/个体目标档位">🎯 目标设定</button>
                                 <div class="tools-dd" id="toolsDd">
                                     <button class="btn btn-outline btn-sm" id="toolsMenuBtn">🛠 工具 <span class="caret">▾</span></button>
                                     <div class="tools-dd-menu" id="toolsMenu" style="display:none;">
@@ -2225,10 +2280,7 @@
                         if (!taskNameSet.has(tName)) { taskNameSet.add(tName); allTaskNames.push(tName); }
                     });
                     const taskLegend = allTaskNames.length > 0 ? ` [${allTaskNames.map(n => this.escapeHtml(n)).join('/')}]` : '';
-                    html += `<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.3rem;">`;
-                    html += `<span style="font-size:0.85rem;font-weight:600;color:var(--gray-600);">👥 参与学员 (${students.length})${taskLegend}</span>`;
-                    html += `<button class="btn btn-outline btn-sm" id="studentGoalBtn" title="修改学员目标档位">🎯 目标设置</button>`;
-                    html += `</div>`;
+                    html += `<div style="font-size:0.85rem;font-weight:600;color:var(--gray-600);margin-bottom:0.3rem;">👥 参与学员 (${students.length})${taskLegend}</div>`;
                     if (students.length > 0) {
                         html += '<div class="training-students">';
                         students.forEach((s) => {
