@@ -242,7 +242,7 @@
             <!-- 个体：全部学员展开 -->
             <div id="goalIndividualPane" style="display:none;">
                 <div id="goalIndividualList" style="overflow-x:auto;"></div>
-                <div style="font-size:0.75rem;color:var(--gray-400);margin-top:0.4rem;">每个学员每任务一格；留空 = 用全局默认，输入与全局一致也视为用全局默认；高亮框 = 已单独设置</div>
+                <div style="font-size:0.75rem;color:var(--gray-400);margin-top:0.4rem;">未高亮的格子默认=全局档位，单击修改即从全局值开始（改后生成该学员覆盖）；留空 = 恢复全局默认；高亮框 = 已单独设置</div>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-outline" id="studentGoalCancel">取消</button>
@@ -549,10 +549,13 @@
                     table += `<tr><td style="padding:0.35rem 0.5rem;border-bottom:1px solid var(--gray-100);white-space:nowrap;font-weight:600;">${this.escapeHtml(s.name)}</td>`;
                     taskDefs.forEach(td => {
                         const sg = (training.studentGoals || []).find(g => g.studentId === s.id && g.taskId === td.id);
-                        const val = sg ? (sg.goalTimes || []).join(',') : '';
-                        const ph = sg ? '' : ((td.goalTimes && td.goalTimes.length) ? `默认 ${td.goalTimes.join('/')}s` : '无全局');
+                        const globalStr = (td.goalTimes && td.goalTimes.length) ? td.goalTimes.join(',') : '';
+                        // 无覆盖时默认预填全局档位：单击修改即从全局值开始，无需重新输入
+                        const val = sg ? (sg.goalTimes || []).join(',') : globalStr;
+                        const ph = (sg || globalStr) ? '' : '无全局';
+                        const title = sg ? '已单独设置；留空 = 恢复全局默认' : (globalStr ? '默认=全局档位，修改即生成该学员覆盖' : '无全局档位');
                         table += `<td style="padding:0.25rem 0.4rem;border-bottom:1px solid var(--gray-100);">
-                            <input type="text" id="goalIndInput_${s.id}_${td.id}" value="${this.escapeHtml(val)}" placeholder="${this.escapeHtml(ph)}" title="留空=全局默认" style="width:100%;min-width:96px;padding:0.35rem 0.5rem;border:1px solid ${sg ? 'var(--primary)' : 'var(--gray-300)'};border-radius:var(--radius-sm);font-size:0.8rem;box-sizing:border-box;" />
+                            <input type="text" id="goalIndInput_${s.id}_${td.id}" value="${this.escapeHtml(val)}" placeholder="${this.escapeHtml(ph)}" title="${this.escapeHtml(title)}" style="width:100%;min-width:96px;padding:0.35rem 0.5rem;border:1px solid ${sg ? 'var(--primary)' : 'var(--gray-300)'};border-radius:var(--radius-sm);font-size:0.8rem;box-sizing:border-box;" />
                         </td>`;
                     });
                     table += '</tr>';
