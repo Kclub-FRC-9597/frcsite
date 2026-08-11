@@ -158,9 +158,6 @@
                 </a>
                 <a href="devtools.html" class="sidebar-item${activeMenu === 'devtools' ? ' active' : ''}">
                     <span class="icon">🛠</span>开发者工具
-                </a>
-                <a href="changelog.html" class="sidebar-item${activeMenu === 'changelog' ? ' active' : ''}">
-                    <span class="icon">📝</span>修订记录
                 </a>`;
         }
 
