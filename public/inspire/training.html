@@ -510,7 +510,13 @@
             return { goalTimes, bestFullScoreTime, current };
         },
 
+        // 已结束集训（记录里含正赛）不显示目标
+        _trainingEnded(training) {
+            return !!(training && (training.mockCompetitions || []).some(m => Shared.getMockType(m) === 'official'));
+        },
+
         _goalCellHtml(studentId, tid, training) {
+            if (this._trainingEnded(training)) return '';
             const gi = this._getGoalInfo(studentId, tid, training);
             if (!gi.goalTimes || !gi.current) return '';
             return `<div style="font-size:0.68rem;color:var(--gray-400);margin-top:0.15rem;">🎯 当前目标 ${gi.current}s</div>`;
@@ -1756,7 +1762,8 @@
                         const { bestScore, bestTime } = bestPerTask[tid];
                         if (bestScore !== null) {
                             const timeStr = bestTime !== null ? bestTime.toFixed(3) + 's' : '-';
-                            html += `<td style="text-align:center;padding:0.4rem 0.3rem;"><strong style="color:var(--primary);font-size:0.85rem;">${timeStr}</strong></td>`;
+                            // 每个项目最佳成绩下显示当前目标（已结束集训由 _goalCellHtml 内部判断不显示）
+                            html += `<td style="text-align:center;padding:0.4rem 0.3rem;"><strong style="color:var(--primary);font-size:0.85rem;">${timeStr}</strong>${this._goalCellHtml(studentId, tid, training)}</td>`;
                             html += `<td style="text-align:center;padding:0.4rem 0.3rem;"><strong style="color:var(--primary);font-size:0.85rem;">${bestScore}</strong></td>`;
                         } else {
                             html += '<td style="text-align:center;color:var(--gray-300);">-</td><td style="text-align:center;color:var(--gray-300);">-</td>';
