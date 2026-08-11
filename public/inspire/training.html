@@ -518,8 +518,12 @@
         _goalCellHtml(studentId, tid, training) {
             if (this._trainingEnded(training)) return '';
             const gi = this._getGoalInfo(studentId, tid, training);
-            if (!gi.goalTimes || !gi.current) return '';
-            return `<div style="font-size:0.68rem;color:var(--gray-400);margin-top:0.15rem;">🎯 当前目标 ${gi.current}s</div>`;
+            if (!gi.goalTimes) return '';
+            if (!gi.current) {
+                // 全部档位已达成：提示老师可新增目标等级
+                return '<div style="font-size:0.68rem;color:#10b981;margin-top:0.15rem;">🎯 全部达标</div>';
+            }
+            return `<div style="font-size:0.68rem;color:#ef4444;font-weight:600;margin-top:0.15rem;">🎯 ${gi.current}s</div>`;
         },
 
         openStudentGoalModal() {

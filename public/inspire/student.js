@@ -245,7 +245,9 @@
                     if (goalTimes) {
                         const current = Shared.currentGoal(b.bestFullScoreTime, goalTimes);
                         if (current) {
-                            goalHtml = `<div style="font-size:0.7rem;color:var(--gray-400);">🎯 当前目标 ${current}s</div>`;
+                            goalHtml = `<div style="font-size:0.7rem;color:#ef4444;font-weight:600;">🎯 ${current}s</div>`;
+                        } else {
+                            goalHtml = '<div style="font-size:0.7rem;color:#10b981;">🎯 全部达标</div>';
                         }
                     }
                     return `
