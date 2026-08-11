@@ -146,51 +146,37 @@ header .logo {
     flex: 1;
 }
 
-/* ========== Header: 学员入口（我的成绩） ========== */
-.header-student-entry {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    color: #fff;
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    transition: 0.2s ease;
-    white-space: nowrap;
-}
-.header-student-entry .icon {
-    font-size: 1rem;
-}
-.header-student-entry:hover {
-    background: rgba(255, 255, 255, 0.28);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-.header-student-entry.active {
-    background: #fff;
-    color: var(--primary);
-    border-color: #fff;
-    font-weight: 700;
-}
-
-/* ========== Header: about 入口 ========== */
+/* ========== Header: 右侧入口（自主训练 / about） ========== */
+/* 与分类 tab（.header-tab）统一样式：普通透明 / 悬停浅底 / 激活高亮 */
+.header-student-entry,
 .header-about-entry {
     display: inline-flex;
     align-items: center;
+    gap: 0.3rem;
     color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
-    font-size: 0.85rem;
-    padding: 0.4rem 0.6rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.4rem 0.85rem;
     border-radius: 20px;
     transition: 0.2s ease;
     white-space: nowrap;
     cursor: pointer;
 }
-.header-about-entry:hover { color: #fff; background: rgba(255, 255, 255, 0.12); }
-.header-about-entry.active { color: #fff; background: rgba(255, 255, 255, 0.2); font-weight: 600; }
+.header-student-entry .icon {
+    font-size: 1rem;
+}
+.header-student-entry:hover,
+.header-about-entry:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}
+.header-student-entry.active,
+.header-about-entry.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
 
 /* ========== Layout: Sidebar + Main ========== */
 .layout {
