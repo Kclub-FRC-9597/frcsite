@@ -2398,8 +2398,8 @@
                                 if (best && best.score !== null) {
                                     const timeStr = best.time !== null ? best.time.toFixed(2) + 's' : '-';
                                     html += `<td style="text-align:center;padding:0.2rem 0.4rem;">
-                                        <span style="font-weight:600;color:var(--primary);">${best.score}</span>
-                                        <span style="font-size:0.7rem;color:var(--gray-400);"> ${timeStr}</span>
+                                        <span style="font-weight:600;color:var(--primary);">${timeStr}</span>
+                                        <span style="font-size:0.7rem;color:var(--gray-400);"> ${best.score}分</span>
                                         ${this._goalCellHtml(s.id, taskIdList[0], t)}
                                     </td>`;
                                 } else {
@@ -2417,8 +2417,8 @@
                                     if (best && best.score !== null) {
                                         const timeStr = best.time !== null ? best.time.toFixed(2) + 's' : '-';
                                         html += `<td style="text-align:center;padding:0.2rem 0.4rem;">
-                                            <span style="font-weight:600;color:var(--primary);">${best.score}</span>
-                                            <span style="font-size:0.7rem;color:var(--gray-400);"> ${timeStr}</span>
+                                            <span style="font-weight:600;color:var(--primary);">${timeStr}</span>
+                                            <span style="font-size:0.7rem;color:var(--gray-400);"> ${best.score}分</span>
                                             ${this._goalCellHtml(s.id, tid, t)}
                                         </td>`;
                                     } else {
@@ -2433,8 +2433,8 @@
                             students.forEach(s => {
                                 const tot = studentBest[s.id];
                                 html += `<td style="text-align:center;padding:0.2rem 0.4rem;">
-                                    <span style="color:var(--primary);font-weight:700;">${tot.totalScore}</span>
-                                    <span style="font-size:0.7rem;color:var(--gray-400);"> ${tot.totalTime.toFixed(2)}s</span>
+                                    <span style="color:var(--primary);font-weight:700;">${tot.totalTime.toFixed(2)}s</span>
+                                    <span style="font-size:0.7rem;color:var(--gray-400);"> ${tot.totalScore}分</span>
                                 </td>`;
                             });
                             html += '</tr>';
@@ -2505,8 +2505,8 @@
                                         if (sc !== undefined && sc !== null) {
                                             const timeStr = tm !== null && tm !== undefined ? tm.toFixed(2) + 's' : '-';
                                             html += `<td style="text-align:center;padding:0.25rem 0.4rem;">
-                                                <span style="font-weight:600;color:var(--primary);">${sc}</span>
-                                                <span style="font-size:0.7rem;color:var(--gray-400);"> ${timeStr}</span>
+                                                <span style="font-weight:600;color:var(--primary);">${timeStr}</span>
+                                                <span style="font-size:0.7rem;color:var(--gray-400);"> ${sc}分</span>
                                             </td>`;
                                         } else {
                                             html += `<td style="text-align:center;color:var(--gray-300);font-size:0.78rem;">-</td>`;
@@ -2564,8 +2564,8 @@
                                     }
                                 });
                                 html += `<td style="text-align:center;padding:0.25rem 0.4rem;">
-                                    <span style="color:var(--primary);font-weight:700;">${totalScore}</span>
-                                    <span style="font-size:0.7rem;color:var(--gray-400);"> ${totalTime.toFixed(2)}s</span>
+                                    <span style="color:var(--primary);font-weight:700;">${totalTime.toFixed(2)}s</span>
+                                    <span style="font-size:0.7rem;color:var(--gray-400);"> ${totalScore}分</span>
                                 </td>`;
                             });
                             html += '</tr>';
