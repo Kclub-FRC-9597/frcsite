@@ -12,6 +12,8 @@
     const searchParams = new URLSearchParams(window.location.search);
     const trainingIdParam = searchParams.get('id');
 
+    const isAboutPage = path === 'about.html';
+
     // Skip header/sidebar injection on display page (has its own UI)
     if (path === 'display.html') return;
 
@@ -53,12 +55,12 @@
 </div>
 <header>
     <div class="header-inner">
-        <button class="sidebar-toggle" id="sidebarToggle" aria-label="切换菜单">☰</button>
+        ${isAboutPage ? '' : '<button class="sidebar-toggle" id="sidebarToggle" aria-label="切换菜单">☰</button>'}
         <a href="/" class="back-home" title="返回 9597 主站">← 主页</a>
         <span class="logo">🏆 MakeX Inspire</span>
         <div class="header-tabs">
             ${categoryTabs.map(t =>
-                `<a href="${t.href}" class="header-tab${category === t.key ? ' active' : ''}">${t.label}</a>`
+                `<a href="${t.href}" class="header-tab${category === t.key && !isAboutPage ? ' active' : ''}">${t.label}</a>`
             ).join('')}
         </div>
         <div class="header-spacer"></div>
@@ -109,7 +111,7 @@
         ).join('');
 
         const sidebarCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
-        const sidebarHtml = `
+        const sidebarHtml = isAboutPage ? '' : `
 <aside class="sidebar${sidebarCollapsed ? ' collapsed' : ''}" id="sidebar">
     <div class="sidebar-menu">
         ${category === 'competition' ? buildCompetitionMenu(trainingMenuItems, shouldExpand) : buildEducationMenu()}
@@ -180,8 +182,10 @@
             }
         });
 
-        layout.appendChild(sidebarWrapper.firstElementChild);  // aside.sidebar
-        layout.appendChild(sidebarWrapper.lastElementChild);   // div.sidebar-overlay
+        if (!isAboutPage) {
+            layout.appendChild(sidebarWrapper.firstElementChild);  // aside.sidebar
+            layout.appendChild(sidebarWrapper.lastElementChild);   // div.sidebar-overlay
+        }
         layout.appendChild(main);
         document.body.appendChild(layout);
 
@@ -364,7 +368,7 @@
         }
 
         // Intercept all sidebar link clicks via delegation
-        sidebarEl.addEventListener('click', function (e) {
+        if (sidebarEl) sidebarEl.addEventListener('click', function (e) {
             const link = e.target.closest('a[href]');
             if (!link) return;
             const href = link.getAttribute('href');
