@@ -2356,6 +2356,15 @@
                             const td = this.data.tasks.find(d => d.id === tid);
                             return td ? td.name : '?';
                         };
+                        // 概览提示：任务未配置目标档位时显示，便于定位“为何无当前目标”
+                        const getGoalHint = (tid) => {
+                            if (this._trainingEnded(t)) return '';
+                            const td = this.data.tasks.find(d => d.id === tid);
+                            if (!td || !td.goalTimes || !td.goalTimes.length) {
+                                return ' <span style="font-size:0.68rem;color:var(--gray-300);" title="该任务未配置目标档位，请在「目标设定 → 全局」或任务管理中设置">🎯未设目标</span>';
+                            }
+                            return '';
+                        };
                         const hasBestTasks = taskIdList.length > 0;
 
                         // Build competitions table
@@ -2391,7 +2400,7 @@
                             const overviewRows = taskIdList.length + 2; // tasks + 综合最佳 + 综合排名
                             html += `<tr style="background:#f8fafc;">`;
                             html += `<td rowspan="${overviewRows}" style="vertical-align:middle;text-align:center;font-weight:700;color:var(--primary);font-size:0.85rem;">🏆 最佳成绩</td>`;
-                            html += `<td style="font-size:0.82rem;">${this.escapeHtml(getTaskName(taskIdList[0]))}</td>`;
+                            html += `<td style="font-size:0.82rem;">${this.escapeHtml(getTaskName(taskIdList[0]))}${getGoalHint(taskIdList[0])}</td>`;
                             html += '<td></td>';
                             students.forEach(s => {
                                 const best = studentBest[s.id].tasks[taskIdList[0]];
@@ -2410,7 +2419,7 @@
                             for (let ti = 1; ti < taskIdList.length; ti++) {
                                 const tid = taskIdList[ti];
                                 html += '<tr>';
-                                html += `<td style="font-size:0.82rem;">${this.escapeHtml(getTaskName(tid))}</td>`;
+                                html += `<td style="font-size:0.82rem;">${this.escapeHtml(getTaskName(tid))}${getGoalHint(tid)}</td>`;
                                 html += '<td></td>';
                                 students.forEach(s => {
                                     const best = studentBest[s.id].tasks[tid];
