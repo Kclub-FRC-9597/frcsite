@@ -512,16 +512,8 @@
 
         _goalCellHtml(studentId, tid, training) {
             const gi = this._getGoalInfo(studentId, tid, training);
-            if (!gi.goalTimes) return '';
-            if (!gi.current) {
-                return '<div style="font-size:0.68rem;color:#10b981;margin-top:0.15rem;">🎯 目标全达成 ✅</div>';
-            }
-            const achieved = gi.goalTimes.filter(t => Shared.isGoalAchieved(gi.bestFullScoreTime, t));
-            const achievedMax = achieved.length ? Math.max(...achieved) : null;
-            const badge = achievedMax != null
-                ? `<span style="color:#10b981;">✅ 达成${achievedMax}s</span>`
-                : `<span style="color:#ef4444;">✗ 未达成</span>`;
-            return `<div style="font-size:0.68rem;color:var(--gray-400);margin-top:0.15rem;">🎯 当前目标 ${gi.current}s · ${badge}</div>`;
+            if (!gi.goalTimes || !gi.current) return '';
+            return `<div style="font-size:0.68rem;color:var(--gray-400);margin-top:0.15rem;">🎯 当前目标 ${gi.current}s</div>`;
         },
 
         openStudentGoalModal() {

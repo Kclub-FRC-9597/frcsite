@@ -244,15 +244,8 @@
                     let goalHtml = '';
                     if (goalTimes) {
                         const current = Shared.currentGoal(b.bestFullScoreTime, goalTimes);
-                        if (!current) {
-                            goalHtml = '<div style="font-size:0.7rem;color:#10b981;">🎯 目标全达成 ✅</div>';
-                        } else {
-                            const achieved = goalTimes.filter(t => Shared.isGoalAchieved(b.bestFullScoreTime, t));
-                            const achievedMax = achieved.length ? Math.max(...achieved) : null;
-                            const badge = achievedMax != null
-                                ? `<span style="color:#10b981;">✅ ${achievedMax}s</span>`
-                                : `<span style="color:#ef4444;">✗ 未达成</span>`;
-                            goalHtml = `<div style="font-size:0.7rem;color:var(--gray-400);">🎯 当前目标 ${current}s · ${badge}</div>`;
+                        if (current) {
+                            goalHtml = `<div style="font-size:0.7rem;color:var(--gray-400);">🎯 当前目标 ${current}s</div>`;
                         }
                     }
                     return `
