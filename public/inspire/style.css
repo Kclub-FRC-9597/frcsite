@@ -176,6 +176,22 @@ header .logo {
     font-weight: 700;
 }
 
+/* ========== Header: about 入口 ========== */
+.header-about-entry {
+    display: inline-flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 20px;
+    transition: 0.2s ease;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.header-about-entry:hover { color: #fff; background: rgba(255, 255, 255, 0.12); }
+.header-about-entry.active { color: #fff; background: rgba(255, 255, 255, 0.2); font-weight: 600; }
+
 /* ========== Layout: Sidebar + Main ========== */
 .layout {
     display: flex;

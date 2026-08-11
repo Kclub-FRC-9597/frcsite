@@ -26,6 +26,7 @@
         case 'migration.html': activeMenu = 'migration'; break;
         case 'devtools.html':  activeMenu = 'devtools';  break;
         case 'changelog.html': activeMenu = 'changelog'; break;
+        case 'about.html':     activeMenu = 'about';     break;
     }
 
     let category;
@@ -61,9 +62,10 @@
             ).join('')}
         </div>
         <div class="header-spacer"></div>
-        <a href="stu_tool.html" class="header-student-entry${activeMenu === 'stu_tool' ? ' active' : ''}" title="成绩录入：录入与查看自己的成绩">
-            <span class="icon">👤</span>成绩录入
+        <a href="stu_tool.html" class="header-student-entry${activeMenu === 'stu_tool' ? ' active' : ''}" title="自主训练：录入与查看自己的练习成绩">
+            <span class="icon">🎯</span>自主训练
         </a>
+        <a href="about.html" class="header-about-entry${activeMenu === 'about' ? ' active' : ''}" title="关于本工具">about</a>
     </div>
 </header>`;
 
