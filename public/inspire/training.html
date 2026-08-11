@@ -24,6 +24,9 @@
             background: #dbeafe; color: #2563eb; font-size: 0.6rem; font-weight: 700;
             flex-shrink: 0;
         }
+        /* 参与学员：超链接样式 */
+        .student-link { color: var(--primary); }
+        .student-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -225,7 +228,7 @@
             <input type="hidden" id="studentGoalStudentId" />
             <div class="form-group">
                 <label>学员</label>
-                <div id="studentGoalStudentName" style="padding:0.4rem 0;font-weight:600;"></div>
+                <select id="studentGoalStudentSelect" style="width:100%;padding:0.5rem 0.85rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.9rem;"></select>
             </div>
             <div class="form-group">
                 <label>任务</label>
@@ -518,20 +521,29 @@
         openStudentGoalModal(studentId) {
             const training = this.data.trainings.find(t => t.id === this.selectedTrainingId);
             if (!training) return;
-            const student = this.data.students.find(s => s.id === studentId);
-            if (!student) return;
+            const students = this.data.students.filter(s => training.studentIds.includes(s.id));
+            if (!students.length) { this.toast('暂无参与学员', 'warning'); return; }
+            if (!studentId || !students.some(s => s.id === studentId)) studentId = students[0].id;
+            const stuSel = document.getElementById('studentGoalStudentSelect');
+            stuSel.innerHTML = students.map(s => `<option value="${s.id}">${this.escapeHtml(s.name)}</option>`).join('');
+            stuSel.value = studentId;
             document.getElementById('studentGoalStudentId').value = studentId;
-            document.getElementById('studentGoalStudentName').textContent = student.name;
             const taskSel = document.getElementById('studentGoalTaskSelect');
             const tasks = (training.tasks || []).map(x => x.taskId).map(id => this.data.tasks.find(t => t.id === id)).filter(Boolean);
             taskSel.innerHTML = '<option value="">— 选择任务 —</option>' + tasks.map(t =>
                 `<option value="${t.id}">${this.escapeHtml(t.name)}</option>`
             ).join('');
-            document.getElementById('studentGoalTimesInput').value = '';
-            taskSel.onchange = () => {
-                const sg = (training.studentGoals || []).find(g => g.studentId === studentId && g.taskId === taskSel.value);
+            const loadOverride = () => {
+                const sid = stuSel.value;
+                const sg = (training.studentGoals || []).find(g => g.studentId === sid && g.taskId === taskSel.value);
                 document.getElementById('studentGoalTimesInput').value = sg ? (sg.goalTimes || []).join(',') : '';
             };
+            stuSel.onchange = () => {
+                document.getElementById('studentGoalStudentId').value = stuSel.value;
+                loadOverride();
+            };
+            taskSel.onchange = loadOverride;
+            loadOverride();
             document.getElementById('studentGoalModal').classList.add('open');
         },
 
@@ -2213,7 +2225,10 @@
                         if (!taskNameSet.has(tName)) { taskNameSet.add(tName); allTaskNames.push(tName); }
                     });
                     const taskLegend = allTaskNames.length > 0 ? ` [${allTaskNames.map(n => this.escapeHtml(n)).join('/')}]` : '';
-                    html += `<div style="font-size:0.85rem;font-weight:600;color:var(--gray-600);margin-bottom:0.3rem;">👥 参与学员 (${students.length})${taskLegend}</div>`;
+                    html += `<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.3rem;">`;
+                    html += `<span style="font-size:0.85rem;font-weight:600;color:var(--gray-600);">👥 参与学员 (${students.length})${taskLegend}</span>`;
+                    html += `<button class="btn btn-outline btn-sm" id="studentGoalBtn" title="修改学员目标档位">🎯 目标设置</button>`;
+                    html += `</div>`;
                     if (students.length > 0) {
                         html += '<div class="training-students">';
                         students.forEach((s) => {
@@ -2224,7 +2239,7 @@
                                 return myPRs.filter(r => r.taskId === (task ? task.id : null)).length;
                             });
                             const label = gn ? `${this.escapeHtml(s.name)} <span style="font-size:0.7rem;color:var(--gray-400);">(${this.escapeHtml(gn)})</span>` : this.escapeHtml(s.name);
-                            html += `<span class="badge" style="cursor:pointer;" data-student-id="${s.id}">${label}`;
+                            html += `<span class="badge student-link" data-student-id="${s.id}" title="点击查看成绩详情">${label}`;
                             html += ` <sup style="font-size:0.7rem;color:var(--gray-400);font-weight:500;">[${counts.join(', ')}]</sup>`;
                             html += `</span>`;
                         });
@@ -2313,7 +2328,7 @@
                             if (hasTasks) html += '<th style="min-width:70px;">任务</th>';
                             html += '<th style="width:44px;">轮次</th>';
                             students.forEach(s => {
-                                html += `<th style="text-align:center;min-width:80px;">${this.escapeHtml(s.name)}<br><button class="student-goal-btn" data-student-id="${s.id}" title="调整目标档位" style="font-size:0.65rem;padding:0.05rem 0.4rem;margin-top:0.15rem;background:var(--primary-bg);color:var(--primary);border:none;border-radius:8px;cursor:pointer;">🎯目标</button></th>`;
+                                html += `<th style="text-align:center;min-width:80px;">${this.escapeHtml(s.name)}</th>`;
                             });
                             html += '</tr></thead><tbody>';
 
@@ -2579,6 +2594,8 @@
                     });
                     // 点击菜单外关闭：全局委托见 bindEvents（仅绑定一次，避免 render 累积）
                 }
+                const studentGoalBtn = document.getElementById('studentGoalBtn');
+                if (studentGoalBtn) studentGoalBtn.addEventListener('click', () => this.openStudentGoalModal());
             }
 
             container.querySelectorAll('.badge[data-student-id]').forEach((el) => {
@@ -2590,13 +2607,6 @@
                     this.openScoreEntry(el.dataset.trainingId, el.dataset.mockId);
                 });
             });
-            container.querySelectorAll('.student-goal-btn').forEach((el) => {
-                el.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.openStudentGoalModal(el.dataset.studentId);
-                });
-            });
-
         },
     };
 
