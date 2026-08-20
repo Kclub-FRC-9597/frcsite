@@ -1,0 +1,85 @@
+# R1.plan.yaml
+title: 数据 IndexedDB 化
+prd_ref: prd-5-1.R1
+created: 2026-08-17
+
+steps:
+  # ── agent 自动执行阶段 ──────────────────────────────────
+  - id: A-1
+    phase: auto
+    executor: agent
+    file: public/inspire/shared_indexdb.js
+    action: 升级为四库（ins_edu/ins_training/ins_practice/ins_meta）+ 版本化 LWW 记录（lamport/deviceId/deleted）+ 每库 DB_VERSION/_MIGRATIONS 迁移框架 + merge()
+    verify: node --check public/inspire/shared_indexdb.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-2
+    phase: auto
+    executor: agent
+    file: public/inspire/shared.js
+    action: loadData/saveData 换持久化后端（读四库组装、按域增量写）；一次性从 makexScoreData 迁移；BroadcastChannel 同机多标签
+    verify: node --check public/inspire/shared.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-3
+    phase: auto
+    executor: agent
+    file: public/inspire/devtools.js
+    action: DB 管理/迁移工具同步到四库（建表/删表/查看/旧 STS_DB 清理）
+    verify: node --check public/inspire/devtools.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-4
+    phase: auto
+    executor: agent
+    action: merge() 单元测试（并发/删除复活/平局 lamport=deviceId）
+    verify: node 注入测试
+    expect: 全部通过
+    history: []
+
+  # ── 手动测试阶段（GATE 1 · R1） ────────────────────────
+  - id: M-1
+    phase: manual
+    executor: human
+    instructions:
+      - 打开页面确认数据完整迁入四库
+      - 刷新 / 同机多标签页确认数据联动
+      - 确认旧 STS_DB 已清理、localStorage 只剩小配置
+    pass_criteria: 数据完整、格式冻结、同机联动正常、旧库清理完成
+    signal: 反馈「GATE 1（prd-5-1 R1）通过」
+    history: []
+
+  # ── 收尾阶段（冻结） ────────────────────────────────────
+  - id: W-1
+    phase: auto
+    executor: agent
+    action: 整理数据层 API 文档（四库结构、迁移、merge）
+    expect: API 文档已更新
+    history: []
+
+  - id: W-2
+    phase: auto
+    executor: agent
+    action: 更新 R1.md front matter 中 status.implement = done
+    expect: R1.md status.implement 已变为 done
+    history: []
+
+test_strategy:
+  auto:
+    - node --check shared_indexdb.js / shared.js / devtools.js
+    - merge() 单测（并发/删除复活/平局）
+  manual:
+    - 数据完整迁入四库，格式冻结
+    - 同机多标签页联动
+    - 旧 STS_DB 清理完成
+
+not_doing:
+  - 多端同步（prd-5-2）
+  - 开放云端服务
+
+boundary:
+  constraints: Shared.data 内存模型不变；只换持久化后端；不引入服务器
+  depends_on: 无（prd-5-1 为 prd-5-2 打底）

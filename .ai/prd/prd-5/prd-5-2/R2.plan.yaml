@@ -1,0 +1,78 @@
+# R2.plan.yaml
+title: 老师机本地 hub 多端同步（闭合）
+prd_ref: prd-5-2.R2
+created: 2026-08-17
+
+steps:
+  # ── agent 自动执行阶段 ──────────────────────────────────
+  - id: A-1
+    phase: auto
+    executor: agent
+    file: tools/ins-hub
+    action: 新增老师机小服务（单文件 Node/Deno/Bun）实现统一同步协议（push/pull/snapshot + LWW 合并），存储为 JSON 文件；提供 /api/ip 与状态接口；可选 mDNS 注册
+    verify: node --check tools/ins-hub/*.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-2
+    phase: auto
+    executor: agent
+    file: public/inspire/sync.js
+    action: 新增同步引擎（outbox + push/pull/snapshot + 后端地址配置）；客户端走统一协议，复用 prd-5-1 merge()
+    verify: node --check public/inspire/sync.js
+    expect: 无输出（通过）
+    history: []
+
+  - id: A-3
+    phase: auto
+    executor: agent
+    file: public/inspire/devtools.html
+    action: 同步状态面板（后端地址/二维码/待推数量/最近同步）
+    verify: node 提取内联脚本校验
+    expect: ALL OK
+    history: []
+
+  # ── 手动测试阶段（GATE 2 · R2） ────────────────────────
+  - id: M-1
+    phase: manual
+    executor: human
+    instructions:
+      - 老师机运行 hub，管理页显示本机 IP
+      - 学生机填 IP（或扫码）连接 → 自动同步合并
+      - 断开 hub 后学生机仍可用本地数据
+      - 验证固定端口/防火墙/同网段/共享码
+    pass_criteria: 学生连上 hub 自动合并；hub 落盘；断网本地可用；实操清单可行
+    signal: 反馈「GATE 2（prd-5-2 R2）通过」
+    history: []
+
+  # ── 收尾阶段（冻结） ────────────────────────────────────
+  - id: W-1
+    phase: auto
+    executor: agent
+    action: 整理同步协议与 hub 部署 API 文档
+    expect: API 文档已更新
+    history: []
+
+  - id: W-2
+    phase: auto
+    executor: agent
+    action: 更新 R2.md front matter 中 status.implement = done
+    expect: R2.md status.implement 已变为 done
+    history: []
+
+test_strategy:
+  auto:
+    - node --check tools/ins-hub/*.js / sync.js
+  manual:
+    - 学生填 IP/扫码连 hub，自动合并
+    - hub 数据落盘、断电不丢
+    - 断网学生机本地可用
+    - 固定端口/防火墙/同网段/共享码
+
+not_doing:
+  - 开放云端服务
+  - 公网自动发现（不引入信令服务器）
+
+boundary:
+  constraints: 复用 prd-5-1 版本化记录与 merge()；同步一律 client→hub；数据不出局域网
+  depends_on: prd-5-1（四库 + 版本化记录 + merge）

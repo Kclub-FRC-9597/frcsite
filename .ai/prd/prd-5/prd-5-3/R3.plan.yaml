@@ -1,0 +1,73 @@
+# R3.plan.yaml
+title: 应用化（可选）
+prd_ref: prd-5-3.R3
+created: 2026-08-17
+
+steps:
+  # ── agent 自动执行阶段 ──────────────────────────────────
+  - id: A-1
+    phase: auto
+    executor: agent
+    action: 搭建应用外壳骨架（Tauri 或 Electron），内嵌静态 UI + 复用 prd-5-2 hub
+    verify: 应用可构建（build）
+    expect: 构建通过
+    history: []
+
+  - id: A-2
+    phase: auto
+    executor: agent
+    action: 原生层实现局域网互查（mDNS/DNS-SD + UDP 广播信标）与本机 IP/二维码
+    verify: 本地运行可发现同网设备
+    expect: 互查/显示正常
+    history: []
+
+  - id: A-3
+    phase: auto
+    executor: agent
+    action: 页面经 localhost 桥接访问发现结果与同步后端
+    verify: 浏览器用户可连老师 hub
+    expect: 互通正常
+    history: []
+
+  # ── 手动测试阶段（GATE 3 · R3） ────────────────────────
+  - id: M-1
+    phase: manual
+    executor: human
+    instructions:
+      - 老师安装应用 → 打开即作为中心
+      - 浏览器用户连老师的 hub，互通正常
+      - 局域网互查/本机 IP/二维码可用
+    pass_criteria: 应用可作中心、浏览器互通、原生发现可用
+    signal: 反馈「GATE 3（prd-5-3 R3）通过」
+    history: []
+
+  # ── 收尾阶段（冻结） ────────────────────────────────────
+  - id: W-1
+    phase: auto
+    executor: agent
+    action: 整理应用化文档（打包、部署、原生发现说明）
+    expect: 文档已更新
+    history: []
+
+  - id: W-2
+    phase: auto
+    executor: agent
+    action: 更新 R3.md front matter 中 status.implement = done
+    expect: R3.md status.implement 已变为 done
+    history: []
+
+test_strategy:
+  auto:
+    - 应用 build 通过
+    - 原生互查/本机 IP 显示
+  manual:
+    - 老师应用可作中心，浏览器用户互通
+    - 局域网互查可用
+
+not_doing:
+  - 重写 UI（保持静态页）
+  - 开放云端服务
+
+boundary:
+  constraints: 复用静态 UI 与同步协议；应用只是外壳 + 原生发现/传输
+  depends_on: prd-5-2（hub + 同步协议）

@@ -8,12 +8,18 @@ A Team From K CLUB
 
 FRC Team 9597 的数据收集和分析系统，用于比赛前调研（PreScouting）和现场数据收集（Scouting）。
 
+本项目由两部分组成：
+
+- **主站系统**（本仓库）：队员/赛事/赞助商等管理 + PreScouting / Scouting / Analysis
+- **Inspire 应用**：独立于本仓库维护（见下文「Inspire 独立管理与同步」），作为 submodule 挂载在 `public/inspire/`，主站与独立域名 `inspire.frc9597.com` 共用同一份代码
+
 ## 功能特性
 
 - **PreScouting**: 赛前队伍信息收集（练习时长、比赛经验、底盘类型等）
 - **Scouting**: 现场比赛数据收集，支持自定义字段和模板
 - **Analysis**: 数据分析和可视化展示
 - **模板系统**: 支持保存和管理自定义字段配置
+- **Inspire**: 教务/任务/集训/自主练习一体化工具（本地优先、IndexedDB）
 
 ## 技术栈
 
@@ -21,6 +27,14 @@ FRC Team 9597 的数据收集和分析系统，用于比赛前调研（PreScouti
 - **后端**: Cloudflare Workers
 - **数据库**: Cloudflare D1 (SQLite)
 - **部署**: Cloudflare Pages/Workers
+- **Inspire**: 纯静态（HTML/JS + IndexedDB），独立仓库管理
+
+## 仓库结构（多仓库）
+
+| 仓库 | 远程 | 作用 |
+|------|------|------|
+| `frcsite`（本仓库） | `github.com/Kclub-FRC-9597/frcsite.git` | 主站：Worker + D1，`public/` 静态资源 |
+| `BK_course_and_training` | `github.com/Kclub-FRC-9597/BK_course_and_training.git` | Inspire 唯一代码来源，以 **submodule** 挂载到 `public/inspire/` |
 
 ## 环境要求
 
@@ -41,6 +55,7 @@ npm run dev
 
 ### 部署到 Cloudflare
 ```bash
+git submodule update --init   # 克隆后/新环境必跑，否则 /inspire/ 404
 npm run deploy
 ```
 
@@ -49,8 +64,11 @@ npm run deploy
 适用于两台电脑都开发、都可部署到同一个 Cloudflare Worker。
 
 ### 一次性配置（两台电脑都做）
-1. 拉取同一仓库并安装依赖：
+1. 拉取同一仓库并安装依赖（含 submodule）：
   ```bash
+  git clone <仓库地址>
+  cd frcsite
+  git submodule update --init
   npm install
   ```
 2. 登录 Cloudflare（各自账号）：
@@ -65,6 +83,7 @@ npm run deploy
 
 ```bash
 git pull --rebase
+git submodule update --init
 npm run cf:whoami
 npm run db:list
 npm run db:check
@@ -87,6 +106,7 @@ npm run dev:remote
 ### 部署前固定流程（两台电脑都一样）
 ```bash
 git pull --rebase
+git submodule update --init
 npm run db:check
 npm run deploy
 ```
@@ -95,6 +115,54 @@ npm run deploy
 - `database binding not found`：检查 `wrangler.jsonc` 的 `binding` 是否与代码中使用名称一致。
 - `not found / unauthorized`：重新执行 `npx wrangler login`，并确认账号有该 D1/Worker 权限。
 - 两台电脑结果不一致：优先检查是否一台使用了 `dev --remote`，另一台使用了本地 `dev`。
+- 部署后 `/inspire/` 404：submodule 未初始化，执行 `git submodule update --init`。
+
+## Inspire 独立管理与同步（git submodule）
+
+> 背景：inspire 之前以「双仓库同步」维护——`public/inspire` 与独立仓库各存一份，每次改动要提交两遍。现已改为 **submodule**：inspire 只在独立仓库 `BK_course_and_training` 维护，本仓库 `public/inspire/` 只记录它的 commit 指针。
+
+### 日常更新流程
+
+**A. 修改 inspire（只改独立仓库）**
+```bash
+# 在 E:\Git\BK_course_and_training —— 唯一开发点
+git add -A && git commit -m "inspire: xxx" && git push origin main
+```
+
+**B. 同步最新改动到主站（frcsite）**
+```bash
+git submodule update --remote public/inspire   # 拉独立仓库 main 最新并移动指针
+git add public/inspire
+git commit -m "chore: sync inspire 最新改动"
+git push origin main
+```
+
+> `--remote` 默认跟随独立仓库默认分支；如需显式指定，可在 `.gitmodules` 中加 `branch = main` 后执行 `git submodule sync`。
+
+### 部署 / CI 注意事项
+
+- **本地部署**：先 `git submodule update --init`，再 `npm run deploy`（wrangler 会连同 `public/inspire` 一起发布）。
+- **GitHub Actions**：checkout 需带 `submodules: recursive`。
+- **Cloudflare Pages（Git 集成）**：不会自动拉 submodule，build 命令前加 `git submodule update --init`。
+
+### 常用命令速查
+
+| 场景 | 命令 |
+|------|------|
+| 克隆后初始化子模块 | `git submodule update --init --recursive` |
+| 拉取独立仓库最新改动 | `git submodule update --remote public/inspire` |
+| 恢复到主仓库记录的版本 | `git submodule update --init` |
+| 子模块内单独操作 | `cd public/inspire && git pull`（改完回主仓库 `git add public/inspire`） |
+| 修改 `.gitmodules` 后对齐 | `git submodule sync` |
+| 查看当前指向的 commit | `git submodule status` |
+| 回退 inspire 到历史版本 | `cd public/inspire && git checkout <commit>`，回主仓库提交 |
+
+### 常见问题
+
+- **`git add` 时 `LF will be replaced by CRLF` warning？**
+  换行符规范化提示，无害。Git for Windows 默认 `core.autocrlf=true`：入库存 LF、检出转 CRLF。提交一次后通常不再出现；想根治可加 `.gitattributes`（`* text=auto`）。
+- **`git submodule update` 和 `--remote` 的区别？**
+  前者恢复到主仓库记录的指针（部署用）；后者拉独立仓库最新分支并移动指针（日常同步用）。
 
 ## 数据库配置
 
@@ -128,6 +196,7 @@ npm run deploy
 │   │   ├── seasons.js             # 赛季模块逻辑
 │   │   ├── seasons-templates.js   # 赛季模块模板函数
 │   │   └── sponsors.js            # 赞助商管理模块逻辑
+│   ├── inspire/           # (git submodule) Inspire 独立应用，指向 BK_course_and_training 仓库
 │   └── partials/
 │       ├── header.html    # 页头组件
 │       └── footer.html    # 页脚组件
@@ -137,6 +206,8 @@ npm run deploy
 ├── wrangler.jsonc    # Cloudflare 配置
 └── tsconfig.json     # TypeScript 配置
 ```
+
+> `public/inspire/` 是 submodule，其文件不进入本仓库；内容与更新方式见上文「Inspire 独立管理与同步」。
 
 ## 使用说明
 
