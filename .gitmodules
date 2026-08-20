@@ -1,0 +1,3 @@
+[submodule "public/inspire"]
+	path = public/inspire
+	url = https://github.com/Kclub-FRC-9597/BK_course_and_training.git
