@@ -146,15 +146,9 @@ git diff --submodule=log -- public/inspire      # 指针已变但未提交时，
 
 ### 日常更新流程
 
-**A. 修改 inspire（只改独立仓库）**
-```bash
-# 在 E:\Git\BK_course_and_training —— 唯一开发点
-git add -A && git commit -m "inspire: xxx" && git push origin main
-```
+**A. 把独立仓库的改动同步到主站（frcsite）**
 
-**B. 把独立仓库的改动同步到主站（frcsite）**
-
-方式 B1 —— 一条命令拉取并移动指针（日常推荐）：
+方式 A1 —— 一条命令拉取并移动指针（日常推荐）：
 
 ```bash
 git submodule update --remote public/inspire   # 拉独立仓库 main 最新，并把工作区切到该 commit
@@ -166,7 +160,7 @@ git push origin main
 > `--remote` 默认跟随独立仓库默认分支（本仓库即 `main`）；如需显式指定，可在 `.gitmodules` 中加 `branch = main` 后执行 `git submodule sync`。
 > 注意：该命令会让子模块处于 **detached HEAD**，这是正常的，部署只认 commit 指针。
 
-方式 B2 —— 进子模块手动合并（能看到完整提交记录，便于确认合了什么）：
+方式 A2 —— 进子模块手动合并（能看到完整提交记录，便于确认合了什么）：
 
 ```bash
 cd public/inspire
@@ -180,16 +174,20 @@ git push origin main
 ```
 
 > `--ff-only` 失败说明独立仓库历史被改写（如 rebase/force push），改用 `git merge origin/main` 手动处理。
+> **GitHub 连不上时（`Connection was reset`）**：改从本地开发克隆取，结果一致（commit 相同）：
+> ```bash
+> git fetch E:/Git/BK_course_and_training main && git merge --ff-only FETCH_HEAD
+> ```
 > 无论用哪种方式，父仓库里都**只提交 `public/inspire` 这一个 gitlink**，不要把它和无关改动混在同一个 commit（可用 `git add public/inspire` 精确暂存）。
 
-**C. 验证同步结果**
+**B. 验证同步结果**
 
 ```bash
 git submodule status      # 首列 sha 应与独立仓库 main 的 sha 一致
 git log --oneline -3      # 应看到 chore: sync inspire ...
 ```
 
-**D. 回退 inspire 到历史版本**
+**C. 回退 inspire 到历史版本**
 
 ```bash
 cd public/inspire && git checkout <旧 commit>
