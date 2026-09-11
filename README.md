@@ -36,6 +36,8 @@ FRC Team 9597 的数据收集和分析系统，用于比赛前调研（PreScouti
 | `frcsite`（本仓库） | `github.com/Kclub-FRC-9597/frcsite.git` | 主站：Worker + D1，`public/` 静态资源 |
 | `BK_course_and_training` | `github.com/Kclub-FRC-9597/BK_course_and_training.git` | Inspire 唯一代码来源，以 **submodule** 挂载到 `public/inspire/` |
 
+> 子模块的路径、跟踪分支、本地开发克隆位置、拉取/合并方式与常见问题，统一见下文「Inspire 独立管理与同步（git submodule）」。
+
 ## 环境要求
 
 - Node.js >= 18.0.0
@@ -121,6 +123,27 @@ npm run deploy
 
 > 背景：inspire 之前以「双仓库同步」维护——`public/inspire` 与独立仓库各存一份，每次改动要提交两遍。现已改为 **submodule**：inspire 只在独立仓库 `BK_course_and_training` 维护，本仓库 `public/inspire/` 只记录它的 commit 指针。
 
+### 子模块信息
+
+| 项 | 值 |
+|------|------|
+| 本仓库路径 | `public/inspire/` |
+| 独立仓库（唯一代码来源） | `github.com/Kclub-FRC-9597/BK_course_and_training.git` |
+| 跟踪分支 | `main`（`.gitmodules` 中未写 `branch`，`--remote` 走独立仓库默认分支，即 `main`） |
+| 本地开发克隆 | `E:\Git\BK_course_and_training`（唯一开发点，含独立 `.git`） |
+| 非代码来源 | `public copy/`（Windows 整站备份副本，已在 `.gitignore` 忽略，不入库、不参与构建） |
+| 配置文件 | `.gitmodules`（**两个仓库都要入库**，缺了它新机器无法初始化子模块） |
+| 当前指针 | `868c30a`（2026-09-10，独立仓库 `main`） |
+
+查看当前实际状态：
+
+```bash
+git submodule status                            # <sha> public/inspire (heads/main) 表示在分支上
+git diff --submodule=log -- public/inspire      # 指针已变但未提交时，列出落后的提交
+```
+
+> 括号内为 `(remotes/origin/HEAD)` 或 `HEAD (no branch)` 时，说明子模块处于 **detached HEAD**，属正常状态（见下文「常见问题」）。
+
 ### 日常更新流程
 
 **A. 修改 inspire（只改独立仓库）**
@@ -129,15 +152,49 @@ npm run deploy
 git add -A && git commit -m "inspire: xxx" && git push origin main
 ```
 
-**B. 同步最新改动到主站（frcsite）**
+**B. 把独立仓库的改动同步到主站（frcsite）**
+
+方式 B1 —— 一条命令拉取并移动指针（日常推荐）：
+
 ```bash
-git submodule update --remote public/inspire   # 拉独立仓库 main 最新并移动指针
+git submodule update --remote public/inspire   # 拉独立仓库 main 最新，并把工作区切到该 commit
 git add public/inspire
 git commit -m "chore: sync inspire 最新改动"
 git push origin main
 ```
 
-> `--remote` 默认跟随独立仓库默认分支；如需显式指定，可在 `.gitmodules` 中加 `branch = main` 后执行 `git submodule sync`。
+> `--remote` 默认跟随独立仓库默认分支（本仓库即 `main`）；如需显式指定，可在 `.gitmodules` 中加 `branch = main` 后执行 `git submodule sync`。
+> 注意：该命令会让子模块处于 **detached HEAD**，这是正常的，部署只认 commit 指针。
+
+方式 B2 —— 进子模块手动合并（能看到完整提交记录，便于确认合了什么）：
+
+```bash
+cd public/inspire
+git checkout main                  # 若当前是 detached HEAD，先回到分支
+git fetch origin
+git merge --ff-only origin/main    # 历史未分叉时快进；等价于 git pull --ff-only
+cd ../..
+git add public/inspire
+git commit -m "chore: sync inspire 子模块最新改动"
+git push origin main
+```
+
+> `--ff-only` 失败说明独立仓库历史被改写（如 rebase/force push），改用 `git merge origin/main` 手动处理。
+> 无论用哪种方式，父仓库里都**只提交 `public/inspire` 这一个 gitlink**，不要把它和无关改动混在同一个 commit（可用 `git add public/inspire` 精确暂存）。
+
+**C. 验证同步结果**
+
+```bash
+git submodule status      # 首列 sha 应与独立仓库 main 的 sha 一致
+git log --oneline -3      # 应看到 chore: sync inspire ...
+```
+
+**D. 回退 inspire 到历史版本**
+
+```bash
+cd public/inspire && git checkout <旧 commit>
+cd ../.. && git add public/inspire && git commit -m "revert: inspire 回退到 <旧 commit>"
+```
 
 ### 部署 / CI 注意事项
 
@@ -154,7 +211,10 @@ git push origin main
 | 恢复到主仓库记录的版本 | `git submodule update --init` |
 | 子模块内单独操作 | `cd public/inspire && git pull`（改完回主仓库 `git add public/inspire`） |
 | 修改 `.gitmodules` 后对齐 | `git submodule sync` |
-| 查看当前指向的 commit | `git submodule status` |
+| 查看当前指向的 commit / 分支 | `git submodule status` |
+| 查看指针落后的提交 | `git diff --submodule=log -- public/inspire` |
+| 从 detached HEAD 回到分支 | `cd public/inspire && git checkout main` |
+| 丢弃子模块内本地改动 | `git submodule update --init --force public/inspire` |
 | 回退 inspire 到历史版本 | `cd public/inspire && git checkout <commit>`，回主仓库提交 |
 
 ### 常见问题
@@ -163,6 +223,13 @@ git push origin main
   换行符规范化提示，无害。Git for Windows 默认 `core.autocrlf=true`：入库存 LF、检出转 CRLF。提交一次后通常不再出现；想根治可加 `.gitattributes`（`* text=auto`）。
 - **`git submodule update` 和 `--remote` 的区别？**
   前者恢复到主仓库记录的指针（部署用）；后者拉独立仓库最新分支并移动指针（日常同步用）。
+- **子模块显示 `detached HEAD` / `HEAD (no branch)` 正常吗？**
+  正常。`git submodule update`（含 `--remote`）都会把子模块置于 detached HEAD，只认 commit 指针。
+  若要在子模块里继续开发，先 `cd public/inspire && git checkout main` 切回分支，否则新提交会变成游离提交，容易丢失。
+- **`public copy/` 需要一起提交吗？**
+  不需要。它是 Windows 下的整站备份副本，已在 `.gitignore` 忽略，不属于仓库也不会被部署，请勿当作 inspire 的代码来源。
+- **子模块目录里有本地改动，`git submodule update` 会不会覆盖？**
+  不会。命令会因「本地修改」而中止，需先 `cd public/inspire` 提交或 stash；确实要丢弃时用 `git submodule update --init --force public/inspire`。
 
 ## 数据库配置
 
