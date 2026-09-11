@@ -133,7 +133,7 @@ npm run deploy
 | 本地开发克隆 | `E:\Git\BK_course_and_training`（唯一开发点，含独立 `.git`） |
 | 非代码来源 | `public copy/`（Windows 整站备份副本，已在 `.gitignore` 忽略，不入库、不参与构建） |
 | 配置文件 | `.gitmodules`（**两个仓库都要入库**，缺了它新机器无法初始化子模块） |
-| 当前指针 | `868c30a`（2026-09-10，独立仓库 `main`） |
+| 当前指针 | 以 `git submodule status` 实测为准（每次 sync 都会变，故不在文档里写死 sha） |
 
 查看当前实际状态：
 
