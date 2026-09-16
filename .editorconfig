@@ -10,9 +10,3 @@ insert_final_newline = true
 
 [*.yml]
 indent_style = space
-
-# PowerShell 脚本：Windows PowerShell 5.1 需要 BOM 才能正确读取中文，故单独覆盖编码
-[*.ps1]
-charset = utf-8-bom
-indent_style = space
-indent_size = 4

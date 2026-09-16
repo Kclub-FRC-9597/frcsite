@@ -146,9 +146,9 @@ git diff --submodule=log -- public/inspire      # 指针已变但未提交时，
 
 ### 日常更新流程
 
-> **一键脚本**：`npm run sync:inspire` —— 依次完成「拉取合并 → 部署 → 提交推送」。
-> 脚本位于 `scripts/sync-inspire.ps1`，可选参数：`-SkipDeploy`（不部署）、`-SkipPush`（不推送）、`-Force`（子模块无更新时也走完流程）、`-DevClone <路径>`（换兜底的本地克隆）。
-> 子模块已是最新时脚本会直接退出，不会重复部署 / 推送；GitHub 拉不动时自动改用本地开发克隆兜底。
+> **一键脚本**：`npm run syn:sub` —— 依次完成「拉取合并 → 部署 → 提交推送」。
+> 脚本位于 `scripts/sync-inspire.mjs`（跟平台无关的 Node）：只有一个子模块时直接更新，多个时按编号选择；也可 `npm run syn:sub -- public/inspire` 直接指定。
+> 提交信息自动带上子模块 sha，例如 `chore: sync inspire 子模块最新改动 (7443f24)`。
 
 **A. 把独立仓库的改动同步到主站（frcsite）**
 
