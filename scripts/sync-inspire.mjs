@@ -65,7 +65,10 @@ const msg =
 
 sh('npm run deploy');
 sh(`git add ${picked.join(' ')}`);
-sh(`git commit -m "${msg}"`);
+// 无变化时不提交（子模块本来就没更新），但继续推送，避免本地积压的提交推不上去
+if (out('git diff --cached --name-only')) {
+	sh(`git commit -m "${msg}"`);
+}
 sh('git push');
 
 console.log(`\n完成：${msg}`);
