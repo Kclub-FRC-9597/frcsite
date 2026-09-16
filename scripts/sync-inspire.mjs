@@ -3,22 +3,24 @@ import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import readline from 'node:readline/promises';
 
-// 命令执行：失败就打印一行结果并中止（不抛 stack trace），保证每步都有「开始 + 结果」
-const sh = (cmd) => {
+// 命令执行：失败不抛 stack trace，改为打印一行结果 + 询问是否继续
+const sh = async (cmd) => {
 	try {
 		execSync(cmd, { stdio: 'inherit' });
+		return true;
 	} catch {
-		console.log(`  [X] 本步失败，已中止：${cmd}`);
-		process.exit(1);
+		bad(`本步失败：${cmd}`);
+		return await askContinue();
 	}
 };
 
-const out = (cmd) => {
+const out = async (cmd) => {
 	try {
 		return execSync(cmd, { encoding: 'utf8' }).trim();
 	} catch {
-		console.log(`  [X] 本步失败，已中止：${cmd}`);
-		process.exit(1);
+		bad(`本步失败：${cmd}`);
+		await askContinue();
+		return '';
 	}
 };
 
@@ -29,6 +31,17 @@ const step = (msg) => console.log(`\n=== ${msg} ===`);
 const run = (cmd) => console.log(`>>> ${cmd}`);
 const ok = (msg) => console.log(`  [OK] ${msg}`);
 const miss = (msg) => console.log(`  [--] ${msg}`);
+const bad = (msg) => console.log(`  [X]  ${msg}`);
+
+// 出错时询问：继续执行剩余步骤，还是就此终止
+const askContinue = async () => {
+	const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+	const ans = (await rl.question('  继续执行剩余步骤吗？（y＝继续 / 其它＝终止）: ')).trim().toLowerCase();
+	rl.close();
+	if (ans === 'y' || ans === 'yes') return true;
+	bad('已按你的选择终止');
+	process.exit(1);
+};
 
 // 1. 列出 .gitmodules 里的所有子模块
 const paths = readFileSync('.gitmodules', 'utf8')
@@ -77,16 +90,18 @@ ok(`本次更新：${picked.join('、')}`);
 step('2/4 拉取合并子模块');
 const synced = [];
 for (const p of picked) {
-	const before = out(`git -C ${p} rev-parse --short HEAD`);
+	const before = await out(`git -C ${p} rev-parse --short HEAD`);
 	run(`git submodule update --remote ${p}`);
-	sh(`git submodule update --remote ${p}`);
-	const after = out(`git -C ${p} rev-parse --short HEAD`);
+	const updated = await sh(`git submodule update --remote ${p}`);
+	const after = await out(`git -C ${p} rev-parse --short HEAD`);
 
-	if (before === after) {
+	if (!updated) {
+		bad(`${p} 未更新成功，仍停在 ${after}`);
+	} else if (before === after) {
 		miss(`${p} 已是最新（${after}），无需变动`);
 	} else {
 		ok(`${p} 已更新：${before} -> ${after}`);
-		out(`git -C ${p} log --oneline ${before}..${after}`)
+		(await out(`git -C ${p} log --oneline ${before}..${after}`))
 			.split('\n')
 			.forEach((line) => console.log(`       ${line}`));
 	}
@@ -102,25 +117,21 @@ const msg =
 
 step('3/4 部署');
 run('npm run deploy');
-sh('npm run deploy');
-ok('部署完成');
+if (await sh('npm run deploy')) ok('部署完成');
 
 step('4/4 提交并推送');
 run(`git add ${picked.join(' ')}`);
-sh(`git add ${picked.join(' ')}`);
-ok(`已暂存：${picked.join('、')}`);
+if (await sh(`git add ${picked.join(' ')}`)) ok(`已暂存：${picked.join('、')}`);
 
 // 只有本次子模块指针真的变了才提交；无变化时跳过提交，但仍推送，避免本地积压的提交推不上去
-if (out(`git diff --cached --name-only -- ${picked.join(' ')}`)) {
+if (await out(`git diff --cached --name-only -- ${picked.join(' ')}`)) {
 	run(`git commit -m "${msg}" -- ${picked.join(' ')}`);
-	sh(`git commit -m "${msg}" -- ${picked.join(' ')}`);
-	ok(`已提交：${msg}`);
+	if (await sh(`git commit -m "${msg}" -- ${picked.join(' ')}`)) ok(`已提交：${msg}`);
 } else {
 	miss('子模块指针没有变化，跳过提交');
 }
 
 run('git push');
-sh('git push');
-ok('已推送到 origin');
+if (await sh('git push')) ok('已推送到 origin');
 
 console.log(`\n全部完成：${msg}`);
