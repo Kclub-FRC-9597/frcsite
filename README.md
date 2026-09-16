@@ -144,11 +144,60 @@ git diff --submodule=log -- public/inspire      # 指针已变但未提交时，
 
 > 括号内为 `(remotes/origin/HEAD)` 或 `HEAD (no branch)` 时，说明子模块处于 **detached HEAD**，属正常状态（见下文「常见问题」）。
 
-### 日常更新流程
+### 一键脚本 `npm run syn:sub`（推荐）
 
-> **一键脚本**：`npm run syn:sub` —— 依次完成「拉取合并 → 部署 → 提交推送」。
-> 脚本位于 `scripts/sync-inspire.mjs`（跟平台无关的 Node）：只有一个子模块时直接更新，多个时按编号选择；也可 `npm run syn:sub -- public/inspire` 直接指定。
-> 提交信息自动带上子模块 sha，例如 `chore: sync inspire 子模块最新改动 (7443f24)`。
+```bash
+npm run syn:sub                        # 直接跑；只有一个子模块时不会问你
+npm run syn:sub -- public/inspire      # 指定要更新哪些子模块，跳过选择步骤
+```
+
+脚本在 `scripts/sync-inspire.mjs`（Node，跨平台），依次做 4 步。**每步都先打印「将要执行的命令」，再打印「结果」**：
+
+| 步骤 | 做什么 | 结果提示 |
+|------|------|------|
+| 1/4 选择子模块 | 读 `.gitmodules` 列出子模块 | 只有一个 → 直接选中；多个 → 列出编号让你选（如 `1,3`，回车＝全部）；命令行给了路径 → 直接用 |
+| 2/4 拉取合并 | `git submodule update --remote <路径>` | 有更新 → `[OK] 已更新：旧sha -> 新sha`，并列出本次带来的提交；没更新 → `[--] 已是最新（sha），无需变动` |
+| 3/4 部署 | `npm run deploy` | `[OK] 部署完成` |
+| 4/4 提交并推送 | `git add` → `git commit` → `git push` | 提交信息自动带子模块 sha；指针没变化 → `[--] 跳过提交`，但仍执行推送（避免本地积压的提交推不上去） |
+
+提交只针对所选子模块的指针（`git commit -- <路径>`），不会把你工作区里其它已暂存的改动一起带进去。
+
+**某一步失败不会直接中断**，而是打印失败的那条命令并询问：
+
+```text
+  [X]  本步失败：git submodule update --remote public/inspire
+  继续执行剩余步骤吗？（y＝继续 / 其它＝终止）:
+```
+
+- 输入 `y`（或 `yes`）→ 跳过该步，继续执行剩余步骤
+- 其它任意输入（含直接回车）→ 打印 `[X] 已按你的选择终止`，退出码 1
+
+运行示例（子模块本来就和远端一致时）：
+
+```text
+=== 1/4 选择子模块 ===
+  [OK] 只有一个子模块，直接选中：public/inspire
+
+=== 2/4 拉取合并子模块 ===
+>>> git submodule update --remote public/inspire
+  [--] public/inspire 已是最新（7443f24），无需变动
+
+=== 3/4 部署 ===
+>>> npm run deploy
+  [OK] 部署完成
+
+=== 4/4 提交并推送 ===
+>>> git add public/inspire
+  [OK] 已暂存：public/inspire
+  [--] 子模块指针没有变化，跳过提交
+>>> git push
+  [OK] 已推送到 origin
+```
+
+> 注意：第 2 步用 `--remote`，会让子模块处于 **detached HEAD**（正常，部署只认 commit 指针）。
+> 想让它停在 `main` 分支上，用下面的手工流程。
+
+### 手工更新流程（脚本跑不了时）
 
 **A. 把独立仓库的改动同步到主站（frcsite）**
 
