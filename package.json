@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
+		"sync:inspire": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-inspire.ps1",
 		"dev": "wrangler dev",
 		"dev:remote": "wrangler dev --remote",
 		"start": "wrangler dev",
